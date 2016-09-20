@@ -23,26 +23,45 @@
         app:menu="@menu/activity_main_drawer" />
 
     <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_marginTop="80dp">
 
             <org.freelectron.leobel.winline98.NextView
                 android:id="@+id/next"
+                android:layout_centerHorizontal="true"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"/>
+
+            <TextView
+                android:id="@+id/score_test"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@+id/next"
+                android:layout_alignBottom="@+id/next"
+                android:layout_toLeftOf="@+id/score"
+                android:gravity="center"
+                android:text="Score:"/>
+
             <TextView
                 android:id="@+id/score"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_width="70dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentRight="true"
+                android:layout_alignTop="@+id/score_test"
+                android:layout_alignBottom="@+id/score_test"
+                android:gravity="left|center"
+                android:layout_marginLeft="2dp"/>
 
             <org.freelectron.leobel.winline98.BoardView
                 android:id="@+id/board"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:layout_below="@+id/next">
 
             </org.freelectron.leobel.winline98.BoardView>
 
