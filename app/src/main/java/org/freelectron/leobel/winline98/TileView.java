@@ -67,15 +67,21 @@ public class TileView extends View {
     }
 
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        this.mTileSize = Math.min(w / this.mXTileCount, h / this.mYTileCount);
         int measuredWidth = this.mTileSize * this.mXTileCount;
         int measuredHeight = this.mTileSize * this.mYTileCount;
-        if (w < measuredWidth || h < measuredHeight) {
-            this.mTileSize = Math.min(w / this.mXTileCount, h / this.mYTileCount);
-            measuredWidth = this.mTileSize * this.mXTileCount;
-            measuredHeight = this.mTileSize * this.mYTileCount;
-        }
+//        int measuredWidth = this.mTileSize * this.mXTileCount;
+//        int measuredHeight = this.mTileSize * this.mYTileCount;
+//        if (w < measuredWidth || h < measuredHeight) {
+//            this.mTileSize = Math.min(w / this.mXTileCount, h / this.mYTileCount);
+//            measuredWidth = this.mTileSize * this.mXTileCount;
+//            measuredHeight = this.mTileSize * this.mYTileCount;
+//        }
         load();
         this.mXOffset = (w - measuredWidth) / 2;
         this.mYOffset = (h - measuredHeight) / 2;
+//        this.mXOffset = getLeft();
+//        this.mYOffset = getTop();
     }
+
 }

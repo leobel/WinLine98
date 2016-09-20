@@ -12,31 +12,5 @@
     tools:context="org.freelectron.leobel.winline98.MainActivity"
     tools:showIn="@layout/app_bar_main">
 
-    <org.freelectron.leobel.winline98.NextView
-        android:id="@+id/next"
-        android:layout_centerHorizontal="true"
-        android:layout_width="100dp"
-        android:layout_height="40dp"
-        />
 
-    <TextView
-        android:id="@+id/score_test"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/next"
-        android:layout_alignTop="@+id/next"
-        android:layout_alignBottom="@+id/next"
-        android:gravity="center"
-        android:layout_marginLeft="20dp"
-        android:text="Score:"/>
-
-    <TextView
-        android:id="@+id/score"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_toRightOf="@+id/score_test"
-        android:layout_alignTop="@+id/score_test"
-        android:layout_alignBottom="@+id/score_test"
-        android:gravity="center"
-        android:layout_marginLeft="5dp"/>
 </RelativeLayout>
