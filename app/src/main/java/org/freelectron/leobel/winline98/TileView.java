@@ -32,7 +32,6 @@ public class TileView extends View {
         super(context, attrs);
         this.context = context;
         this.mPaint = new Paint();
-        //TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.TileView);
         this.mTileSize = 60;
         this.mTileArray = new HashMap();
         this.mYTileCount = 9;
