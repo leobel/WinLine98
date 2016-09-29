@@ -3,9 +3,6 @@ package org.freelectron.leobel.winline98;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -20,12 +17,16 @@ import org.freelectron.winline.Checker;
 import org.freelectron.winline.LogicWinLine;
 import org.freelectron.winline.MPoint;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import timber.log.Timber;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private Thread timerMoveTile;
+    private Thread timerAnimateTile;
+    AnimateSelectedTail animateSelectedTail;
 
     private BoardView boardView;
     private TextView scoreView;
@@ -102,12 +103,22 @@ public class MainActivity extends AppCompatActivity
                     if (path == null) {
                         return true;
                     }
-                    MoveTile(board);
+                    stopAnimateTail(() -> {
+                        MoveTile(board);
+                    });
                     return true;
                 } else if (emptyPlace) {
                     return true;
                 } else {
                     orig = new MPoint(i, j);
+                    if(animateSelectedTail != null && animateSelectedTail.isRunning()){
+                        stopAnimateTail(()-> {
+                            animateTail(orig);
+                        });
+                    }
+                    else {
+                        animateTail(orig);
+                    }
                     return true;
                 }
             });
@@ -196,6 +207,20 @@ public class MainActivity extends AppCompatActivity
         timerMoveTile.start();
     }
 
+    private void animateTail(MPoint point){
+        Checker tail = game.getBoard()[point.getX()][point.getY()];
+        animateSelectedTail = new AnimateSelectedTail(new AnimateChecker(tail), boardHandler);
+        timerAnimateTile = new Thread(animateSelectedTail);
+        timerAnimateTile.start();
+    }
+
+
+    private void stopAnimateTail(Runnable actionAfter){
+        animateSelectedTail.stopAnimation(actionAfter);
+    }
+
+
+
 
     class AnimateMoveTails implements Runnable {
         Handler alertHandler;
@@ -276,6 +301,55 @@ public class MainActivity extends AppCompatActivity
             if (game.gameOver()) {
                 endAlertHandler.sendMessage(new Message());
             }
+        }
+    }
+
+
+
+    class AnimateSelectedTail implements Runnable {
+        Handler boardHandler;
+        AnimateChecker tail;
+        private AtomicBoolean canRun;
+        Runnable actionAfter;
+
+
+        public AnimateSelectedTail(AnimateChecker tail, Handler boardHandler){
+            this.boardHandler = boardHandler;
+            this.tail = tail;
+            canRun = new AtomicBoolean();
+            canRun.set(true);
+        }
+
+        public void stopAnimation(Runnable after){
+            actionAfter = after;
+            canRun.set(false);
+
+        }
+
+        public boolean isRunning(){
+            return canRun.get();
+        }
+
+        @Override
+        public void run() {
+            MPoint point = tail.getPosition();
+            Checker[][] board = game.getBoard();
+            board[point.getX()][point.getY()] = tail;
+            while (canRun.get()){
+                for(int i=0; i < AnimateChecker.FRAMES_COUNT; i++){
+                    Timber.d("Animation: Start animate selected tail");
+                    tail.setAnimateColor(i);
+                    this.boardHandler.sendMessage(new Message());
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+            board[point.getX()][point.getY()] = tail.getChecker();
+            if(actionAfter != null)
+                actionAfter.run();
         }
     }
 }

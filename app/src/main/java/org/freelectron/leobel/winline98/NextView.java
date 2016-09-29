@@ -3,6 +3,7 @@ package org.freelectron.leobel.winline98;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.drawable.AnimationDrawable;
 import android.util.AttributeSet;
 
 import org.freelectron.winline.Checker;
@@ -40,7 +41,15 @@ public class NextView extends TileView {
             if (f != null) {
                 c = f.Color();
             }
+
+
             canvas.drawBitmap((Bitmap) this.mTileArray.get(c), (float) (this.mXOffset + (this.mTileSize * x)), (float) this.mYOffset, this.mPaint);
         }
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        this.mYOffset = mYOffset + 1;
     }
 }

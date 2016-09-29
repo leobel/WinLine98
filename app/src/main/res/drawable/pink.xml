@@ -11,7 +11,7 @@
             <solid android:color="@color/empty"/>
         </shape>
     </item>
-    <item android:right="2dp" android:bottom="2dp" android:top="2dp" android:left="2dp">
+    <item android:right="6dp" android:bottom="6dp" android:top="6dp" android:left="6dp">
         <shape  android:shape="oval" >
             <solid android:color="@color/pink"/>
         </shape>

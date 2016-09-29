@@ -3,6 +3,9 @@ package org.freelectron.leobel.winline98;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.drawable.AnimatedVectorDrawable;
+import android.graphics.drawable.AnimationDrawable;
+import android.graphics.drawable.BitmapDrawable;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -48,7 +51,16 @@ public class BoardView extends TileView {
                 if (f != null) {
                     c = f.Color();
                 }
-                canvas.drawBitmap(this.mTileArray.get(c), (float) (this.mXOffset + (this.mTileSize * y)), (float) (this.mYOffset + (this.mTileSize * x)), this.mPaint);
+//                AnimationDrawable drawable = (AnimationDrawable) mGifArray.get(c);
+//                drawable.start();
+                Bitmap bitmap;
+                if(f instanceof AnimateChecker){
+                    bitmap = this.mGifArray.get(((AnimateChecker) f).getAnimateColor());
+                }
+                else{
+                    bitmap = this.mTileArray.get(c);
+                }
+                canvas.drawBitmap(bitmap, (float) (this.mXOffset + (this.mTileSize * y)), (float) (this.mYOffset + (this.mTileSize * x)), this.mPaint);
             }
         }
     }
