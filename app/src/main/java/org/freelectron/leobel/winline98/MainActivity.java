@@ -17,6 +17,8 @@ import org.freelectron.winline.Checker;
 import org.freelectron.winline.LogicWinLine;
 import org.freelectron.winline.MPoint;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import timber.log.Timber;
@@ -26,6 +28,7 @@ public class MainActivity extends AppCompatActivity
 
     private Thread timerMoveTile;
     private Thread timerAnimateTile;
+    private Thread timerAnimateInsertTile;
     AnimateSelectedTail animateSelectedTail;
 
     private BoardView boardView;
@@ -126,15 +129,6 @@ public class MainActivity extends AppCompatActivity
             e.printStackTrace();
         }
 
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -219,7 +213,10 @@ public class MainActivity extends AppCompatActivity
         animateSelectedTail.stopAnimation(actionAfter);
     }
 
-
+    private void animateInsertTile(List<AnimateChecker> tails, Runnable doAfter) {
+        timerAnimateInsertTile = new Thread(new AnimateInsertTails(tails, boardHandler, doAfter));
+        timerAnimateInsertTile.start();
+    }
 
 
     class AnimateMoveTails implements Runnable {
@@ -287,12 +284,21 @@ public class MainActivity extends AppCompatActivity
                 MainActivity.this.scoreHandler.sendMessage(new Message());
             } else {
                 try {
-                    game.addCheckers();
+                    List<Integer> positions = game.addCheckers();
+                    Checker[][]board = game.getBoard();
+                    List<AnimateChecker> tails = new ArrayList<>(3);
+                    for(Integer pos: positions){
+                        int x = pos / dimension;
+                        int y = pos % dimension;
+                        tails.add(new AnimateInsertChecker(board[x][y]));
+                    }
                     game.buildNext(3);
-                    boardView.setBoard(game.getBoard());
-                    nextView.setBoard(game.getNext());
-                    this.boardHandler.sendMessage(new Message());
-                    this.nextHandler.sendMessage(new Message());
+                    animateInsertTile(tails, () -> {
+                        boardView.setBoard(game.getBoard());
+                        nextView.setBoard(game.getNext());
+                        this.boardHandler.sendMessage(new Message());
+                        this.nextHandler.sendMessage(new Message());
+                    });
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 }
@@ -302,9 +308,50 @@ public class MainActivity extends AppCompatActivity
                 endAlertHandler.sendMessage(new Message());
             }
         }
+
+
     }
 
+    class AnimateInsertTails implements Runnable{
+        Handler boardHandler;
+        List<AnimateChecker> tails;
+        Runnable doAfter;
 
+        public AnimateInsertTails(List<AnimateChecker> tails, Handler boardHandler, Runnable doAfter){
+            this.tails = tails;
+            this.boardHandler = boardHandler;
+            this.doAfter = doAfter;
+        }
+
+        @Override
+        public void run() {
+            Checker[][] board = game.getBoard();
+            List<Checker> originals = new ArrayList<>(3);
+            for (AnimateChecker checker: tails){
+                originals.add(checker.getChecker());
+            }
+            for(int i = 0; i< AnimateChecker.FRAMES_COUNT; i++){
+                for (AnimateChecker checker: tails){
+                    checker.setAnimateColor(i);
+                    MPoint position = checker.getPosition();
+                    board[position.getX()][position.getY()] = checker;
+                }
+                this.boardHandler.sendMessage(new Message());
+                try {
+                    Thread.sleep(40);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            for (Checker orig: originals){
+                MPoint position = orig.getPosition();
+                board[position.getX()][position.getY()] = orig;
+            }
+            if(doAfter != null){
+                doAfter.run();
+            }
+        }
+    }
 
     class AnimateSelectedTail implements Runnable {
         Handler boardHandler;

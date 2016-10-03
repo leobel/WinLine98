@@ -82,6 +82,30 @@ public class TileView extends View {
         loadTile(AnimateChecker.AnimateColor.YELLOW2,  ContextCompat.getDrawable(context, R.drawable.yellowanimate2));
         loadTile(AnimateChecker.AnimateColor.YELLOW3,  ContextCompat.getDrawable(context, R.drawable.yellowanimate3));
 
+        loadTile(AnimateChecker.AnimateColor.RED_INSERT1,  ContextCompat.getDrawable(context, R.drawable.redanimateinsert1));
+        loadTile(AnimateChecker.AnimateColor.RED_INSERT2,  ContextCompat.getDrawable(context, R.drawable.redanimateinsert2));
+        loadTile(AnimateChecker.AnimateColor.RED_INSERT3,  ContextCompat.getDrawable(context, R.drawable.redanimateinsert3));
+
+        loadTile(AnimateChecker.AnimateColor.PINK_INSERT1,  ContextCompat.getDrawable(context, R.drawable.pinkanimateinsert1));
+        loadTile(AnimateChecker.AnimateColor.PINK_INSERT2,  ContextCompat.getDrawable(context, R.drawable.pinkanimateinsert2));
+        loadTile(AnimateChecker.AnimateColor.PINK_INSERT3,  ContextCompat.getDrawable(context, R.drawable.pinkanimateinsert3));
+
+        loadTile(AnimateChecker.AnimateColor.BLUE_INSERT1,  ContextCompat.getDrawable(context, R.drawable.blueanimateinsert1));
+        loadTile(AnimateChecker.AnimateColor.BLUE_INSERT2,  ContextCompat.getDrawable(context, R.drawable.blueanimateinsert2));
+        loadTile(AnimateChecker.AnimateColor.BLUE_INSERT3,  ContextCompat.getDrawable(context, R.drawable.blueanimateinsert3));
+
+        loadTile(AnimateChecker.AnimateColor.BROWN_INSERT1,  ContextCompat.getDrawable(context, R.drawable.brownanimateinsert1));
+        loadTile(AnimateChecker.AnimateColor.BROWN_INSERT2,  ContextCompat.getDrawable(context, R.drawable.brownanimateinsert2));
+        loadTile(AnimateChecker.AnimateColor.BROWN_INSERT3,  ContextCompat.getDrawable(context, R.drawable.brownanimateinsert3));
+
+        loadTile(AnimateChecker.AnimateColor.GREEN_INSERT1,  ContextCompat.getDrawable(context, R.drawable.greenanimateinsert1));
+        loadTile(AnimateChecker.AnimateColor.GREEN_INSERT2,  ContextCompat.getDrawable(context, R.drawable.greenanimateinsert2));
+        loadTile(AnimateChecker.AnimateColor.GREEN_INSERT3,  ContextCompat.getDrawable(context, R.drawable.greenanimateinsert3));
+
+        loadTile(AnimateChecker.AnimateColor.YELLOW_INSERT1,  ContextCompat.getDrawable(context, R.drawable.yellowanimateinsert1));
+        loadTile(AnimateChecker.AnimateColor.YELLOW_INSERT2,  ContextCompat.getDrawable(context, R.drawable.yellowanimateinsert2));
+        loadTile(AnimateChecker.AnimateColor.YELLOW_INSERT3,  ContextCompat.getDrawable(context, R.drawable.yellowanimateinsert3));
+
     }
 
     public void loadTile(LogicWinLine.Color key, Drawable tile) {

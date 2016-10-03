@@ -10,6 +10,7 @@ import org.freelectron.winline.MPoint;
 public class AnimateChecker extends Checker {
     AnimateColor animateColor;
     public static int FRAMES_COUNT = 3;
+    public static int CHECKER_COUNT = 6;
     Checker checker;
 
     public AnimateChecker(MPoint p, LogicWinLine.Color color) {
@@ -76,7 +77,24 @@ public class AnimateChecker extends Checker {
         YELLOW1,
         YELLOW2,
         YELLOW3,
-        BLACK
+        RED_INSERT1,
+        RED_INSERT2,
+        RED_INSERT3,
+        PINK_INSERT1,
+        PINK_INSERT2,
+        PINK_INSERT3,
+        BLUE_INSERT1,
+        BLUE_INSERT2,
+        BLUE_INSERT3,
+        BROWN_INSERT1,
+        BROWN_INSERT2,
+        BROWN_INSERT3,
+        GREEN_INSERT1,
+        GREEN_INSERT2,
+        GREEN_INSERT3,
+        YELLOW_INSERT1,
+        YELLOW_INSERT2,
+        YELLOW_INSERT3,
     }
 
 
