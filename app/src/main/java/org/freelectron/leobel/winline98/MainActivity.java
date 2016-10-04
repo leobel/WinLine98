@@ -11,8 +11,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Button;
 import android.widget.TextView;
 
+import org.freelectron.leobel.winline98.utils.ActivityUtils;
 import org.freelectron.winline.Checker;
 import org.freelectron.winline.LogicWinLine;
 import org.freelectron.winline.MPoint;
@@ -29,15 +31,18 @@ public class MainActivity extends AppCompatActivity
     private Thread timerMoveTile;
     private Thread timerAnimateTile;
     private Thread timerAnimateInsertTile;
-    AnimateSelectedTail animateSelectedTail;
+    private AnimateSelectedTail animateSelectedTail;
 
     private BoardView boardView;
     private TextView scoreView;
     private NextView nextView;
+    private Button newGame;
+
     private LogicWinLine game;
     private int dimension;
-    MPoint orig;
-    String path;
+    private boolean savedCurrentState;
+    private MPoint orig;
+    private String path;
 
     private Handler boardHandler;
     private Handler nextHandler;
@@ -54,6 +59,7 @@ public class MainActivity extends AppCompatActivity
         boardView = (BoardView) findViewById(R.id.board);
         nextView = (NextView) findViewById(R.id.next);
         scoreView = (TextView) findViewById(R.id.score);
+        newGame = (Button)findViewById(R.id.new_game);
 
         boardHandler = new Handler(msg -> {
             boardView.invalidate();
@@ -76,58 +82,62 @@ public class MainActivity extends AppCompatActivity
         });
 
         dimension = boardView.getDimension();
-        try {
-            game = new LogicWinLine(9);
-            boardView.setBoard(game.getBoard());
-            nextView.setBoard(this.game.getNext());
-            this.scoreView.setText(game.getScore().toString());
-            boardView.invalidate();
-            nextView.invalidate();
-            boardView.setOnTouchListener((v, event) -> {
-                boolean emptyPlace = false;
-                if (v.getId() != R.id.board) {
-                    return false;
-                }
-                if (event.getAction() != 1) {
+
+        newGame.setOnClickListener(v -> {
+            if(savedCurrentState)
+                createNewGame();
+            else{
+                ActivityUtils.showDialog(this, getString(R.string.unsaved_current_state), true, v1 -> {
+                    createNewGame();
+                });
+            }
+
+        });
+
+        createNewGame();
+        boardView.setOnTouchListener((v, event) -> {
+            boolean emptyPlace = false;
+            if (v.getId() != R.id.board) {
+                return false;
+            }
+            if (event.getAction() != 1) {
+                return true;
+            }
+            int i = (int) ((event.getY() - ((float) boardView.mYOffset)) / ((float) boardView.mTileSize));
+            int j = (int) ((event.getX() - ((float) boardView.mXOffset)) / ((float) boardView.mTileSize));
+            if (i < 0 || i >= dimension || j < 0 || j >= dimension) {
+                return true;
+            }
+            BoardView board = (BoardView) v;
+            if (game.getBoard()[i][j] == null) {
+                emptyPlace = true;
+            }
+            if (orig != null && emptyPlace) {
+                MPoint dest = new MPoint(i, j);
+                path = game.getPath(orig, dest);
+                if (path == null) {
                     return true;
                 }
-                int i = (int) ((event.getY() - ((float) boardView.mYOffset)) / ((float) boardView.mTileSize));
-                int j = (int) ((event.getX() - ((float) boardView.mXOffset)) / ((float) boardView.mTileSize));
-                if (i < 0 || i >= dimension || j < 0 || j >= dimension) {
-                    return true;
-                }
-                BoardView board = (BoardView) v;
-                if (game.getBoard()[i][j] == null) {
-                    emptyPlace = true;
-                }
-                if (orig != null && emptyPlace) {
-                    MPoint dest = new MPoint(i, j);
-                    path = game.getPath(orig, dest);
-                    if (path == null) {
-                        return true;
-                    }
-                    stopAnimateTail(() -> {
-                        MoveTile(board);
-                    });
-                    return true;
-                } else if (emptyPlace) {
-                    return true;
-                } else {
-                    orig = new MPoint(i, j);
-                    if(animateSelectedTail != null && animateSelectedTail.isRunning()){
-                        stopAnimateTail(()-> {
-                            animateTail(orig);
-                        });
-                    }
-                    else {
+                stopAnimateTail(() -> {
+                    MoveTile(board);
+                });
+                return true;
+            } else if (emptyPlace) {
+                return true;
+            } else {
+                orig = new MPoint(i, j);
+                if(animateSelectedTail != null && animateSelectedTail.isRunning()){
+                    stopAnimateTail(()-> {
                         animateTail(orig);
-                    }
-                    return true;
+                    });
                 }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+                else {
+                    animateTail(orig);
+                }
+                return true;
+            }
+        });
+
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -137,6 +147,19 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+    }
+
+    private void createNewGame(){
+        try {
+            game = new LogicWinLine(dimension);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        boardView.setBoard(game.getBoard());
+        nextView.setBoard(this.game.getNext());
+        this.scoreView.setText(game.getScore().toString());
+        boardView.invalidate();
+        nextView.invalidate();
     }
 
     @Override
@@ -399,4 +422,7 @@ public class MainActivity extends AppCompatActivity
                 actionAfter.run();
         }
     }
+
+
+
 }

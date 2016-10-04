@@ -26,46 +26,114 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" >
 
-        <RelativeLayout
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginTop="80dp">
+            android:layout_height="match_parent">
 
-            <org.freelectron.leobel.winline98.NextView
-                android:id="@+id/next"
-                android:layout_centerHorizontal="true"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="40dp"/>
+                android:layout_height="0dp"
+                android:layout_weight="0.25">
 
-            <TextView
-                android:id="@+id/score_test"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/next"
-                android:layout_centerHorizontal="true"
-                android:textColor="@color/black"
-                android:text="Score:"/>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="60dp">
 
-            <TextView
-                android:id="@+id/score"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignTop="@+id/score_test"
-                android:layout_alignBottom="@+id/score_test"
-                android:layout_toRightOf="@+id/score_test"
-                android:gravity="center"
-                android:textColor="@color/black"
-                android:layout_marginLeft="2dp"/>
+                    <org.freelectron.leobel.winline98.NextView
+                        android:id="@+id/next"
+                        android:layout_centerHorizontal="true"
+                        android:layout_width="match_parent"
+                        android:layout_height="35dp"/>
 
-            <org.freelectron.leobel.winline98.BoardView
-                android:id="@+id/board"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@+id/score_test">
+                    <TextView
+                        android:id="@+id/score_test"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/next"
+                        android:layout_centerHorizontal="true"
+                        android:textColor="@color/black"
+                        android:text="Score:"/>
 
-            </org.freelectron.leobel.winline98.BoardView>
+                    <TextView
+                        android:id="@+id/score"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignTop="@+id/score_test"
+                        android:layout_alignBottom="@+id/score_test"
+                        android:layout_toRightOf="@+id/score_test"
+                        android:gravity="center"
+                        android:textColor="@color/black"
+                        android:layout_marginLeft="2dp"/>
+                </RelativeLayout>
 
-        </RelativeLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.05">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@android:drawable/stat_notify_sync_noanim"/>
+
+                </RelativeLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.6"
+                android:layout_margin="10dp">
+
+                <org.freelectron.leobel.winline98.BoardView
+                    android:id="@+id/board"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center">
+
+                </org.freelectron.leobel.winline98.BoardView>
+            </LinearLayout>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.1">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <Button
+                        android:id="@+id/new_game"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_alignParentLeft="true"
+                        android:text="New Game"/>
+
+                    <Button
+                        android:id="@+id/save_game"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginRight="10dp"
+                        android:text="Save Game"/>
+                </RelativeLayout>
+
+
+
+            </LinearLayout>
+
+        </LinearLayout>
 
     </FrameLayout>
 

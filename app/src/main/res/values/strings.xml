@@ -1,8 +1,16 @@
 <resources>
-    <string name="app_name">Winline98</string>
+    <string name="app_name">WinLine</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
+
+
+    <!-- Dialog section -->
+    <string name="warning_title">Warning!</string>
+    <string name="dialog_ok">Yes</string>
+    <string name="dialog_cancel">No</string>
+    <string name="unsaved_current_state">Your current game state isn\'t saved yet. New game will reset the current.\n\nDo you want to proceed any way?</string>
+
 </resources>
