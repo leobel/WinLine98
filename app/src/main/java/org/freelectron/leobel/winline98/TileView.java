@@ -26,6 +26,7 @@ public class TileView extends View {
     protected int mYOffset;
     protected int mYTileCount;
     private Context context;
+    private OnTileViewListener listener;
 
     public TileView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -108,6 +109,10 @@ public class TileView extends View {
 
     }
 
+    public int getTitleSize(){return mTileSize;}
+
+    public int getLeftPosition(){return mXOffset;}
+
     public void loadTile(LogicWinLine.Color key, Drawable tile) {
         Bitmap bitmap = Bitmap.createBitmap(this.mTileSize, this.mTileSize, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
@@ -136,10 +141,22 @@ public class TileView extends View {
 //            measuredHeight = this.mTileSize * this.mYTileCount;
 //        }
         load();
-        this.mXOffset = (w - measuredWidth) / 2;
-        this.mYOffset = (h - measuredHeight) - 1;
-//        this.mXOffset = getLeft();
+
+        this.mXOffset = Math.abs(w - measuredWidth) / 2;
+        this.mYOffset = Math.abs(h - measuredHeight) / 2;
+        if(listener != null)
+            listener.onSetPosition();
+//        getLayoutParams().width = Math.min(w, h);
+//        getLayoutParams().height = Math.min(w, h);
 //        this.mYOffset = getTop();
+    }
+    
+    public void setListener(OnTileViewListener listener){
+        this.listener = listener;
+    }
+    
+    public interface OnTileViewListener{
+        void onSetPosition();
     }
 
 }

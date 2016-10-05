@@ -3,6 +3,7 @@ package org.freelectron.leobel.winline98;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.AnimationDrawable;
 import android.graphics.drawable.BitmapDrawable;
@@ -18,21 +19,24 @@ import java.lang.reflect.Array;
 /**
  * Created by leobel on 7/22/16.
  */
-public class BoardView extends TileView {
+public class BoardView extends TileView implements TileView.OnTileViewListener {
 
     int dimension;
     LogicWinLine game;
     Checker[][] mTileGrid;
+    Runnable doAfterSetPosition;
 
     public BoardView(Context context, AttributeSet attrs) {
         super(context, attrs);
         this.dimension = 9;
+        setListener(this);
         initBoardView();
     }
 
     public BoardView(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         this.dimension = 9;
+        setListener(this);
         initBoardView();
     }
 
@@ -60,6 +64,7 @@ public class BoardView extends TileView {
                 else{
                     bitmap = this.mTileArray.get(c);
                 }
+
                 canvas.drawBitmap(bitmap, (float) (this.mXOffset + (this.mTileSize * y)), (float) (this.mYOffset + (this.mTileSize * x)), this.mPaint);
             }
         }
@@ -69,4 +74,14 @@ public class BoardView extends TileView {
         this.mTileGrid = (Checker[][]) Array.newInstance(Checker.class, this.dimension, this.dimension);
     }
 
+    public void onSetPosition(Runnable after){
+        doAfterSetPosition = after;
+    }
+
+
+    @Override
+    public void onSetPosition() {
+        if(doAfterSetPosition != null)
+            doAfterSetPosition.run();
+    }
 }

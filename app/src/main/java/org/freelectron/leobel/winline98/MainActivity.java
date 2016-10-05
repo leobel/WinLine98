@@ -3,6 +3,7 @@ package org.freelectron.leobel.winline98;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.SystemClock;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -11,7 +12,12 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Chronometer;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import org.freelectron.leobel.winline98.utils.ActivityUtils;
@@ -37,12 +43,16 @@ public class MainActivity extends AppCompatActivity
     private TextView scoreView;
     private NextView nextView;
     private Button newGame;
+    private ImageView timer;
+    private Chronometer chronometer;
 
     private LogicWinLine game;
     private int dimension;
     private boolean savedCurrentState;
     private MPoint orig;
     private String path;
+    private Long timeWhenStopped = 0L;
+
 
     private Handler boardHandler;
     private Handler nextHandler;
@@ -60,6 +70,22 @@ public class MainActivity extends AppCompatActivity
         nextView = (NextView) findViewById(R.id.next);
         scoreView = (TextView) findViewById(R.id.score);
         newGame = (Button)findViewById(R.id.new_game);
+        timer = (ImageView) findViewById(R.id.timer);
+        chronometer = (Chronometer) findViewById(R.id.chronometer);
+
+        boardView.onSetPosition(() -> {
+            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            params.height = chronometer.getHeight();
+            params.setMargins(boardView.getLeft() + boardView.getLeftPosition(), 0, 5, 0);
+            timer.setLayoutParams(params);
+
+            //chronometer.setWidth(nextView.getLeft() + nextView.getLeftPosition() - timer.getRight());
+        });
+
+
+
+
+        //timer.setLeft(timer.getLeft() + 300);
 
         boardHandler = new Handler(msg -> {
             boardView.invalidate();
@@ -84,11 +110,17 @@ public class MainActivity extends AppCompatActivity
         dimension = boardView.getDimension();
 
         newGame.setOnClickListener(v -> {
-            if(savedCurrentState)
+            if(savedCurrentState){
+                stopChornometer();
                 createNewGame();
+            }
             else{
+                pauseChronometer();
                 ActivityUtils.showDialog(this, getString(R.string.unsaved_current_state), true, v1 -> {
+                    stopChornometer();
                     createNewGame();
+                }, v2 -> {
+                    startChronometer();
                 });
             }
 
@@ -141,13 +173,44 @@ public class MainActivity extends AppCompatActivity
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close){
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                pauseChronometer();
+
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                super.onDrawerClosed(drawerView);
+                startChronometer();
+            }
+        };
         drawer.setDrawerListener(toggle);
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
     }
+
+    private void stopChornometer(){
+        timeWhenStopped = 0L;
+        chronometer.stop();
+    }
+
+    private void pauseChronometer() {
+        timeWhenStopped = chronometer.getBase() - SystemClock.elapsedRealtime();
+        chronometer.stop();
+    }
+
+    private void startChronometer() {
+        chronometer.setBase(SystemClock.elapsedRealtime() + timeWhenStopped);
+        chronometer.start();
+    }
+
 
     private void createNewGame(){
         try {
@@ -160,6 +223,7 @@ public class MainActivity extends AppCompatActivity
         this.scoreView.setText(game.getScore().toString());
         boardView.invalidate();
         nextView.invalidate();
+        startChronometer();
     }
 
     @Override
@@ -167,6 +231,7 @@ public class MainActivity extends AppCompatActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
+
         } else {
             super.onBackPressed();
         }

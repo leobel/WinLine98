@@ -34,17 +34,42 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="0.25">
+                android:layout_weight="0.21" >
 
                 <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_marginTop="60dp">
 
+                    <ImageView
+                        android:id="@+id/timer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:src="@drawable/ic_timer"/>
+
+                    <Chronometer
+                        android:id="@+id/chronometer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignTop="@+id/next"
+                        android:layout_alignBottom="@+id/next"
+                        android:layout_toRightOf="@+id/timer"
+                        android:gravity="center"/>
+
+                    <!--<TextView-->
+                        <!--android:id="@+id/time1"-->
+                        <!--android:layout_width="wrap_content"-->
+                        <!--android:layout_height="wrap_content"-->
+                        <!--android:layout_alignTop="@+id/next"-->
+                        <!--android:layout_alignBottom="@+id/next"-->
+                        <!--android:layout_toRightOf="@+id/timer"-->
+                        <!--android:gravity="center_vertical|left"-->
+                        <!--android:text="00:00:00"/>-->
+
                     <org.freelectron.leobel.winline98.NextView
                         android:id="@+id/next"
                         android:layout_centerHorizontal="true"
-                        android:layout_width="match_parent"
+                        android:layout_width="105dp"
                         android:layout_height="35dp"/>
 
                     <TextView
@@ -70,34 +95,21 @@
 
             </LinearLayout>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.05">
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <ImageView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="@android:drawable/stat_notify_sync_noanim"/>
-
-                </RelativeLayout>
-            </LinearLayout>
 
             <LinearLayout
+                android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="0.6"
-                android:layout_margin="10dp">
+                android:gravity="center"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp">
 
                 <org.freelectron.leobel.winline98.BoardView
                     android:id="@+id/board"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center">
+                    android:layout_width="315dp"
+                    android:layout_height="315dp"
+                    >
 
                 </org.freelectron.leobel.winline98.BoardView>
             </LinearLayout>
@@ -106,7 +118,7 @@
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="0.1">
+                android:layout_weight="0.09">
 
                 <RelativeLayout
                     android:layout_width="match_parent"
@@ -129,7 +141,12 @@
                         android:text="Save Game"/>
                 </RelativeLayout>
 
+            </LinearLayout>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.1">
 
             </LinearLayout>
 
