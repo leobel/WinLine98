@@ -31,6 +31,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import timber.log.Timber;
 
+//import timber.log.Timber;
+
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -65,9 +67,9 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         boardContainer = findViewById(R.id.boardContainer);
         boardView = (BoardView) findViewById(R.id.board);
         nextView = (NextView) findViewById(R.id.next);
@@ -337,7 +339,6 @@ public class MainActivity extends AppCompatActivity
             int x = orig.getX();
             int y = orig.getY();
             Checker f = t[x][y];
-            Timber.d("Animation: Start moving animation");
             for (int i = 0; i < path.length(); i++) {
                 t[x][y] = null;
                 switch (path.charAt(i)) {
@@ -363,7 +364,6 @@ public class MainActivity extends AppCompatActivity
                     e.printStackTrace();
                 }
             }
-            Timber.d("Animation: End moving animation");
             MPoint dest = new MPoint(x, y);
             game.moveChecker(orig, dest, f);
             ContinueGameLogic(dest);
@@ -484,7 +484,6 @@ public class MainActivity extends AppCompatActivity
             board[point.getX()][point.getY()] = tail;
             while (canRun.get()){
                 for(int i=0; i < AnimateChecker.FRAMES_COUNT; i++){
-                    Timber.d("Animation: Start animate selected tail");
                     tail.setAnimateColor(i);
                     this.boardHandler.sendMessage(new Message());
                     try {
