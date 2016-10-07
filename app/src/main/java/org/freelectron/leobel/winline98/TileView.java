@@ -113,6 +113,10 @@ public class TileView extends View {
 
     public int getLeftPosition(){return mXOffset;}
 
+    public int getRightPosition(){return getLeft() + mXOffset + (mTileSize * mXTileCount);}
+
+
+
     public void loadTile(LogicWinLine.Color key, Drawable tile) {
         Bitmap bitmap = Bitmap.createBitmap(this.mTileSize, this.mTileSize, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
@@ -133,22 +137,11 @@ public class TileView extends View {
         this.mTileSize = Math.min(w / this.mXTileCount, h / this.mYTileCount);
         int measuredWidth = this.mTileSize * this.mXTileCount;
         int measuredHeight = this.mTileSize * this.mYTileCount;
-//        int measuredWidth = this.mTileSize * this.mXTileCount;
-//        int measuredHeight = this.mTileSize * this.mYTileCount;
-//        if (w < measuredWidth || h < measuredHeight) {
-//            this.mTileSize = Math.min(w / this.mXTileCount, h / this.mYTileCount);
-//            measuredWidth = this.mTileSize * this.mXTileCount;
-//            measuredHeight = this.mTileSize * this.mYTileCount;
-//        }
         load();
-
         this.mXOffset = Math.abs(w - measuredWidth) / 2;
         this.mYOffset = Math.abs(h - measuredHeight) / 2;
         if(listener != null)
             listener.onSetPosition();
-//        getLayoutParams().width = Math.min(w, h);
-//        getLayoutParams().height = Math.min(w, h);
-//        this.mYOffset = getTop();
     }
     
     public void setListener(OnTileViewListener listener){

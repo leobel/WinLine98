@@ -39,12 +39,14 @@ public class MainActivity extends AppCompatActivity
     private Thread timerAnimateInsertTile;
     private AnimateSelectedTail animateSelectedTail;
 
+    private View boardContainer;
     private BoardView boardView;
     private TextView scoreView;
     private NextView nextView;
     private Button newGame;
     private ImageView timer;
     private Chronometer chronometer;
+    private ImageView scoreImage;
 
     private LogicWinLine game;
     private int dimension;
@@ -66,20 +68,30 @@ public class MainActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        boardContainer = findViewById(R.id.boardContainer);
         boardView = (BoardView) findViewById(R.id.board);
         nextView = (NextView) findViewById(R.id.next);
         scoreView = (TextView) findViewById(R.id.score);
         newGame = (Button)findViewById(R.id.new_game);
         timer = (ImageView) findViewById(R.id.timer);
         chronometer = (Chronometer) findViewById(R.id.chronometer);
+        scoreImage = (ImageView) findViewById(R.id.score_image);
 
         boardView.onSetPosition(() -> {
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             params.height = chronometer.getHeight();
-            params.setMargins(boardView.getLeft() + boardView.getLeftPosition(), 0, 5, 0);
+            params.width = chronometer.getHeight();
+            params.setMargins(boardView.getLeft() + boardView.getLeftPosition(), 0, 0, 0);
             timer.setLayoutParams(params);
+            chronometer.setWidth(nextView.getLeft() - (boardView.getLeft() + boardView.getLeftPosition() + params.width));
 
-            //chronometer.setWidth(nextView.getLeft() + nextView.getLeftPosition() - timer.getRight());
+            RelativeLayout.LayoutParams scoreLayout = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+            scoreLayout.height = chronometer.getHeight();
+            scoreLayout.width = chronometer.getHeight();
+            scoreLayout.setMargins(boardView.getRightPosition() - scoreLayout.width, 0, 0, 0);
+            scoreImage.setLayoutParams(scoreLayout);
+            scoreView.setWidth(boardView.getRightPosition() - scoreLayout.width - nextView.getRight());
+
         });
 
 

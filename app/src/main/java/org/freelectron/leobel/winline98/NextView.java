@@ -47,9 +47,9 @@ public class NextView extends TileView {
         }
     }
 
-    @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-        //this.mYOffset = mYOffset + 1;
-    }
+//    @Override
+//    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+//        super.onSizeChanged(w, h, oldw, oldh);
+//        //this.mYOffset = mYOffset + 1;
+//    }
 }

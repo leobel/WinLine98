@@ -11,6 +11,6 @@
     <string name="warning_title">Warning!</string>
     <string name="dialog_ok">Yes</string>
     <string name="dialog_cancel">No</string>
-    <string name="unsaved_current_state">Your current game state isn\'t saved yet. New game will reset the current.\n\nDo you want to proceed any way?</string>
+    <string name="unsaved_current_state">Your current game state isn\'t saved yet. New game will reset it.\n\nDo you want to proceed any way?</string>
 
 </resources>
