@@ -154,7 +154,7 @@
                         android:id="@+id/save_game"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:background="@drawable/replay"
+                        android:background="@drawable/load"
                         android:layout_centerVertical="true"
                         android:layout_toRightOf="@+id/new_game"/>
                 </RelativeLayout>

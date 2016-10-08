@@ -57,32 +57,10 @@ public class GameRealm extends RealmObject{
 
     public void copyFrom(LogicWinLine game, int time) {
         Date current = new Date();
-
         setId(current.getTime());
         setScore(game.getScore());
         setTime(time);
         setCreatedOn(current.toString());
-
-        RealmList<CheckerRealm> nextChecker = new RealmList<>();
-
-        for(Checker checker : game.getNext()){
-            MPoint point = checker.getPosition();
-            nextChecker.add(new CheckerRealm(point.getX(), point.getY(), checker.Color().ordinal()));
-        }
-        setNext(nextChecker);
-
-        RealmList<CheckerRealm> boardChecker = new RealmList<>();
-        Checker[][] board = game.getBoard();
-        for (int i=0; i< board.length; i++){
-            for(int j = 0; j < board.length; j++){
-                Checker checker = board[i][j];
-                MPoint point = checker.getPosition();
-                boardChecker.add(new CheckerRealm(point.getX(), point.getY(), checker.Color().ordinal()));
-            }
-        }
-        setBoard(boardChecker);
-
-
     }
 
     public RealmList<CheckerRealm> getNext() {
@@ -105,13 +83,14 @@ public class GameRealm extends RealmObject{
         Checker[] nextChecker = new Checker[next.size()];
         for(int i = 0; i < nextChecker.length; i++){
             CheckerRealm checker = next.get(i);
-            nextChecker[i] = new Checker(new MPoint(checker.getX(), checker.getY()), LogicWinLine.Color.values()[checker.getColor()]);
+            nextChecker[i] = new Checker(LogicWinLine.Color.values()[checker.getColor()]);
         }
         Checker[][] boardChecker = new Checker[9][9];
         for (int i=0; i< boardChecker.length; i++){
             for(int j = 0; j < boardChecker.length; j++){
                 CheckerRealm checker = board.get(boardChecker.length * i + j);
-                boardChecker[i][j] = new Checker(new MPoint(checker.getX(), checker.getY()), LogicWinLine.Color.values()[checker.getColor()]);
+                LogicWinLine.Color color = checker.getColor() < 0 ? LogicWinLine.Color.values()[checker.getColor()] : LogicWinLine.Color.Empty;
+                boardChecker[i][j] = new Checker(new MPoint(checker.getX(), checker.getY()), color);
             }
         }
 

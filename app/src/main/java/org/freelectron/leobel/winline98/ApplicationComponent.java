@@ -16,4 +16,5 @@ import dagger.Component;
 public interface ApplicationComponent {
     void inject(WinLineApp app);
 
+    void inject(MainActivity activity);
 }

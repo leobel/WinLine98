@@ -2,14 +2,18 @@ package org.freelectron.leobel.winline98.services;
 
 import android.content.Context;
 
+import org.freelectron.leobel.winline98.models.CheckerRealm;
 import org.freelectron.leobel.winline98.models.GameRealm;
+import org.freelectron.winline.Checker;
 import org.freelectron.winline.LogicWinLine;
+import org.freelectron.winline.MPoint;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
+import io.realm.RealmList;
 import io.realm.exceptions.RealmException;
 import timber.log.Timber;
 
@@ -35,10 +39,41 @@ public class GameServiceImpl implements GameService {
 
             GameRealm gameRealm = realm.createObject(GameRealm.class);
 
+            RealmList<CheckerRealm> nextChecker = new RealmList<>();
+
+            for(Checker checker : game.getNext()){
+                CheckerRealm checkerRealm = realm.createObject(CheckerRealm.class);
+                checkerRealm.setColor(checker.Color().ordinal());
+                nextChecker.add(checkerRealm);
+            }
+            gameRealm.setNext(nextChecker);
+
+            RealmList<CheckerRealm> boardChecker = new RealmList<>();
+            Checker[][] board = game.getBoard();
+            for (int i=0; i< board.length; i++){
+                for(int j = 0; j < board.length; j++){
+                    Checker checker = board[i][j];
+                    CheckerRealm checkerRealm = realm.createObject(CheckerRealm.class);
+                    if(checker != null){
+                        MPoint point = checker.getPosition();
+                        checkerRealm.setX(point.getX());
+                        checkerRealm.setY(point.getY());
+                        checkerRealm.setColor(checker.Color().ordinal());
+                    }
+                    else{
+                        checkerRealm.setX(-1);
+                        checkerRealm.setY(-1);
+                        checkerRealm.setColor(-1);
+                    }
+                    boardChecker.add(checkerRealm);
+                }
+            }
+            gameRealm.setBoard(boardChecker);
             gameRealm.copyFrom(game, time);
 
             realm.commitTransaction();
         } catch (RuntimeException e) {
+            Timber.d(e.getMessage());
             result = false;
             try {
                 realm.cancelTransaction();

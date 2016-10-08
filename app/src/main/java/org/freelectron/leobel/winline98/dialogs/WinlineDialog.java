@@ -43,7 +43,7 @@ public class WinlineDialog extends DialogFragment {
      * @return A new instance of fragment WinlineDialog.
      */
     public static WinlineDialog newInstance(String message) {
-        return  WinlineDialog.newInstance(message, "", true);
+        return  WinlineDialog.newInstance(message, "", false);
     }
 
 

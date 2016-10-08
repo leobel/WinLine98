@@ -11,7 +11,12 @@ public class CheckerRealm extends RealmObject {
     private int y;
     private int color;
 
-    public CheckerRealm(){}
+    public CheckerRealm(){
+    }
+
+    public CheckerRealm(int color){
+        this.color = color;
+    }
 
     public CheckerRealm(int x, int y, int color){
         this.x = x;

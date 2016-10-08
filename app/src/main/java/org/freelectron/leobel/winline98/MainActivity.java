@@ -1,5 +1,6 @@
 package org.freelectron.leobel.winline98;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -19,7 +20,9 @@ import android.widget.Chronometer;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import org.freelectron.leobel.winline98.services.GameService;
 import org.freelectron.leobel.winline98.utils.ActivityUtils;
 import org.freelectron.winline.Checker;
 import org.freelectron.winline.LogicWinLine;
@@ -28,6 +31,8 @@ import org.freelectron.winline.MPoint;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.inject.Inject;
 
 import timber.log.Timber;
 
@@ -46,6 +51,8 @@ public class MainActivity extends AppCompatActivity
     private TextView scoreView;
     private NextView nextView;
     private Button newGame;
+    private Button loadGame;
+    private Button saveGame;
     private ImageView timer;
     private Chronometer chronometer;
     private ImageView scoreImage;
@@ -63,10 +70,21 @@ public class MainActivity extends AppCompatActivity
     private Handler scoreHandler;
     private Handler endAlertHandler;
 
+    @Inject
+    public GameService gameService;
+    private ProgressDialog mProgressDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        WinLineApp.getInstance().getComponent().inject(this);
+
+        mProgressDialog = new ProgressDialog(this);
+        mProgressDialog.setIndeterminate(false);
+        mProgressDialog.setMessage("Your request is being processes");
+        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -75,6 +93,8 @@ public class MainActivity extends AppCompatActivity
         nextView = (NextView) findViewById(R.id.next);
         scoreView = (TextView) findViewById(R.id.score);
         newGame = (Button)findViewById(R.id.new_game);
+        loadGame = (Button)findViewById(R.id.load_game);
+        saveGame = (Button)findViewById(R.id.save_game);
         timer = (ImageView) findViewById(R.id.timer);
         chronometer = (Chronometer) findViewById(R.id.chronometer);
         scoreImage = (ImageView) findViewById(R.id.score_image);
@@ -140,6 +160,24 @@ public class MainActivity extends AppCompatActivity
 
         });
 
+        loadGame.setOnClickListener(v -> {
+
+        });
+
+        saveGame.setOnClickListener(v -> {
+            mProgressDialog.show();
+            if(gameService.save(game, (int)(SystemClock.elapsedRealtime() - chronometer.getBase()))){
+                savedCurrentState = true;
+                mProgressDialog.hide();
+                Toast.makeText(this, "Your game was saved!", Toast.LENGTH_SHORT).show();
+
+            }
+            else {
+                mProgressDialog.hide();
+                ActivityUtils.showDialog(this, "Your game can\'t be saved.");
+            }
+        });
+
         createNewGame();
         boardView.setOnTouchListener((v, event) -> {
             boolean emptyPlace = false;
@@ -164,6 +202,7 @@ public class MainActivity extends AppCompatActivity
                 if (path == null) {
                     return true;
                 }
+                savedCurrentState = false;
                 stopAnimateTail(() -> {
                     MoveTile(board);
                 });
