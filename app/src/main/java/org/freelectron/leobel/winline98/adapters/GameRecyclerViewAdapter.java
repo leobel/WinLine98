@@ -120,5 +120,9 @@ public class GameRecyclerViewAdapter extends RecyclerView.Adapter<GameRecyclerVi
             this.leftContainerVisibility = leftContainerVisibility ? View.VISIBLE: View.GONE;
             leftContainer.setVisibility(this.leftContainerVisibility);
         }
+
+        public boolean isSwipeable() {
+            return leftContainerVisibility  == View.VISIBLE ? false : true;
+        }
     }
 }

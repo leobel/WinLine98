@@ -83,7 +83,8 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
         recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), R.drawable.game_list_divider));
 
         Paint p = new Paint();
-        p.setARGB(255, 255, 0, 0);
+        p.setColor(getResources().getColor(R.color.red));
+        //p.setARGB(255, 255, 0, 0);
         Boolean[] swiped = new Boolean[]{false};
 
         ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
@@ -94,17 +95,20 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
 
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-                int position = viewHolder.getAdapterPosition();
-                GameRecyclerViewAdapter adapter = (GameRecyclerViewAdapter)recyclerView.getAdapter();
-                adapter.setLeftContainerVisibility(position, true);
-                adapter.notifyItemChanged(position);
+                if(((GameRecyclerViewAdapter.GameViewHolder) viewHolder).isSwipeable()){
+                    int position = viewHolder.getAdapterPosition();
+                    GameRecyclerViewAdapter adapter = (GameRecyclerViewAdapter)recyclerView.getAdapter();
+                    adapter.setLeftContainerVisibility(position, true);
+                    adapter.notifyItemChanged(position);
+                }
             }
 
             @Override
             public void onChildDraw(Canvas c, RecyclerView recyclerView,
                                     RecyclerView.ViewHolder viewHolder, float dX, float dY,
                                     int actionState, boolean isCurrentlyActive) {
-                if(actionState == ItemTouchHelper.ACTION_STATE_SWIPE){
+
+                if(((GameRecyclerViewAdapter.GameViewHolder) viewHolder).isSwipeable() && actionState == ItemTouchHelper.ACTION_STATE_SWIPE){
                     View itemView = viewHolder.itemView;
                     if (dX > 0) {
                         c.drawRect(itemView.getLeft(), itemView.getTop(), dX, itemView.getBottom(), p);
