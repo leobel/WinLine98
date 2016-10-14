@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import org.freelectron.leobel.winline98.adapters.GameRecyclerViewAdapter;
 import org.freelectron.leobel.winline98.adapters.RecyclerViewGameLoadAdapterListener;
 import org.freelectron.leobel.winline98.services.GameService;
+import org.freelectron.leobel.winline98.widgets.DividerItemDecoration;
 import org.freelectron.winline.LogicWinLine;
 
 import javax.inject.Inject;
@@ -65,8 +66,11 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
         Context context = view.getContext();
         RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
+
+        // set divider between items
+        recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), R.drawable.game_list_divider));
+
         recyclerView.setAdapter(new GameRecyclerViewAdapter(gameService.findAll(), this));
-        recyclerView.addItemDecoration(new TopDividerItemDecoration(getContext(), R.drawable.game_list_divider));
         return view;
     }
 
