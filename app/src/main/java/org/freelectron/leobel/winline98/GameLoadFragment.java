@@ -1,22 +1,32 @@
 package org.freelectron.leobel.winline98;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.view.menu.MenuView;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import org.freelectron.leobel.winline98.adapters.GameRecyclerViewAdapter;
 import org.freelectron.leobel.winline98.adapters.RecyclerViewGameLoadAdapterListener;
+import org.freelectron.leobel.winline98.models.WinLine;
 import org.freelectron.leobel.winline98.services.GameService;
+import org.freelectron.leobel.winline98.utils.ActivityUtils;
 import org.freelectron.leobel.winline98.widgets.DividerItemDecoration;
 import org.freelectron.winline.LogicWinLine;
 
 import javax.inject.Inject;
+
+import timber.log.Timber;
 
 /**
  * A fragment representing a list of Items.
@@ -27,6 +37,8 @@ import javax.inject.Inject;
 public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAdapterListener {
 
     private OnListFragmentInteractionListener mListener;
+
+    private RecyclerView recyclerView;
 
     @Inject
     public GameService gameService;
@@ -64,11 +76,50 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
 
         // Set the adapter
         Context context = view.getContext();
-        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.list);
+        recyclerView = (RecyclerView) view.findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
 
         // set divider between items
         recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), R.drawable.game_list_divider));
+
+        Paint p = new Paint();
+        p.setARGB(255, 255, 0, 0);
+        Boolean[] swiped = new Boolean[]{false};
+
+        ItemTouchHelper.SimpleCallback simpleCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                int position = viewHolder.getAdapterPosition();
+                GameRecyclerViewAdapter adapter = (GameRecyclerViewAdapter)recyclerView.getAdapter();
+                adapter.setLeftContainerVisibility(position, true);
+                adapter.notifyItemChanged(position);
+            }
+
+            @Override
+            public void onChildDraw(Canvas c, RecyclerView recyclerView,
+                                    RecyclerView.ViewHolder viewHolder, float dX, float dY,
+                                    int actionState, boolean isCurrentlyActive) {
+                if(actionState == ItemTouchHelper.ACTION_STATE_SWIPE){
+                    View itemView = viewHolder.itemView;
+                    if (dX > 0) {
+                        c.drawRect(itemView.getLeft(), itemView.getTop(), dX, itemView.getBottom(), p);
+                    } else {
+                        c.drawRect(itemView.getRight() + dX, itemView.getTop(), itemView.getRight(), itemView.getBottom(), p);
+                    }
+                    super.onChildDraw(c, recyclerView, viewHolder, dX, dY, actionState, isCurrentlyActive);
+                }
+
+            }
+
+        };
+
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
+        itemTouchHelper.attachToRecyclerView(recyclerView);
 
         recyclerView.setAdapter(new GameRecyclerViewAdapter(gameService.findAll(), this));
         return view;
@@ -95,6 +146,18 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
     @Override
     public void onLoadGame(LogicWinLine game) {
         mListener.loadGame(game);
+    }
+
+    @Override
+    public void removeItem(int adapterPosition, LogicWinLine mItem) {
+        WinLine game = (WinLine) mItem;
+        if(gameService.remove(game.getId())){
+            ((GameRecyclerViewAdapter)recyclerView.getAdapter()).removeItem(adapterPosition);
+            ActivityUtils.showDialog(getActivity(), getString(R.string.delete_game_success), getString(R.string.success_title));
+        }
+        else{
+            ActivityUtils.showDialog(getActivity(), getString(R.string.delete_game_fail), getString(R.string.error_title));
+        }
     }
 
     /**

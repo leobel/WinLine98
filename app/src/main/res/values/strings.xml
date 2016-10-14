@@ -9,8 +9,17 @@
 
     <!-- Dialog section -->
     <string name="warning_title">Warning!</string>
-    <string name="dialog_ok">Yes</string>
+    <string name="error_title">Oops!</string>
+    <string name="success_title">Success!</string>
+    <string name="dialog_yes">Yes</string>
+    <string name="dialog_ok">Ok</string>
     <string name="dialog_cancel">No</string>
     <string name="unsaved_current_state">Your current game state isn\'t saved yet. New game will reset it.\n\nDo you want to proceed any way?</string>
+
+
+    <!-- Delete game -->
+    <string name="delete_game">Are you sure you want to delete the game?</string>
+    <string name="delete_game_success">The game was deleted!</string>
+    <string name="delete_game_fail">The game couldn\'t be deleted?</string>
 
 </resources>

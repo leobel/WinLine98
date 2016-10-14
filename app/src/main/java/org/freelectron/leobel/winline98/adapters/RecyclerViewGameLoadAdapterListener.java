@@ -7,4 +7,5 @@ import org.freelectron.winline.LogicWinLine;
  */
 public interface RecyclerViewGameLoadAdapterListener {
     void onLoadGame(LogicWinLine game);
+    void removeItem(int adapterPosition, LogicWinLine mItem);
 }

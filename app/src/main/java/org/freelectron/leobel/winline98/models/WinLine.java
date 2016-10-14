@@ -10,6 +10,7 @@ import java.io.Serializable;
  */
 public class WinLine extends LogicWinLine implements Serializable {
 
+    private long id;
     private int time;
 
     public WinLine(int dimesion) throws Exception {
@@ -20,9 +21,10 @@ public class WinLine extends LogicWinLine implements Serializable {
         super(board, next, score);
     }
 
-    public WinLine(Checker[][] board, Checker[] next, int score, int time){
+    public WinLine(long id, Checker[][] board, Checker[] next, int score, int time){
         super(board, next, score);
         this.time = time;
+        this.id = id;
     }
 
     public int getTime() {
@@ -31,5 +33,9 @@ public class WinLine extends LogicWinLine implements Serializable {
 
     public void setTime(int time) {
         this.time = time;
+    }
+
+    public long getId() {
+        return id;
     }
 }

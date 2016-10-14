@@ -124,6 +124,7 @@ public class WinlineDialog extends DialogFragment {
             buttonCancel.setVisibility(View.VISIBLE);
         }
         else{
+            buttonOk.setText(getString(R.string.dialog_ok));
             buttonCancel.setVisibility(View.GONE);
         }
 

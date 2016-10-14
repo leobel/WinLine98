@@ -94,7 +94,7 @@ public class GameRealm extends RealmObject{
             }
         }
 
-        WinLine game = new WinLine(boardChecker, nextChecker, getScore(), getTime());
+        WinLine game = new WinLine(getId(), boardChecker, nextChecker, getScore(), getTime());
         return game;
     }
 }

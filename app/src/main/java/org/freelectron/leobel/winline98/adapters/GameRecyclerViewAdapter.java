@@ -4,12 +4,16 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
+import android.widget.Button;
 
 import org.freelectron.leobel.winline98.BoardView;
 import org.freelectron.leobel.winline98.R;
 import org.freelectron.winline.LogicWinLine;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Dictionary;
 import java.util.List;
 
 /**
@@ -17,26 +21,30 @@ import java.util.List;
  * specified {@link RecyclerViewGameLoadAdapterListener}.
  * TODO: Replace the implementation with code for your data type.
  */
-public class GameRecyclerViewAdapter extends RecyclerView.Adapter<GameRecyclerViewAdapter.ViewHolder> {
+public class GameRecyclerViewAdapter extends RecyclerView.Adapter<GameRecyclerViewAdapter.GameViewHolder> {
 
     private final List<LogicWinLine> mValues;
     private final RecyclerViewGameLoadAdapterListener mListener;
+    private List<Boolean> leftContainers;
 
     public GameRecyclerViewAdapter(List<LogicWinLine> items, RecyclerViewGameLoadAdapterListener listener) {
         mValues = items;
         mListener = listener;
+        leftContainers = new ArrayList<>(Arrays.asList(new Boolean[items.size()]));
+        Collections.fill(leftContainers, Boolean.FALSE);
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public GameViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(R.layout.fragment_game, parent, false);
-        return new ViewHolder(view);
+        return new GameViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position) {
+    public void onBindViewHolder(final GameViewHolder holder, int position) {
         holder.setItem(mValues.get(position));
+        holder.setLeftContainerVisibility(leftContainers.get(position));
 
         holder.mView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -48,6 +56,27 @@ public class GameRecyclerViewAdapter extends RecyclerView.Adapter<GameRecyclerVi
                 }
             }
         });
+
+        holder.cancelDeleteGame.setOnClickListener( v -> {
+            setLeftContainerVisibility(holder.getAdapterPosition(), false);
+            holder.setLeftContainerVisibility(leftContainers.get(holder.getAdapterPosition()));
+        });
+
+        holder.deleteGame.setOnClickListener(v -> {
+            setLeftContainerVisibility(holder.getAdapterPosition(), false);
+            holder.setLeftContainerVisibility(leftContainers.get(holder.getAdapterPosition()));
+            mListener.removeItem(holder.getAdapterPosition(), holder.mItem);
+        });
+    }
+
+    public void removeItem(int position){
+        leftContainers.remove(position);
+        mValues.remove(position);
+        notifyItemRemoved(position);
+    }
+
+    public void setLeftContainerVisibility(int position, Boolean visibility){
+        leftContainers.set(position, visibility);
     }
 
     @Override
@@ -55,27 +84,41 @@ public class GameRecyclerViewAdapter extends RecyclerView.Adapter<GameRecyclerVi
         return mValues.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public class GameViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
 
         private BoardView boardView;
+        private View leftContainer;
         private LogicWinLine mItem;
+        private int leftContainerVisibility = View.GONE;
+        public Button deleteGame;
+        public Button cancelDeleteGame;
 
-        public ViewHolder(View view) {
+        public GameViewHolder(View view) {
             super(view);
             mView = view;
             boardView = (BoardView) view.findViewById(R.id.board_game);
+            leftContainer = view.findViewById(R.id.left_container);
+            deleteGame = (Button) view.findViewById(R.id.delete_game);
+            cancelDeleteGame = (Button) view.findViewById(R.id.cancel_delete_action);
+            leftContainer.setVisibility(leftContainerVisibility);
         }
 
         public void setItem(LogicWinLine item){
             this.mItem = item;
             boardView.setBoard(mItem.getBoard());
             //boardView.invalidate();
+
         }
 
         @Override
         public String toString() {
             return super.toString();
+        }
+
+        public void setLeftContainerVisibility(boolean leftContainerVisibility) {
+            this.leftContainerVisibility = leftContainerVisibility ? View.VISIBLE: View.GONE;
+            leftContainer.setVisibility(this.leftContainerVisibility);
         }
     }
 }

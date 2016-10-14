@@ -63,7 +63,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:gravity="center"
-                android:text="@string/dialog_ok"
+                android:text="@string/dialog_yes"
                 style="@style/dialogButton"/>
 
 
