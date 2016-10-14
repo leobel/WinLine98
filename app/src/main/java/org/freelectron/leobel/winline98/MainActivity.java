@@ -1,6 +1,8 @@
 package org.freelectron.leobel.winline98;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -22,6 +24,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.freelectron.leobel.winline98.models.WinLine;
 import org.freelectron.leobel.winline98.services.GameService;
 import org.freelectron.leobel.winline98.utils.ActivityUtils;
 import org.freelectron.winline.Checker;
@@ -41,6 +44,7 @@ import timber.log.Timber;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
+    private static final int LOAD_GAME = 1;
     private Thread timerMoveTile;
     private Thread timerAnimateTile;
     private Thread timerAnimateInsertTile;
@@ -73,6 +77,7 @@ public class MainActivity extends AppCompatActivity
     @Inject
     public GameService gameService;
     private ProgressDialog mProgressDialog;
+    private boolean loadGameOnStart;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -145,13 +150,13 @@ public class MainActivity extends AppCompatActivity
 
         newGame.setOnClickListener(v -> {
             if(savedCurrentState){
-                stopChornometer();
+                stopChronometer();
                 createNewGame();
             }
             else{
                 pauseChronometer();
                 ActivityUtils.showDialog(this, getString(R.string.unsaved_current_state), true, v1 -> {
-                    stopChornometer();
+                    stopChronometer();
                     createNewGame();
                 }, v2 -> {
                     startChronometer();
@@ -161,7 +166,7 @@ public class MainActivity extends AppCompatActivity
         });
 
         loadGame.setOnClickListener(v -> {
-
+            startActivityForResult(new Intent(this, LoadGameActivity.class), LOAD_GAME);
         });
 
         saveGame.setOnClickListener(v -> {
@@ -178,7 +183,7 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        createNewGame();
+        //createNewGame();
         boardView.setOnTouchListener((v, event) -> {
             boolean emptyPlace = false;
             if (v.getId() != R.id.board) {
@@ -249,7 +254,18 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    private void stopChornometer(){
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == LOAD_GAME && resultCode == Activity.RESULT_OK){
+            loadGameOnStart = true;
+            WinLine loadedGame = (WinLine) data.getSerializableExtra(LoadGameActivity.GAME_LOADED);
+            timeWhenStopped = -1L * loadedGame.getTime();
+            game = new LogicWinLine(loadedGame.getBoard(), loadedGame.getNext(), loadedGame.getScore());
+
+        }
+    }
+
+    private void stopChronometer(){
         timeWhenStopped = 0L;
         chronometer.stop();
     }
@@ -264,13 +280,30 @@ public class MainActivity extends AppCompatActivity
         chronometer.start();
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        createNewGame();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        pauseChronometer();
+    }
 
     private void createNewGame(){
-        try {
-            game = new LogicWinLine(dimension);
-        } catch (Exception e) {
-            e.printStackTrace();
+        if(!loadGameOnStart){
+            try {
+                game = new LogicWinLine(dimension);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
+        else {
+            loadGameOnStart = false;
+        }
+
         boardView.setBoard(game.getBoard());
         nextView.setBoard(this.game.getNext());
         this.scoreView.setText(game.getScore().toString());

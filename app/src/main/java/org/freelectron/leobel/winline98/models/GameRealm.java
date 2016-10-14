@@ -89,8 +89,8 @@ public class GameRealm extends RealmObject{
         for (int i=0; i< boardChecker.length; i++){
             for(int j = 0; j < boardChecker.length; j++){
                 CheckerRealm checker = board.get(boardChecker.length * i + j);
-                LogicWinLine.Color color = checker.getColor() < 0 ? LogicWinLine.Color.values()[checker.getColor()] : LogicWinLine.Color.Empty;
-                boardChecker[i][j] = new Checker(new MPoint(checker.getX(), checker.getY()), color);
+                if(checker.getColor() >= 0)
+                    boardChecker[i][j] = new Checker(new MPoint(checker.getX(), checker.getY()), LogicWinLine.Color.values()[checker.getColor()]);
             }
         }
 

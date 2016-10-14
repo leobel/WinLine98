@@ -58,16 +58,6 @@
                         android:layout_toRightOf="@+id/timer"
                         android:gravity="center|left"/>
 
-                    <!--<TextView-->
-                        <!--android:id="@+id/time1"-->
-                        <!--android:layout_width="wrap_content"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:layout_alignTop="@+id/next"-->
-                        <!--android:layout_alignBottom="@+id/next"-->
-                        <!--android:layout_toRightOf="@+id/timer"-->
-                        <!--android:gravity="center_vertical|left"-->
-                        <!--android:text="00:00:00"/>-->
-
                     <org.freelectron.leobel.winline98.NextView
                         android:id="@+id/next"
                         android:layout_centerHorizontal="true"

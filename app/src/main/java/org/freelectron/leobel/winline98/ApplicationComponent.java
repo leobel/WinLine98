@@ -17,4 +17,6 @@ public interface ApplicationComponent {
     void inject(WinLineApp app);
 
     void inject(MainActivity activity);
+
+    void inject(GameLoadFragment fragment);
 }

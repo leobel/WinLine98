@@ -3,10 +3,12 @@ package org.freelectron.leobel.winline98.models;
 import org.freelectron.winline.Checker;
 import org.freelectron.winline.LogicWinLine;
 
+import java.io.Serializable;
+
 /**
  * Created by leobel on 10/7/16.
  */
-public class WinLine extends LogicWinLine {
+public class WinLine extends LogicWinLine implements Serializable {
 
     private int time;
 

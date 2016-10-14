@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="org.freelectron.leobel.winline98.LoadGameActivity"
+    android:background="@color/windowBackground">
+
+    <fragment
+        android:name="org.freelectron.leobel.winline98.GameLoadFragment"
+        android:id="@+id/game_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:layout="@layout/fragment_game_list">
+
+    </fragment>
+
+</RelativeLayout>
