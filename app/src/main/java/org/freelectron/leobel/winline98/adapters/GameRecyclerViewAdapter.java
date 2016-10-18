@@ -34,6 +34,7 @@ public class GameRecyclerViewAdapter extends RecyclerView.Adapter<GameRecyclerVi
 
     public GameRecyclerViewAdapter(List<LogicWinLine> items, RecyclerViewGameLoadAdapterListener listener) {
         mValues = items;
+        Collections.sort(mValues, (lhs, rhs) -> -lhs.getScore().compareTo(rhs.getScore()));
         mListener = listener;
         leftContainers = new ArrayList<>(Arrays.asList(new Boolean[items.size()]));
         Collections.fill(leftContainers, Boolean.FALSE);
