@@ -6,6 +6,10 @@ import android.view.View;
 
 import org.freelectron.leobel.winline98.dialogs.WinlineDialog;
 
+import java.text.DateFormat;
+import java.util.Date;
+import java.util.Locale;
+
 /**
  * Created by leobel on 10/4/16.
  */
@@ -67,5 +71,9 @@ public class ActivityUtils {
         });
 
         dialogFragment.show(((AppCompatActivity)activity).getSupportFragmentManager(), "dialog");
+    }
+
+    public static String formatFullDate(Long date){
+        return DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.SHORT).format(new Date(date));
     }
 }

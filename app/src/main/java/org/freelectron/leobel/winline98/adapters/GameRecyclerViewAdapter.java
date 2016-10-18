@@ -1,13 +1,18 @@
 package org.freelectron.leobel.winline98.adapters;
 
+import android.os.SystemClock;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Chronometer;
+import android.widget.TextView;
 
 import org.freelectron.leobel.winline98.BoardView;
 import org.freelectron.leobel.winline98.R;
+import org.freelectron.leobel.winline98.models.WinLine;
+import org.freelectron.leobel.winline98.utils.ActivityUtils;
 import org.freelectron.winline.LogicWinLine;
 
 import java.util.ArrayList;
@@ -88,16 +93,25 @@ public class GameRecyclerViewAdapter extends RecyclerView.Adapter<GameRecyclerVi
         public final View mView;
 
         private BoardView boardView;
+        private TextView gameDate;
+        private Chronometer chronometer;
+        private TextView score;
         private View leftContainer;
         private LogicWinLine mItem;
         private int leftContainerVisibility = View.GONE;
         public Button deleteGame;
         public Button cancelDeleteGame;
 
+
         public GameViewHolder(View view) {
             super(view);
             mView = view;
             boardView = (BoardView) view.findViewById(R.id.board_game);
+            gameDate = (TextView) view.findViewById(R.id.game_date);
+            chronometer = (Chronometer) view.findViewById(R.id.chronometer);
+            score = (TextView) view.findViewById(R.id.score);
+
+
             leftContainer = view.findViewById(R.id.left_container);
             deleteGame = (Button) view.findViewById(R.id.delete_game);
             cancelDeleteGame = (Button) view.findViewById(R.id.cancel_delete_action);
@@ -107,8 +121,11 @@ public class GameRecyclerViewAdapter extends RecyclerView.Adapter<GameRecyclerVi
         public void setItem(LogicWinLine item){
             this.mItem = item;
             boardView.setBoard(mItem.getBoard());
-            //boardView.invalidate();
-
+            WinLine game = (WinLine)mItem;
+            gameDate.setText(ActivityUtils.formatFullDate(game.getId()));
+            long timeWhenStopped = -1L * game.getTime();
+            chronometer.setBase(SystemClock.elapsedRealtime() + timeWhenStopped);
+            score.setText(game.getScore().toString());
         }
 
         @Override
