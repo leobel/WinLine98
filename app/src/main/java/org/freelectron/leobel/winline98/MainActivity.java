@@ -292,6 +292,12 @@ public class MainActivity extends AppCompatActivity
         pauseChronometer();
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        loadGameOnStart = true;
+    }
+
     private void createNewGame(){
         if(!loadGameOnStart){
             try {
