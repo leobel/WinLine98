@@ -152,6 +152,7 @@ public class MainActivity extends AppCompatActivity
             if(savedCurrentState){
                 stopChronometer();
                 createNewGame();
+                savedCurrentState = false;
             }
             else{
                 pauseChronometer();
@@ -258,6 +259,7 @@ public class MainActivity extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == LOAD_GAME && resultCode == Activity.RESULT_OK){
             loadGameOnStart = true;
+            savedCurrentState = true;
             WinLine loadedGame = (WinLine) data.getSerializableExtra(LoadGameActivity.GAME_LOADED);
             timeWhenStopped = -1L * loadedGame.getTime();
             game = new LogicWinLine(loadedGame.getBoard(), loadedGame.getNext(), loadedGame.getScore());
