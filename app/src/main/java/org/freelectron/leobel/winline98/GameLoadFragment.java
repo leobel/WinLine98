@@ -95,12 +95,15 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
 
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-                if(((GameRecyclerViewAdapter.GameViewHolder) viewHolder).isSwipeable()){
-                    int position = viewHolder.getAdapterPosition();
-                    GameRecyclerViewAdapter adapter = (GameRecyclerViewAdapter)recyclerView.getAdapter();
-                    adapter.setLeftContainerVisibility(position, true);
-                    adapter.notifyItemChanged(position);
-                }
+                int position = viewHolder.getAdapterPosition();
+                GameRecyclerViewAdapter adapter = (GameRecyclerViewAdapter)recyclerView.getAdapter();
+                adapter.setLeftContainerVisibility(position, true);
+                adapter.notifyItemChanged(position);
+            }
+
+            @Override
+            public float getSwipeThreshold(RecyclerView.ViewHolder viewHolder) {
+                return .3f;
             }
 
             @Override
