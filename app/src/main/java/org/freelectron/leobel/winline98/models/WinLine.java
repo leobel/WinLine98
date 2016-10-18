@@ -27,7 +27,7 @@ public class WinLine extends LogicWinLine implements Serializable {
         this.id = id;
     }
 
-    public int getTime() {
+    public Integer getTime() {
         return time;
     }
 
@@ -35,7 +35,7 @@ public class WinLine extends LogicWinLine implements Serializable {
         this.time = time;
     }
 
-    public long getId() {
+    public Long getId() {
         return id;
     }
 }

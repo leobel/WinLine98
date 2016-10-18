@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/sort_by"
+        android:title="Sort By"
+        app:showAsAction="always">
+
+        <menu>
+            <item
+                android:id="@+id/game_saved_date"
+                android:orderInCategory="100"
+                android:title="Most Recent">
+            </item>
+            <item
+                android:id="@+id/game_saved_score"
+                android:orderInCategory="100"
+                android:title="High Score">
+            </item>
+            <item
+                android:id="@+id/game_saved_time"
+                android:orderInCategory="100"
+                android:title="Longer played">
+            </item>
+        </menu>
+
+    </item>
+
+
+</menu>

@@ -5,16 +5,12 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.view.menu.MenuView;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import org.freelectron.leobel.winline98.adapters.GameRecyclerViewAdapter;
 import org.freelectron.leobel.winline98.adapters.RecyclerViewGameLoadAdapterListener;
@@ -24,9 +20,10 @@ import org.freelectron.leobel.winline98.utils.ActivityUtils;
 import org.freelectron.leobel.winline98.widgets.DividerItemDecoration;
 import org.freelectron.winline.LogicWinLine;
 
-import javax.inject.Inject;
+import java.util.Collections;
+import java.util.List;
 
-import timber.log.Timber;
+import javax.inject.Inject;
 
 /**
  * A fragment representing a list of Items.
@@ -128,8 +125,27 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleCallback);
         itemTouchHelper.attachToRecyclerView(recyclerView);
 
-        recyclerView.setAdapter(new GameRecyclerViewAdapter(gameService.findAll(), this));
+        List<WinLine> items = (List<WinLine>)(List<?>) gameService.findAll();
+        Collections.sort(items, (lhs, rhs) -> -lhs.getScore().compareTo(rhs.getScore()));
+        recyclerView.setAdapter(new GameRecyclerViewAdapter(items, this));
         return view;
+    }
+
+    public void orderGameBy(int option){
+        GameRecyclerViewAdapter adapter = (GameRecyclerViewAdapter) recyclerView.getAdapter();
+        List<WinLine> items = adapter.getItems();
+        if(option == R.id.game_saved_date){
+            Collections.sort(items, (lhs, rhs) -> -lhs.getId().compareTo(rhs.getId()));
+        }
+        else if(option == R.id.game_saved_score){
+            Collections.sort(items, (lhs, rhs) -> -lhs.getScore().compareTo(rhs.getScore()));
+        }
+        else{
+            Collections.sort(items, (lhs, rhs) -> -lhs.getTime().compareTo(rhs.getTime()));
+        }
+
+        adapter.setItems(items);
+        adapter.notifyDataSetChanged();
     }
 
 

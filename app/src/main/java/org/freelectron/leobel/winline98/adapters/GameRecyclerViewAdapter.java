@@ -28,13 +28,12 @@ import java.util.List;
  */
 public class GameRecyclerViewAdapter extends RecyclerView.Adapter<GameRecyclerViewAdapter.GameViewHolder> {
 
-    private final List<LogicWinLine> mValues;
+    private List<WinLine> mValues;
     private final RecyclerViewGameLoadAdapterListener mListener;
     private List<Boolean> leftContainers;
 
-    public GameRecyclerViewAdapter(List<LogicWinLine> items, RecyclerViewGameLoadAdapterListener listener) {
+    public GameRecyclerViewAdapter(List<WinLine> items, RecyclerViewGameLoadAdapterListener listener) {
         mValues = items;
-        Collections.sort(mValues, (lhs, rhs) -> -lhs.getScore().compareTo(rhs.getScore()));
         mListener = listener;
         leftContainers = new ArrayList<>(Arrays.asList(new Boolean[items.size()]));
         Collections.fill(leftContainers, Boolean.FALSE);
@@ -88,6 +87,14 @@ public class GameRecyclerViewAdapter extends RecyclerView.Adapter<GameRecyclerVi
     @Override
     public int getItemCount() {
         return mValues.size();
+    }
+
+    public List<WinLine> getItems() {
+        return mValues;
+    }
+
+    public void setItems(List<WinLine> items) {
+        this.mValues = items;
     }
 
     public class GameViewHolder extends RecyclerView.ViewHolder {
