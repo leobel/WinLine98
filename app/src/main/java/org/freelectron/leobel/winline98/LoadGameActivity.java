@@ -75,10 +75,12 @@ public class LoadGameActivity extends AppCompatActivity implements GameLoadFragm
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.sort_by, menu);
+        getMenuInflater().inflate(R.menu.game_list, menu);
+        MenuItem share = menu.findItem(R.id.share_item);
         MenuItem trash = menu.findItem(R.id.delete_item);
         MenuItem sort = menu.findItem(R.id.sort_by);
-        trash.setVisible(selectMultipleItems && selectedItems > 0);
+        share.setVisible(selectMultipleItems && selectedItems > 0);
+        trash.setVisible(share.isVisible());
         sort.setVisible(!selectMultipleItems);
         return true;
     }
