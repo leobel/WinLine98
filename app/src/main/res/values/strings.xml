@@ -19,6 +19,7 @@
 
     <!-- Delete game -->
     <string name="delete_game">Are you sure you want to delete the game?</string>
+    <string name="delete_games">Are you sure you want to delete the games?</string>
     <string name="delete_game_success">The game was deleted!</string>
     <string name="delete_games_success">The games were deleted!</string>
     <string name="delete_game_fail">The game couldn\'t be deleted?</string>

@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.TextView;
 
 import org.freelectron.leobel.winline98.models.WinLine;
+import org.freelectron.leobel.winline98.utils.ActivityUtils;
 import org.freelectron.winline.LogicWinLine;
 
 public class LoadGameActivity extends AppCompatActivity implements GameLoadFragment.OnListFragmentInteractionListener {
@@ -89,8 +90,12 @@ public class LoadGameActivity extends AppCompatActivity implements GameLoadFragm
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if(id == R.id.delete_item){
-            fragment.removeItems();
-            selectMultipleItems(false);
+            ActivityUtils.showDialog(this, getString(selectedItems > 1 ? R.string.delete_games : R.string.delete_game), true, ok -> {
+                fragment.removeItems();
+                selectMultipleItems(false);
+            }, cancel -> {
+
+            });
         }
         else if(id != R.id.sort_by){
             fragment.orderGameBy(id);
