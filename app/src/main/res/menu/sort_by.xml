@@ -3,6 +3,15 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
+        android:id="@+id/delete_item"
+        android:title="delete"
+        android:icon="@drawable/ic_trash"
+        app:showAsAction="always">
+
+    </item>
+
+
+    <item
         android:id="@+id/sort_by"
         android:title="Sort By"
         app:showAsAction="always">

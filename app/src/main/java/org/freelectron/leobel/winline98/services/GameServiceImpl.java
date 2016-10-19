@@ -124,6 +124,36 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
+    public Boolean remove(List<Long> ids) {
+        RealmConfiguration.Builder builder = new RealmConfiguration.Builder(context);
+        Realm realm = Realm.getInstance(builder.build());
+        boolean result = true;
+        try {
+            realm.beginTransaction();
+            for(Long id: ids){
+                result = result && realm.where(GameRealm.class)
+                    .equalTo("id", id)
+                    .findAll()
+                    .deleteAllFromRealm();
+            }
+            realm.commitTransaction();
+        } catch (RuntimeException e) {
+            try {
+                realm.cancelTransaction();
+            } catch (Exception e1) {
+                Timber.d(e1, "This should never happened");
+            }
+        }
+
+        try {
+            realm.close();
+        } catch (RealmException ex) {
+            Timber.d(ex, "This should never happened");
+        }
+        return result;
+    }
+
+    @Override
     public LogicWinLine findById(Long id) {
         RealmConfiguration.Builder builder = new RealmConfiguration.Builder(context);
         Realm realm = Realm.getInstance(builder.build());

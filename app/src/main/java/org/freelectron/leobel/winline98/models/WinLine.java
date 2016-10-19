@@ -4,11 +4,12 @@ import org.freelectron.winline.Checker;
 import org.freelectron.winline.LogicWinLine;
 
 import java.io.Serializable;
+import java.util.Comparator;
 
 /**
  * Created by leobel on 10/7/16.
  */
-public class WinLine extends LogicWinLine implements Serializable {
+public class WinLine extends LogicWinLine implements Serializable, Comparator<WinLine> {
 
     private long id;
     private int time;
@@ -37,5 +38,15 @@ public class WinLine extends LogicWinLine implements Serializable {
 
     public Long getId() {
         return id;
+    }
+
+    @Override
+    public int compare(WinLine lhs, WinLine rhs) {
+        return lhs.getId().compareTo(rhs.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getId().intValue();
     }
 }

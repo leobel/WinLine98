@@ -1,5 +1,6 @@
 package org.freelectron.leobel.winline98;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -17,10 +18,13 @@ import org.freelectron.leobel.winline98.adapters.RecyclerViewGameLoadAdapterList
 import org.freelectron.leobel.winline98.models.WinLine;
 import org.freelectron.leobel.winline98.services.GameService;
 import org.freelectron.leobel.winline98.utils.ActivityUtils;
+import org.freelectron.leobel.winline98.utils.CollectionsUtils;
 import org.freelectron.leobel.winline98.widgets.DividerItemDecoration;
 import org.freelectron.winline.LogicWinLine;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -35,10 +39,12 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
 
     private OnListFragmentInteractionListener mListener;
 
-    private RecyclerView recyclerView;
+    private GameRecyclerViewAdapter adapter;
 
     @Inject
     public GameService gameService;
+    private HashMap<Integer, WinLine> selectedItems;
+    private ProgressDialog mProgressDialog;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -47,7 +53,6 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
     public GameLoadFragment() {
     }
 
-    // TODO: Customize parameter initialization
     @SuppressWarnings("unused")
     public static GameLoadFragment newInstance(int columnCount) {
         GameLoadFragment fragment = new GameLoadFragment();
@@ -62,6 +67,11 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
 
         WinLineApp.getInstance().getComponent().inject(this);
 
+        mProgressDialog = new ProgressDialog(getActivity());
+        mProgressDialog.setIndeterminate(false);
+        mProgressDialog.setMessage("Your request is being processes");
+        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+
         if (getArguments() != null) {
         }
     }
@@ -73,7 +83,7 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
 
         // Set the adapter
         Context context = view.getContext();
-        recyclerView = (RecyclerView) view.findViewById(R.id.list);
+        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
 
         // set divider between items
@@ -127,12 +137,12 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
 
         List<WinLine> items = (List<WinLine>)(List<?>) gameService.findAll();
         Collections.sort(items, (lhs, rhs) -> -lhs.getScore().compareTo(rhs.getScore()));
-        recyclerView.setAdapter(new GameRecyclerViewAdapter(items, this));
+        adapter = new GameRecyclerViewAdapter(items, this);
+        recyclerView.setAdapter(adapter);
         return view;
     }
 
     public void orderGameBy(int option){
-        GameRecyclerViewAdapter adapter = (GameRecyclerViewAdapter) recyclerView.getAdapter();
         List<WinLine> items = adapter.getItems();
         if(option == R.id.game_saved_date){
             Collections.sort(items, (lhs, rhs) -> -lhs.getId().compareTo(rhs.getId()));
@@ -167,20 +177,78 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
     }
 
     @Override
-    public void onLoadGame(LogicWinLine game) {
+    public void onLoadGame(WinLine game) {
         mListener.loadGame(game);
     }
 
     @Override
-    public void removeItem(int adapterPosition, LogicWinLine mItem) {
-        WinLine game = (WinLine) mItem;
-        if(gameService.remove(game.getId())){
-            ((GameRecyclerViewAdapter)recyclerView.getAdapter()).removeItem(adapterPosition);
+    public void onItemLongClicked(int adapterPosition, WinLine mItem) {
+        selectedItems = new HashMap<>();
+        selectedItems.put(adapterPosition, mItem);
+        mListener.selectMultipleItems(true);
+    }
+
+    @Override
+    public void onItemClickedInSelectMultipleItemsMode(int adapterPosition, WinLine mItem, boolean selected) {
+        if(selected) {
+            selectedItems.put(adapterPosition, mItem);
+        }
+        else{
+            selectedItems.remove(adapterPosition);
+        }
+        mListener.notifySelectMultipleItemsClicked(selectedItems.size());
+    }
+
+    @Override
+    public void removeItem(int adapterPosition, WinLine mItem) {
+        if(gameService.remove(mItem.getId())){
+            adapter.removeItem(adapterPosition);
+            if(selectedItems.containsKey(adapterPosition)){
+                selectedItems.remove(adapterPosition);
+            }
+            mListener.notifySelectMultipleItemsClicked(selectedItems.size());
             ActivityUtils.showDialog(getActivity(), getString(R.string.delete_game_success), getString(R.string.success_title));
         }
         else{
             ActivityUtils.showDialog(getActivity(), getString(R.string.delete_game_fail), getString(R.string.error_title));
         }
+    }
+
+    public void removeItems() {
+        int size = selectedItems.values().size();
+        if(gameService.remove(CollectionsUtils.map(selectedItems.values(), WinLine::getId))){
+            adapter.setSelectMultipleItemsMode(false);
+            adapter.removeItem(new ArrayList<>(selectedItems.keySet()));
+            selectedItems.clear();
+            mListener.selectMultipleItems(false);
+            ActivityUtils.showDialog(getActivity(), getString(size > 1 ? R.string.delete_games_success : R.string.delete_game_success), getString(R.string.success_title));
+        }
+        else{
+            ActivityUtils.showDialog(getActivity(), getString(size > 1 ? R.string.delete_games_fail : R.string.delete_game_fail), getString(R.string.error_title));
+        }
+    }
+
+    public void unCheckAllItems() {
+        adapter.unCheckAllItems();
+        selectedItems.clear();
+    }
+
+    public void checkAllItems() {
+        adapter.checkAllItems();
+        List<WinLine> games = adapter.getItems();
+        for(int i = 0; i < games.size(); i++){
+            selectedItems.put(i, games.get(i));
+        }
+    }
+
+    public int getItemsCount() {
+        return adapter.getItemCount();
+    }
+
+    public void cancelSelectMultipleItemsMode() {
+        adapter.setSelectMultipleItemsMode(false);
+        adapter.unCheckAllItems();
+        selectedItems.clear();
     }
 
     /**
@@ -196,5 +264,9 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
     public interface OnListFragmentInteractionListener {
 
         void loadGame(LogicWinLine item);
+
+        void selectMultipleItems(boolean status);
+
+        void notifySelectMultipleItemsClicked(Integer count);
     }
 }
