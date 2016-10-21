@@ -30,6 +30,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.freelectron.leobel.winline98.dialogs.GameOverDialog;
 import org.freelectron.leobel.winline98.models.WinLine;
 import org.freelectron.leobel.winline98.services.GameService;
 import org.freelectron.leobel.winline98.utils.ActivityUtils;
@@ -158,7 +159,8 @@ public class MainActivity extends AppCompatActivity
 
         endAlertHandler = new Handler(msg -> {
             scoreView.setText(game.getScore().toString());
-
+            GameOverDialog gameOver = GameOverDialog.newInstance(game.getScore(), -(SystemClock.elapsedRealtime() - chronometer.getBase()));
+            gameOver.show(getSupportFragmentManager(), "game over");
             return false;
         });
 

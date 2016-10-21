@@ -2,6 +2,7 @@ package org.freelectron.leobel.winline98.dialogs;
 
 
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,15 +15,12 @@ import org.freelectron.leobel.winline98.R;
  * Use the {@link GameOverDialog#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class GameOverDialog extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+public class GameOverDialog extends DialogFragment {
+    private static final String ARG_SCORE = "ARG_SCORE";
+    private static final String ARG_TIME = "ARG_TIME";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private Integer score;
+    private Long time;
 
 
     public GameOverDialog() {
@@ -37,12 +35,11 @@ public class GameOverDialog extends Fragment {
      * @param param2 Parameter 2.
      * @return A new instance of fragment GameOverDialog.
      */
-    // TODO: Rename and change types and number of parameters
-    public static GameOverDialog newInstance(String param1, String param2) {
+    public static GameOverDialog newInstance(Integer param1, Long param2) {
         GameOverDialog fragment = new GameOverDialog();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putInt(ARG_SCORE, param1);
+        args.putLong(ARG_TIME, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -50,9 +47,10 @@ public class GameOverDialog extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setStyle(DialogFragment.STYLE_NO_TITLE, R.style.AppTheme_AlertDialog);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            score = getArguments().getInt(ARG_SCORE);
+            time = getArguments().getLong(ARG_TIME);
         }
     }
 
@@ -60,7 +58,9 @@ public class GameOverDialog extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_game_over_dialog, container, false);
+        View view = inflater.inflate(R.layout.fragment_game_over_dialog, container, false);
+
+        return view;
     }
 
 }
