@@ -158,6 +158,7 @@ public class MainActivity extends AppCompatActivity
 
         endAlertHandler = new Handler(msg -> {
             scoreView.setText(game.getScore().toString());
+
             return false;
         });
 
@@ -217,10 +218,10 @@ public class MainActivity extends AppCompatActivity
             if (game.getBoard()[i][j] == null) {
                 emptyPlace = true;
             }
-            if (orig != null && emptyPlace) {
+            if (orig != null && emptyPlace) { // try to move to specific location
                 MPoint dest = new MPoint(i, j);
                 path = game.getPath(orig, dest);
-                if (path == null) {
+                if (path == null) { // can't move there!!!
                     return true;
                 }
                 savedCurrentState = false;
@@ -230,9 +231,9 @@ public class MainActivity extends AppCompatActivity
                 return true;
             } else if (emptyPlace) {
                 return true;
-            } else {
+            } else { // select ball
                 orig = new MPoint(i, j);
-                if(animateSelectedTail != null && animateSelectedTail.isRunning()){
+                if(animateSelectedTail != null && animateSelectedTail.isRunning()){ // there is one ball selected already
                     stopAnimateTail(()-> {
                         animateTail(orig);
                     });

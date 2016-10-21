@@ -29,4 +29,7 @@
     <string name="delete_games_fail">The games couldn\'t be deleted?</string>
     <string name="delete_selected">%d selected</string>
 
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
 </resources>
