@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -23,6 +24,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
 import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.ImageView;
@@ -94,6 +96,8 @@ public class MainActivity extends AppCompatActivity
     private ProgressDialog mProgressDialog;
     private boolean loadGameOnStart;
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -105,6 +109,8 @@ public class MainActivity extends AppCompatActivity
         mProgressDialog.setIndeterminate(false);
         mProgressDialog.setMessage("Your request is being processes");
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+
+        MediaPlayer mp = MediaPlayer.create(this, R.raw.buton_click);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -167,6 +173,8 @@ public class MainActivity extends AppCompatActivity
         dimension = boardView.getDimension();
 
         newGame.setOnClickListener(v -> {
+            newGame.startAnimation(ActivityUtils.buttonClick);
+            mp.start();
             if(savedCurrentState){
                 stopChronometer();
                 createNewGame();
@@ -185,10 +193,14 @@ public class MainActivity extends AppCompatActivity
         });
 
         loadGame.setOnClickListener(v -> {
+            loadGame.startAnimation(ActivityUtils.buttonClick);
+            mp.start();
             startActivityForResult(new Intent(this, LoadGameActivity.class), LOAD_GAME);
         });
 
         saveGame.setOnClickListener(v -> {
+            saveGame.startAnimation(ActivityUtils.buttonClick);
+            mp.start();
             mProgressDialog.show();
             if(gameService.save(game, (int)(SystemClock.elapsedRealtime() - chronometer.getBase()))){
                 savedCurrentState = true;

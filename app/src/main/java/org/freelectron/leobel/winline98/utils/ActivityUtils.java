@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.view.animation.AlphaAnimation;
 
 import org.freelectron.leobel.winline98.dialogs.WinlineDialog;
 
@@ -115,4 +116,6 @@ public class ActivityUtils {
         }
         return app_installed;
     }
+
+    public static AlphaAnimation buttonClick = new AlphaAnimation(1F, 0.5F);
 }
