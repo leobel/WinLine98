@@ -8,6 +8,7 @@ import android.content.SharedPreferences;
 public class PreferenceServiceImpl implements PreferenceService {
 
     private static String HIGH_RECORD = "HIGH_RECORD";
+    private static String ALLOW_TOUCH_SOUND_PREFERENCE = "ALLOW_TOUCH_SOUND_PREFERENCE";
 
     private final SharedPreferences sharedPreferences;
 
@@ -29,11 +30,13 @@ public class PreferenceServiceImpl implements PreferenceService {
 
     @Override
     public void setAllowTouchSoundPreference(Boolean allowTouchSoundPreference) {
-
+        SharedPreferences.Editor  editor =  sharedPreferences.edit();
+        editor.putBoolean(ALLOW_TOUCH_SOUND_PREFERENCE, allowTouchSoundPreference);
+        editor.commit();
     }
 
     @Override
     public Boolean getAllowTouchSoundPreference() {
-        return null;
+        return sharedPreferences.getBoolean(ALLOW_TOUCH_SOUND_PREFERENCE, true);
     }
 }

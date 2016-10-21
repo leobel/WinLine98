@@ -3,6 +3,7 @@ package org.freelectron.leobel.winline98;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.media.MediaPlayer;
@@ -35,6 +36,7 @@ import android.widget.Toast;
 import org.freelectron.leobel.winline98.dialogs.GameOverDialog;
 import org.freelectron.leobel.winline98.models.WinLine;
 import org.freelectron.leobel.winline98.services.GameService;
+import org.freelectron.leobel.winline98.services.PreferenceService;
 import org.freelectron.leobel.winline98.utils.ActivityUtils;
 import org.freelectron.winline.Checker;
 import org.freelectron.winline.LogicWinLine;
@@ -93,6 +95,10 @@ public class MainActivity extends AppCompatActivity
 
     @Inject
     public GameService gameService;
+
+    @Inject
+    public PreferenceService preferenceService;
+
     private ProgressDialog mProgressDialog;
     private boolean loadGameOnStart;
 
@@ -174,7 +180,9 @@ public class MainActivity extends AppCompatActivity
 
         newGame.setOnClickListener(v -> {
             newGame.startAnimation(ActivityUtils.buttonClick);
-            mp.start();
+            if(preferenceService.getAllowTouchSoundPreference()){
+                mp.start();
+            }
             if(savedCurrentState){
                 stopChronometer();
                 createNewGame();
@@ -194,13 +202,17 @@ public class MainActivity extends AppCompatActivity
 
         loadGame.setOnClickListener(v -> {
             loadGame.startAnimation(ActivityUtils.buttonClick);
-            mp.start();
+            if(preferenceService.getAllowTouchSoundPreference()){
+                mp.start();
+            }
             startActivityForResult(new Intent(this, LoadGameActivity.class), LOAD_GAME);
         });
 
         saveGame.setOnClickListener(v -> {
             saveGame.startAnimation(ActivityUtils.buttonClick);
-            mp.start();
+            if(preferenceService.getAllowTouchSoundPreference()){
+                mp.start();
+            }
             mProgressDialog.show();
             if(gameService.save(game, (int)(SystemClock.elapsedRealtime() - chronometer.getBase()))){
                 savedCurrentState = true;
