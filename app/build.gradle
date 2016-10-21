@@ -14,7 +14,7 @@ android {
 
     defaultConfig {
         applicationId "org.freelectron.leobel.winline98"
-        minSdkVersion 10
+        minSdkVersion 15
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
@@ -58,6 +58,9 @@ dependencies {
 
     // winline logic library
     //compile 'com.github.leobel:winline:1.1.2'
+
+    // Facebook SDK
+    compile 'com.facebook.android:facebook-android-sdk:4.15.0'
 
 
     compile 'com.android.support:appcompat-v7:23.4.0'

@@ -2,16 +2,24 @@ package org.freelectron.leobel.winline98;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Chronometer;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import org.freelectron.leobel.winline98.adapters.GameRecyclerViewAdapter;
 import org.freelectron.leobel.winline98.adapters.RecyclerViewGameLoadAdapterListener;
@@ -29,6 +37,8 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import timber.log.Timber;
+
 /**
  * A fragment representing a list of Items.
  * <p>
@@ -39,6 +49,7 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
 
     private OnListFragmentInteractionListener mListener;
 
+    private RecyclerView recyclerView;
     private GameRecyclerViewAdapter adapter;
 
     @Inject
@@ -83,7 +94,8 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
 
         // Set the adapter
         Context context = view.getContext();
-        RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.list);
+
+        recyclerView = (RecyclerView) view.findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
 
         // set divider between items
@@ -249,6 +261,82 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
         adapter.setSelectMultipleItemsMode(false);
         adapter.unCheckAllItems();
         selectedItems.clear();
+    }
+
+    public List<Bitmap> getScreenShots() {
+        List<Bitmap> result = new ArrayList<>(selectedItems.size());
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+        for(Integer position: selectedItems.keySet()){
+            RelativeLayout view = (RelativeLayout) inflater.inflate(R.layout.fragment_game, null);
+
+            BoardView boardView = (BoardView) view.findViewById(R.id.board_game);
+            TextView gameDate = (TextView) view.findViewById(R.id.game_date);
+            ImageView timerView = (ImageView) view.findViewById(R.id.timer);
+            Chronometer chronometerView = (Chronometer) view.findViewById(R.id.chronometer);
+            TextView scoreView = (TextView) view.findViewById(R.id.score);
+            ImageView scoreImageView = (ImageView) view.findViewById(R.id.score_image);
+
+            WinLine mItem = selectedItems.get(position);
+
+            RelativeLayout rl = new RelativeLayout(getContext());
+            rl.setLayoutParams(new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+            rl.setPadding(10, 0, 10, 0);
+            rl.setBackgroundColor(getResources().getColor(R.color.windowBackground));
+
+            TextView date = new TextView(getContext());
+            date.setLayoutParams(gameDate.getLayoutParams());
+            date.setId(gameDate.getId());
+            date.setTextColor(getResources().getColor(R.color.black));
+            date.setText(ActivityUtils.formatFullDate(mItem.getId()));
+            date.setGravity(Gravity.CENTER_HORIZONTAL);
+
+            BoardView board = new BoardView(getContext());
+            board.setBoard(mItem.getBoard());
+            board.setLayoutParams(boardView.getLayoutParams());
+            board.setId(boardView.getId());
+
+            ImageView timer = new ImageView(getContext());
+            timer.setLayoutParams(timerView.getLayoutParams());
+            timer.setId(timerView.getId());
+            timer.setImageResource(R.drawable.ic_timer);
+
+            Chronometer chronometer = new Chronometer(getContext());
+            chronometer.setLayoutParams(chronometerView.getLayoutParams());
+            chronometer.setId(chronometerView.getId());
+            long timeWhenStopped = -1L * mItem.getTime();
+            chronometer.setBase(SystemClock.elapsedRealtime() + timeWhenStopped);
+            chronometer.setGravity(Gravity.CENTER | Gravity.LEFT);
+
+            ImageView start = new ImageView(getContext());
+            start.setLayoutParams(scoreImageView.getLayoutParams());
+            start.setId(scoreImageView.getId());
+            start.setImageResource(R.drawable.ic_star);
+            start.setColorFilter(getResources().getColor(R.color.yellow));
+
+            TextView score = new TextView(getContext());
+            score.setLayoutParams(scoreView.getLayoutParams());
+            score.setId(scoreView.getId());
+            score.setTextColor(getResources().getColor(R.color.black));
+            score.setText(mItem.getScore().toString());
+            score.setGravity(Gravity.CENTER | Gravity.RIGHT);
+
+            rl.addView(date);
+            rl.addView(board);
+            rl.addView(timer);
+            rl.addView(chronometer);
+            rl.addView(start);
+            rl.addView(score);
+
+            rl.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+            rl.layout(0, 0, rl.getMeasuredWidth(), rl.getMeasuredHeight());
+
+            Bitmap bitmap = Bitmap.createBitmap(rl.getMeasuredWidth(), rl.getMeasuredHeight(), Bitmap.Config.ARGB_8888);
+            Canvas c = new Canvas(bitmap);
+            rl.draw(c);
+
+            result.add(bitmap);
+        }
+        return result;
     }
 
     /**

@@ -3,14 +3,20 @@ package org.freelectron.leobel.winline98;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.ResolveInfo;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Parcelable;
 import android.os.SystemClock;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -31,9 +37,17 @@ import org.freelectron.winline.Checker;
 import org.freelectron.winline.LogicWinLine;
 import org.freelectron.winline.MPoint;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import com.facebook.FacebookSdk;
+import com.facebook.share.model.ShareLinkContent;
+import com.facebook.share.model.SharePhoto;
+import com.facebook.share.model.SharePhotoContent;
+import com.facebook.share.widget.ShareDialog;
 
 import javax.inject.Inject;
 
@@ -93,6 +107,7 @@ public class MainActivity extends AppCompatActivity
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
         boardContainer = findViewById(R.id.boardContainer);
         boardView = (BoardView) findViewById(R.id.board);
         nextView = (NextView) findViewById(R.id.next);
@@ -346,7 +361,73 @@ public class MainActivity extends AppCompatActivity
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.share) {
+            loadGameOnStart = true;
+            View view = findViewById(R.id.current_game);
+            view.setDrawingCacheEnabled(true);
+            view.buildDrawingCache();
+            Bitmap bitmap = Bitmap.createBitmap(view.getDrawingCache());
+            view.setDrawingCacheEnabled(false);
+            File file = ActivityUtils.storeScreenShot(bitmap, "share.png");
+
+
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Share with");
+                builder.setItems(new CharSequence[] {"Facebook", "Other"}, (dialog, which) -> {
+                    switch (which){
+                        case 0:
+                            ShareLinkContent linkContent = new ShareLinkContent.Builder()
+                                    .setContentTitle("WinLine")
+                                    .setContentDescription("Play WinLine")
+                                    //.setImageUrl(Uri.fromFile(file))
+                                    .build();
+
+                            ShareDialog.show(this, linkContent);
+                            break;
+                        case 1:
+                            Intent intent = new Intent();
+                            intent.setAction(Intent.ACTION_SEND);
+                            intent.putExtra(Intent.EXTRA_SUBJECT, "Play WinLine");
+                            intent.setType("image/*");
+                            Uri contentUri = Uri.fromFile(file);
+                            intent.putExtra(Intent.EXTRA_STREAM, contentUri);
+                            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                            // Exclude Facebook from Apps
+                            List<ResolveInfo> activities = getPackageManager().queryIntentActivities(intent, 0);
+
+                            ArrayList<Intent> targetIntents = new ArrayList<>();
+                            String facebookAppName = getString(R.string.facebokk_app_name);
+                            for (ResolveInfo currentInfo : activities) {
+                                String packageName = currentInfo.activityInfo.packageName;
+                                if (!facebookAppName.equals(packageName)) {
+                                    Intent targetIntent = new Intent(android.content.Intent.ACTION_SEND);
+
+                                    targetIntent.setType("image/*");
+                                    targetIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION); // temp permission for receiving app to read this file
+                                    targetIntent.putExtra(Intent.EXTRA_SUBJECT, "Play WinLine");
+                                    targetIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
+
+                                    targetIntent.setPackage(packageName);
+                                    targetIntents.add(targetIntent);
+                                }
+                            }
+
+                            if(targetIntents.size() > 0) {
+                                Intent chooserIntent = Intent.createChooser(targetIntents.remove(0), "Share with");
+                                chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, targetIntents.toArray(new Parcelable[targetIntents.size()]));
+                                startActivity(chooserIntent);
+                            }
+                            else {
+                                Toast.makeText(this, "No app found", Toast.LENGTH_SHORT).show();
+                            }
+
+                            break;
+                    }
+                });
+                builder.show();
+
             return true;
         }
 

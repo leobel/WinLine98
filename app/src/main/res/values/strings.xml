@@ -6,6 +6,9 @@
 
     <string name="action_settings">Settings</string>
 
+    <!-- Facebook section -->
+    <string name="facebook_app_id">1115623851819997</string>
+    <string name="facebokk_app_name">com.facebook.katana</string>
 
     <!-- Dialog section -->
     <string name="warning_title">Warning!</string>

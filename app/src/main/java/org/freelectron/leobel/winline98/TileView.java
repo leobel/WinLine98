@@ -28,6 +28,17 @@ public class TileView extends View {
     private Context context;
     private OnTileViewListener listener;
 
+    public TileView(Context context){
+        super(context);
+        this.context = context;
+        this.mPaint = new Paint();
+        this.mTileSize = 60;
+        this.mTileArray = new HashMap();
+        this.mGifArray = new HashMap();
+        this.mYTileCount = 9;
+        this.mXTileCount = 9;
+    }
+
     public TileView(Context context, AttributeSet attrs) {
         super(context, attrs);
         this.context = context;

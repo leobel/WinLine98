@@ -2,6 +2,8 @@ package org.freelectron.leobel.winline98;
 
 import android.support.multidex.MultiDexApplication;
 
+import com.facebook.FacebookSdk;
+import com.facebook.appevents.AppEventsLogger;
 import com.squareup.leakcanary.LeakCanary;
 
 import org.freelectron.leobel.winline98.modules.AppModule;
@@ -31,6 +33,10 @@ public class WinLineApp extends MultiDexApplication {
         if (BuildConfig.DEBUG) {
             Timber.plant(new Timber.DebugTree());
         }
+
+        // Initialize the SDK before executing any other operations,
+        FacebookSdk.sdkInitialize(getApplicationContext());
+        AppEventsLogger.activateApp(this);
 
         // Initialize Dagger component
         component = DaggerApplicationComponent

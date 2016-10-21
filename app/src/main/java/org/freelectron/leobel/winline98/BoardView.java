@@ -26,6 +26,13 @@ public class BoardView extends TileView implements TileView.OnTileViewListener {
     Checker[][] mTileGrid;
     Runnable doAfterSetPosition;
 
+    public BoardView(Context context){
+        super(context);
+        this.dimension = 9;
+        setListener(this);
+        initBoardView();
+    }
+
     public BoardView(Context context, AttributeSet attrs) {
         super(context, attrs);
         this.dimension = 9;
