@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v4.app.Fragment;
@@ -57,6 +58,8 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
     private HashMap<Integer, WinLine> selectedItems;
     private ProgressDialog mProgressDialog;
 
+    private MediaPlayer mpTrash;
+
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
      * fragment (e.g. upon screen orientation changes).
@@ -82,6 +85,8 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
         mProgressDialog.setIndeterminate(false);
         mProgressDialog.setMessage("Your request is being processes");
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+
+        mpTrash = MediaPlayer.create(getActivity(), R.raw.trash);
 
         if (getArguments() != null) {
         }
@@ -214,6 +219,7 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
     @Override
     public void removeItem(int adapterPosition, WinLine mItem) {
         if(gameService.remove(mItem.getId())){
+            mpTrash.start();
             adapter.removeItem(adapterPosition);
             if(selectedItems.containsKey(adapterPosition)){
                 selectedItems.remove(adapterPosition);
@@ -229,6 +235,7 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
     public void removeItems() {
         int size = selectedItems.values().size();
         if(gameService.remove(CollectionsUtils.map(selectedItems.values(), WinLine::getId))){
+            mpTrash.start();
             adapter.setSelectMultipleItemsMode(false);
             adapter.removeItem(new ArrayList<>(selectedItems.keySet()));
             selectedItems.clear();

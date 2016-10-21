@@ -102,6 +102,7 @@ public class MainActivity extends AppCompatActivity
     private ProgressDialog mProgressDialog;
     private boolean loadGameOnStart;
 
+    private MediaPlayer mp;
 
 
     @Override
@@ -116,7 +117,7 @@ public class MainActivity extends AppCompatActivity
         mProgressDialog.setMessage("Your request is being processes");
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 
-        MediaPlayer mp = MediaPlayer.create(this, R.raw.buton_click);
+        mp = MediaPlayer.create(this, R.raw.buton_click);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -386,6 +387,10 @@ public class MainActivity extends AppCompatActivity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
+
+        if(preferenceService.getAllowTouchSoundPreference()){
+            mp.start();
+        }
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.share) {
