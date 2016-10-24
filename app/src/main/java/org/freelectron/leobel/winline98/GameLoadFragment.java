@@ -273,16 +273,15 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
     public List<Bitmap> getScreenShots() {
         List<Bitmap> result = new ArrayList<>(selectedItems.size());
         LayoutInflater inflater = LayoutInflater.from(getContext());
+        RelativeLayout view = (RelativeLayout) inflater.inflate(R.layout.fragment_game, null);
+
+        BoardView boardView = (BoardView) view.findViewById(R.id.board_game);
+        TextView gameDate = (TextView) view.findViewById(R.id.game_date);
+        ImageView timerView = (ImageView) view.findViewById(R.id.timer);
+        Chronometer chronometerView = (Chronometer) view.findViewById(R.id.chronometer);
+        TextView scoreView = (TextView) view.findViewById(R.id.score);
+        ImageView scoreImageView = (ImageView) view.findViewById(R.id.score_image);
         for(Integer position: selectedItems.keySet()){
-            RelativeLayout view = (RelativeLayout) inflater.inflate(R.layout.fragment_game, null);
-
-            BoardView boardView = (BoardView) view.findViewById(R.id.board_game);
-            TextView gameDate = (TextView) view.findViewById(R.id.game_date);
-            ImageView timerView = (ImageView) view.findViewById(R.id.timer);
-            Chronometer chronometerView = (Chronometer) view.findViewById(R.id.chronometer);
-            TextView scoreView = (TextView) view.findViewById(R.id.score);
-            ImageView scoreImageView = (ImageView) view.findViewById(R.id.score_image);
-
             WinLine mItem = selectedItems.get(position);
 
             RelativeLayout rl = new RelativeLayout(getContext());

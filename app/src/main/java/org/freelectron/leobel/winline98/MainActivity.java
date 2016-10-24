@@ -60,7 +60,7 @@ import timber.log.Timber;
 
 //import timber.log.Timber;
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private static final int LOAD_GAME = 1;
