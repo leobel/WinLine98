@@ -22,7 +22,8 @@
         app:headerLayout="@layout/nav_header_main"
         app:menu="@menu/activity_main_drawer" />
 
-    <FrameLayout
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
@@ -30,14 +31,14 @@
             android:id="@+id/current_game"
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.75 "
             android:layout_marginTop="?attr/actionBarSize"
             android:background="@color/windowBackground">
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.09"
+                android:layout_height="40dp"
                 android:layout_marginBottom="10dp">
 
                 <RelativeLayout
@@ -100,11 +101,8 @@
                 android:id="@+id/boardContainer"
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.65"
-                android:gravity="center"
-                android:paddingLeft="5dp"
-                android:paddingRight="5dp">
+                android:layout_height="wrap_content"
+                android:gravity="center">
 
                 <org.freelectron.leobel.winline98.BoardView
                     android:id="@+id/board"
@@ -114,11 +112,20 @@
                 </org.freelectron.leobel.winline98.BoardView>
             </LinearLayout>
 
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.25"
+            android:background="@color/windowBackground">
+
             <LinearLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="0.15">
+                android:layout_weight="0.5">
 
                 <RelativeLayout
                     android:layout_width="match_parent"
@@ -134,8 +141,8 @@
 
                     <Button
                         android:id="@+id/new_game"
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
+                        android:layout_width="55dp"
+                        android:layout_height="55dp"
                         android:layout_marginLeft="30dp"
                         android:layout_marginRight="30dp"
                         android:background="@drawable/replay"
@@ -156,12 +163,11 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_weight="0.11">
+                android:layout_weight="0.5">
 
             </LinearLayout>
-
         </LinearLayout>
 
-    </FrameLayout>
+    </LinearLayout>
 
 </android.support.v4.widget.DrawerLayout>

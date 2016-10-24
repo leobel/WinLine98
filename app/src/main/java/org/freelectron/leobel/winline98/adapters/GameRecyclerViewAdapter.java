@@ -82,6 +82,12 @@ public class GameRecyclerViewAdapter extends RecyclerView.Adapter<GameRecyclerVi
                     mListener.onItemLongClicked(holder.getAdapterPosition(), holder.mItem);
                     notifyDataSetChanged();
                 }
+                else{
+                    boolean selected = !holder.checkbox.isChecked();
+                    checkedItems.set(holder.getAdapterPosition(), selected);
+                    holder.setCheckBoxChecked(selected);
+                    mListener.onItemClickedInSelectMultipleItemsMode(holder.getAdapterPosition(), holder.mItem, selected);
+                }
 
             }
             return true;
@@ -190,6 +196,7 @@ public class GameRecyclerViewAdapter extends RecyclerView.Adapter<GameRecyclerVi
 
             checkbox.setVisibility(checkBoxVisibility);
             leftContainer.setVisibility(leftContainerVisibility);
+
         }
 
         public void setItem(WinLine item){

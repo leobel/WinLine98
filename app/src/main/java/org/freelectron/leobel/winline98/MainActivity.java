@@ -103,6 +103,7 @@ public class MainActivity extends BaseActivity
     private boolean loadGameOnStart;
 
     private MediaPlayer mp;
+    private boolean breakRecordAlert;
 
 
     @Override
@@ -132,6 +133,8 @@ public class MainActivity extends BaseActivity
         timer = (ImageView) findViewById(R.id.timer);
         chronometer = (Chronometer) findViewById(R.id.chronometer);
         scoreImage = (ImageView) findViewById(R.id.score_image);
+
+        breakRecordAlert = true;
 
         boardView.onSetPosition(() -> {
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -166,6 +169,19 @@ public class MainActivity extends BaseActivity
         });
 
         scoreHandler = new Handler(msg -> {
+            int highScore = preferenceService.getHighRecord();
+            if(highScore > 0){
+                if(game.getScore() > highScore){
+                    preferenceService.setHighRecord(game.getScore());
+                    if(breakRecordAlert){
+                        ActivityUtils.showDialog(this, getString(R.string.new_record_message), getString(R.string.new_record_title));
+                        breakRecordAlert = false; // only once during a game
+                    }
+                }
+            }
+            else{
+                preferenceService.setHighRecord(game.getScore());
+            }
             scoreView.setText(game.getScore().toString());
             return false;
         });
@@ -188,12 +204,14 @@ public class MainActivity extends BaseActivity
                 stopChronometer();
                 createNewGame();
                 savedCurrentState = false;
+                breakRecordAlert = true;
             }
             else{
                 pauseChronometer();
                 ActivityUtils.showDialog(this, getString(R.string.unsaved_current_state), true, v1 -> {
                     stopChronometer();
                     createNewGame();
+                    breakRecordAlert = true;
                 }, v2 -> {
                     startChronometer();
                 });
@@ -306,7 +324,7 @@ public class MainActivity extends BaseActivity
             WinLine loadedGame = (WinLine) data.getSerializableExtra(LoadGameActivity.GAME_LOADED);
             timeWhenStopped = -1L * loadedGame.getTime();
             game = new LogicWinLine(loadedGame.getBoard(), loadedGame.getNext(), loadedGame.getScore());
-
+            breakRecordAlert = true;
         }
     }
 
@@ -573,8 +591,8 @@ public class MainActivity extends BaseActivity
                     }
                 }
                 boardView.setBoard(game.getBoard());
-                this.boardHandler.sendMessage(new Message());
-                MainActivity.this.scoreHandler.sendMessage(new Message());
+                boardHandler.sendMessage(new Message());
+                scoreHandler.sendMessage(new Message());
             } else {
                 try {
                     List<Integer> positions = game.addCheckers();

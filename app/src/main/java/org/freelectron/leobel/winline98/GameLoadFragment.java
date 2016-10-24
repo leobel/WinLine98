@@ -103,6 +103,7 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
         recyclerView = (RecyclerView) view.findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
 
+
         // set divider between items
         recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), R.drawable.game_list_divider));
 
