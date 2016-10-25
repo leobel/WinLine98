@@ -82,6 +82,7 @@ public class ActivityUtils {
         dialogFragment.show(((AppCompatActivity)activity).getSupportFragmentManager(), "dialog");
     }
 
+
     public static String formatFullDate(Long date){
         return DateFormat.getDateTimeInstance(DateFormat.DEFAULT, DateFormat.SHORT).format(new Date(date));
     }

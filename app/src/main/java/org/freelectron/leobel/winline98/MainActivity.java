@@ -3,40 +3,33 @@ package org.freelectron.leobel.winline98;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Parcelable;
 import android.os.SystemClock;
-import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AlphaAnimation;
 import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.freelectron.leobel.winline98.dialogs.GameOverDialog;
+import org.freelectron.leobel.winline98.dialogs.GameStatsDialog;
 import org.freelectron.leobel.winline98.models.WinLine;
 import org.freelectron.leobel.winline98.services.GameService;
 import org.freelectron.leobel.winline98.services.PreferenceService;
@@ -48,18 +41,12 @@ import org.freelectron.winline.MPoint;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import com.facebook.FacebookSdk;
 import com.facebook.share.model.ShareLinkContent;
-import com.facebook.share.model.SharePhoto;
-import com.facebook.share.model.SharePhotoContent;
 import com.facebook.share.widget.ShareDialog;
 
 import javax.inject.Inject;
-
-import timber.log.Timber;
 
 //import timber.log.Timber;
 
@@ -104,6 +91,7 @@ public class MainActivity extends BaseActivity
 
     private ProgressDialog mProgressDialog;
     private boolean loadGameOnStart;
+
 
     private MediaPlayer mp;
     private boolean breakRecordAlert;
@@ -155,10 +143,6 @@ public class MainActivity extends BaseActivity
             scoreLayout.setMargins(boardView.getRightPosition() - scoreLayout.width, 0, 0, 0);
             scoreImage.setLayoutParams(scoreLayout);
             scoreView.setWidth(boardView.getRightPosition() - scoreLayout.width - nextView.getRight());
-
-//            LinearLayout.LayoutParams recordLayout = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-//            recordLayout.width = (boardView.getRightPosition() - boardView.getLeftPosition());
-//            recordLayout.setMargins(boardView.getLeft() + boardView.getLeftPosition(), 0, 0, 0);
         });
 
 
@@ -200,13 +184,24 @@ public class MainActivity extends BaseActivity
         });
 
         endAlertHandler = new Handler(msg -> {
+            pauseChronometer();
             scoreView.setText(game.getScore().toString());
-            GameOverDialog gameOver = GameOverDialog.newInstance(game.getScore(), -(SystemClock.elapsedRealtime() - chronometer.getBase()));
+            GameStatsDialog gameOver = GameStatsDialog.newInstance(game.getScore(), timeWhenStopped, preferenceService.getHighRecord());
             gameOver.show(getSupportFragmentManager(), "game over");
             return false;
         });
 
         dimension = boardView.getDimension();
+
+        scoreImage.setOnClickListener( v -> {
+            pauseChronometer();
+            GameStatsDialog gameInfo = GameStatsDialog.newInstance(game.getScore(), timeWhenStopped, preferenceService.getHighRecord());
+            gameInfo.setOnCloseListener(() -> {
+                startChronometer();
+            });
+            gameInfo.show(getSupportFragmentManager(), "game info");
+
+        });
 
         newGame.setOnClickListener(v -> {
             newGame.startAnimation(ActivityUtils.buttonClick);
@@ -402,7 +397,8 @@ public class MainActivity extends BaseActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
 
-        } else {
+        }
+        else {
             super.onBackPressed();
         }
     }

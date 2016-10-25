@@ -5,128 +5,178 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     android:background="@color/windowBackgroundPopup"
-    tools:context="org.freelectron.leobel.winline98.dialogs.GameOverDialog">
+    tools:context=".dialogs.GameStatsDialog">
 
-    <RelativeLayout
-        android:id="@+id/game_over_dialog"
+    <LinearLayout
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_centerInParent="true"
-        android:background="@drawable/background_alert_dialog">
+        android:layout_centerInParent="true">
 
-        <ImageView
-            android:id="@+id/score_image"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:layout_marginLeft="30dp"
-            app:srcCompat="@drawable/ic_star"
-            android:tint="@color/yellow"/>
-
-        <ImageView
-            android:id="@+id/timer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:layout_marginRight="30dp"
-            android:layout_alignParentRight="true"
-            android:src="@drawable/ic_timer"/>
-
-        <TextView
-            android:id="@+id/score"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/score_image"
-            android:layout_alignLeft="@+id/score_image"
-            android:layout_alignRight="@+id/score_image"
-            android:textAlignment="center"
-            android:textColor="@color/blue"
-            android:textAllCaps="true"
-            android:textSize="18dp"
-            android:text="100"/>
-
-        <Chronometer
-            android:id="@+id/time"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/timer"
-            android:layout_alignLeft="@+id/timer"
-            android:layout_alignRight="@+id/timer"
-            android:textAlignment="center"
-            android:textSize="18dp"
-            android:textColor="@color/blue"/>
-
-        <TextView
-            android:id="@+id/high_score_text"
+        <RelativeLayout
+            android:id="@+id/game_over_dialog"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:layout_below="@+id/score"
-            android:textAlignment="center"
-            android:textSize="25dp"
-            android:textColor="@color/blue"
-            android:text="@string/game_over_high_score"/>
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:background="@drawable/background_alert_dialog">
 
-        <TextView
-            android:id="@+id/high_score"
+            <RelativeLayout
+                android:id="@+id/game_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginLeft="10dp">
+
+                    <TextView
+                        android:id="@+id/score_image"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="15dp"
+                        android:textSize="28dp"
+                        android:textColor="@color/black"
+                        android:text="Score"/>
+
+                    <TextView
+                        android:id="@+id/score"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/score_image"
+                        android:layout_alignLeft="@+id/score_image"
+                        android:layout_alignRight="@+id/score_image"
+                        android:textAlignment="center"
+                        android:textColor="@color/blue"
+                        android:textAllCaps="true"
+                        android:textSize="20dp"
+                        android:text="100"/>
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_marginTop="5dp">
+
+                    <TextView
+                        android:id="@+id/high_score_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="15dp"
+                        android:textSize="28dp"
+                        android:textColor="@color/black"
+                        android:text="@string/game_over_high_score"/>
+
+                    <TextView
+                        android:id="@+id/high_score"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/high_score_text"
+                        android:layout_alignLeft="@+id/high_score_text"
+                        android:layout_alignRight="@+id/high_score_text"
+                        android:textAlignment="center"
+                        android:textSize="20dp"
+                        android:textColor="@color/blue"
+                        android:text="100"/>
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginTop="5dp"
+                    android:layout_marginRight="10dp">
+
+                    <TextView
+                        android:id="@+id/timer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="15dp"
+                        android:textSize="28dp"
+                        android:textColor="@color/black"
+                        android:text="Time"/>
+
+                    <Chronometer
+                        android:id="@+id/time"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/timer"
+                        android:layout_alignLeft="@+id/timer"
+                        android:layout_alignRight="@+id/timer"
+                        android:textAlignment="center"
+                        android:textSize="20dp"
+                        android:textColor="@color/blue"/>
+
+                </RelativeLayout>
+
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/game_info">
+
+                <TextView
+                    android:id="@+id/game_over_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="30dp"
+                    android:layout_marginRight="30dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+
+                    android:textAlignment="center"
+                    android:textSize="18dp"
+                    android:textColor="@color/black"
+                    android:text="@string/game_over_text"/>
+
+            </RelativeLayout>
+
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/high_score_text"
-            android:textAlignment="center"
-            android:textSize="25dp"
-            android:textColor="@color/blue"
-            android:text="100"/>
+            android:layout_marginTop="15dp"
+            android:layout_below="@+id/game_over_dialog">
 
-        <TextView
-            android:id="@+id/game_over_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="30dp"
-            android:layout_marginRight="30dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:layout_below="@+id/high_score"
-            android:textAlignment="center"
-            android:textSize="18dp"
-            android:textColor="@color/black"
-            android:text="@string/game_over_text"/>
-    </RelativeLayout>
+            <Button
+                android:id="@+id/load_game"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/rate"
+                android:layout_centerVertical="true"
+                android:layout_toLeftOf="@+id/new_game"/>
 
-    <RelativeLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="15dp"
-        android:layout_below="@+id/game_over_dialog">
+            <Button
+                android:id="@+id/new_game"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_marginLeft="30dp"
+                android:layout_marginRight="30dp"
+                android:background="@drawable/replay"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"/>
 
-        <Button
-            android:id="@+id/load_game"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:background="@drawable/rate"
-            android:layout_centerVertical="true"
-            android:layout_toLeftOf="@+id/new_game"/>
+            <Button
+                android:id="@+id/save_game"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/share"
+                android:layout_centerVertical="true"
+                android:layout_toRightOf="@+id/new_game"/>
 
-        <Button
-            android:id="@+id/new_game"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_marginLeft="30dp"
-            android:layout_marginRight="30dp"
-            android:background="@drawable/replay"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"/>
+        </RelativeLayout>
 
-        <Button
-            android:id="@+id/save_game"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:background="@drawable/share"
-            android:layout_centerVertical="true"
-            android:layout_toRightOf="@+id/new_game"/>
+    </LinearLayout>
 
-    </RelativeLayout>
+
 
 </RelativeLayout>
