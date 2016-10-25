@@ -39,7 +39,7 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
-                android:layout_marginBottom="10dp">
+                android:layout_marginBottom="5dp">
 
                 <RelativeLayout
                     android:layout_width="match_parent"
@@ -68,21 +68,19 @@
                         android:layout_height="35dp"
                         android:layout_below="@+id/toolbar"/>
 
-                    <ImageView
+
+                    <org.freelectron.leobel.winline98.RecordTrack
                         android:id="@+id/score_image"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        app:srcCompat="@drawable/ic_star"
-                        android:tint="@color/yellow"/>
+                        android:layout_height="wrap_content"/>
 
-                    <!--<TextView-->
-                        <!--android:id="@+id/score_test"-->
+                    <!--<ImageView-->
+                        <!--android:id="@+id/score_image"-->
                         <!--android:layout_width="wrap_content"-->
                         <!--android:layout_height="wrap_content"-->
-                        <!--android:layout_below="@+id/next"-->
-                        <!--android:layout_centerHorizontal="true"-->
-                        <!--android:textColor="@color/black"-->
-                        <!--android:text="Score:"/>-->
+                        <!--app:srcCompat="@drawable/ic_star"-->
+                        <!--android:tint="@color/yellow"/>-->
+
 
                     <TextView
                         android:id="@+id/score"
@@ -97,12 +95,15 @@
 
             </LinearLayout>
 
+
             <LinearLayout
                 android:id="@+id/boardContainer"
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center">
+                android:gravity="center"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp">
 
                 <org.freelectron.leobel.winline98.BoardView
                     android:id="@+id/board"

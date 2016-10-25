@@ -14,6 +14,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Parcelable;
 import android.os.SystemClock;
+import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -29,6 +30,8 @@ import android.view.animation.AlphaAnimation;
 import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -78,7 +81,7 @@ public class MainActivity extends BaseActivity
     private Button saveGame;
     private ImageView timer;
     private Chronometer chronometer;
-    private ImageView scoreImage;
+    private RecordTrack scoreImage;
 
     private LogicWinLine game;
     private int dimension;
@@ -132,9 +135,11 @@ public class MainActivity extends BaseActivity
         saveGame = (Button)findViewById(R.id.save_game);
         timer = (ImageView) findViewById(R.id.timer);
         chronometer = (Chronometer) findViewById(R.id.chronometer);
-        scoreImage = (ImageView) findViewById(R.id.score_image);
+        scoreImage = (RecordTrack) findViewById(R.id.score_image);
 
         breakRecordAlert = true;
+
+        scoreImage.setMax(preferenceService.getHighRecord());
 
         boardView.onSetPosition(() -> {
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -151,6 +156,9 @@ public class MainActivity extends BaseActivity
             scoreImage.setLayoutParams(scoreLayout);
             scoreView.setWidth(boardView.getRightPosition() - scoreLayout.width - nextView.getRight());
 
+//            LinearLayout.LayoutParams recordLayout = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+//            recordLayout.width = (boardView.getRightPosition() - boardView.getLeftPosition());
+//            recordLayout.setMargins(boardView.getLeft() + boardView.getLeftPosition(), 0, 0, 0);
         });
 
 
@@ -173,15 +181,20 @@ public class MainActivity extends BaseActivity
             if(highScore > 0){
                 if(game.getScore() > highScore){
                     preferenceService.setHighRecord(game.getScore());
+                    scoreImage.setMax(game.getScore());
                     if(breakRecordAlert){
                         ActivityUtils.showDialog(this, getString(R.string.new_record_message), getString(R.string.new_record_title));
                         breakRecordAlert = false; // only once during a game
+
                     }
                 }
+                scoreImage.setProgress(game.getScore());
+                scoreImage.invalidate();
             }
             else{
                 preferenceService.setHighRecord(game.getScore());
             }
+
             scoreView.setText(game.getScore().toString());
             return false;
         });
@@ -376,8 +389,10 @@ public class MainActivity extends BaseActivity
         boardView.setBoard(game.getBoard());
         nextView.setBoard(this.game.getNext());
         this.scoreView.setText(game.getScore().toString());
+        scoreImage.setProgress(game.getScore());
         boardView.invalidate();
         nextView.invalidate();
+        scoreImage.invalidate();
         startChronometer();
     }
 
