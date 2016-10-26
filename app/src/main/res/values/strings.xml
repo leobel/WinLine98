@@ -33,7 +33,7 @@
     <string name="game_over">Game Over</string>
     <string name="game_over_score">Score</string>
     <string name="game_over_time">Time</string>
-    <string name="game_over_high_score">Best Score</string>
+    <string name="game_over_high_score">Record</string>
     <string name="game_over_text">If you enjoy playing WinLine please take a moment and rate it.\nWe will appreciate your support, thanks!</string>
 
     <!-- Record -->

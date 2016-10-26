@@ -53,26 +53,29 @@ public class RecordTrack extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        float x = (getWidth())/2;
-        float y = (getHeight())/2;
+        float min = Math.min(getWidth(), getHeight());
 
-        float radius = Math.min(x, y);
-        float innerRadius = radius / 2;
+        float x = getWidth()/2;
+        float y = getHeight()/2;
+
+        float radius = min * ratioRadius;
+        float innerRadius = min * ratioInnerRadius;
 
         myShape.setStar(x, y, radius, innerRadius);
 
         // Draw the STAR mask in a bitmap
         Path path = myShape.getPath();
 
-
+        starCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         starCanvas.drawPath(path, starPaint);
 
         // Draw the background rectangle in a bitmap
-
+        backCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         if(max > 0 && progress > 0){
             int divider = backBitmap.getHeight() - (progress * backBitmap.getHeight()/ max);
             recordProgress.set(0, divider, backBitmap.getWidth(), backBitmap.getHeight());
             backRect.set(0, 0, backBitmap.getWidth(), divider);
+
             backCanvas.drawRect(recordProgress, starPaint);
         }
         else{
@@ -80,7 +83,6 @@ public class RecordTrack extends View {
         }
         backCanvas.drawRect(backRect, backPaint);
 
-        setLayerType(LAYER_TYPE_HARDWARE, q);
         canvas.drawBitmap(backBitmap, 0, 0, q);
         q.setXfermode(porterDuffXfermode);
         canvas.drawBitmap(starBitmap, 0, 0, q);
@@ -92,8 +94,8 @@ public class RecordTrack extends View {
 
     private void initMyView(Context context, AttributeSet attrs) {
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.RecordTrack);
-        ratioRadius = a.getFloat(R.styleable.RecordTrack_radius, 0.25f);
-        ratioInnerRadius = a.getFloat(R.styleable.RecordTrack_inner_radius, 0.5f);
+        ratioRadius = a.getFloat(R.styleable.RecordTrack_radius, 0.5f);
+        ratioInnerRadius = a.getFloat(R.styleable.RecordTrack_inner_radius, 0.25f);
         numberOfPoint = a.getInt(R.styleable.RecordTrack_inner_radius, 5);
         max = a.getInt(R.styleable.RecordTrack_max, 0);
         progress = a.getInt(R.styleable.RecordTrack_progress, 0);
@@ -102,6 +104,8 @@ public class RecordTrack extends View {
         myShape = new StartShape();
 
         q = new Paint(Paint.ANTI_ALIAS_FLAG);
+        q.setFilterBitmap(true);
+        setLayerType(LAYER_TYPE_HARDWARE, q);
         porterDuffXfermode = new PorterDuffXfermode(PorterDuff.Mode.DST_IN);
 
         starPaint = new Paint(Paint.ANTI_ALIAS_FLAG);

@@ -48,7 +48,7 @@
                         android:layout_below="@+id/score_image"
                         android:layout_alignLeft="@+id/score_image"
                         android:layout_alignRight="@+id/score_image"
-                        android:textAlignment="center"
+                        android:gravity="center"
                         android:textColor="@color/blue"
                         android:textAllCaps="true"
                         android:textSize="20dp"
@@ -78,7 +78,7 @@
                         android:layout_below="@+id/high_score_text"
                         android:layout_alignLeft="@+id/high_score_text"
                         android:layout_alignRight="@+id/high_score_text"
-                        android:textAlignment="center"
+                        android:gravity="center"
                         android:textSize="20dp"
                         android:textColor="@color/blue"
                         android:text="100"/>
@@ -108,7 +108,7 @@
                         android:layout_below="@+id/timer"
                         android:layout_alignLeft="@+id/timer"
                         android:layout_alignRight="@+id/timer"
-                        android:textAlignment="center"
+                        android:gravity="center"
                         android:textSize="20dp"
                         android:textColor="@color/blue"/>
 
@@ -125,12 +125,12 @@
                     android:id="@+id/game_over_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="30dp"
-                    android:layout_marginRight="30dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
                     android:layout_marginTop="10dp"
                     android:layout_marginBottom="10dp"
 
-                    android:textAlignment="center"
+                    android:gravity="center"
                     android:textSize="18dp"
                     android:textColor="@color/black"
                     android:text="@string/game_over_text"/>

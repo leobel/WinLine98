@@ -20,7 +20,7 @@ public class StartShape {
     public StartShape() {
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
         paint.setColor(Color.BLACK);
-        paint.setStrokeWidth(3);
+        //paint.setStrokeWidth(3);
         paint.setStyle(Paint.Style.FILL_AND_STROKE);
 
         path = new Path();
