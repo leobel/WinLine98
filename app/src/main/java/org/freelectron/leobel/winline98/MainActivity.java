@@ -392,13 +392,13 @@ public class MainActivity extends BaseActivity
                 e.printStackTrace();
             }
         }
-        else {
-            loadGameOnStart = false;
-        }
+//        else {
+//            loadGameOnStart = false;
+//        }
 
         boardView.setBoard(game.getBoard());
-        nextView.setBoard(this.game.getNext());
-        this.scoreView.setText(game.getScore().toString());
+        nextView.setBoard(game.getNext());
+        scoreView.setText(game.getScore().toString());
         scoreImage.setProgress(game.getScore());
         boardView.invalidate();
         nextView.invalidate();
