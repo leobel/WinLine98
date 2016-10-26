@@ -15,6 +15,7 @@ import android.widget.Chronometer;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import org.freelectron.leobel.winline98.MainActivity;
 import org.freelectron.leobel.winline98.R;
 
 /**
@@ -105,6 +106,12 @@ public class GameStatsDialog extends DialogFragment {
 
         refresGame.setOnClickListener( v -> {
             onCloseListener.run();
+        });
+
+        shareGame.setOnClickListener(v -> {
+            MainActivity activity =  (MainActivity)getActivity();
+
+            activity.shareApp();
         });
 
         scoreText.setText(score.toString());

@@ -24,6 +24,7 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.share.model.ShareLinkContent;
 import com.facebook.share.model.SharePhoto;
 import com.facebook.share.model.SharePhotoContent;
 import com.facebook.share.widget.ShareDialog;
@@ -44,6 +45,73 @@ public class BaseActivity extends AppCompatActivity {
     public void shareSavedGames(List<Bitmap> screenShots){
         ShareSavedGamesAsyncTask task = new ShareSavedGamesAsyncTask();
         task.execute(screenShots);
+    }
+
+    public void shareApp() {
+
+        View view = findViewById(R.id.current_game);
+        view.setDrawingCacheEnabled(true);
+        view.buildDrawingCache();
+        Bitmap bitmap = Bitmap.createBitmap(view.getDrawingCache());
+        view.setDrawingCacheEnabled(false);
+        File file = ActivityUtils.storeScreenShot(bitmap, "share.png");
+
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Share with");
+        builder.setItems(new CharSequence[] {"Facebook", "Other"}, (dialog, which) -> {
+            switch (which){
+                case 0:
+                    ShareLinkContent linkContent = new ShareLinkContent.Builder()
+                            .setContentTitle("WinLine")
+                            .setContentDescription("Play WinLine")
+                            //.setImageUrl(Uri.fromFile(file))
+                            .build();
+
+                    ShareDialog.show(this, linkContent);
+                    break;
+                case 1:
+                    Intent intent = new Intent();
+                    intent.setAction(Intent.ACTION_SEND);
+                    intent.putExtra(Intent.EXTRA_SUBJECT, "Play WinLine");
+                    intent.setType("image/*");
+                    Uri contentUri = Uri.fromFile(file);
+                    intent.putExtra(Intent.EXTRA_STREAM, contentUri);
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                    // Exclude Facebook from Apps
+                    List<ResolveInfo> activities = getPackageManager().queryIntentActivities(intent, 0);
+
+                    ArrayList<Intent> targetIntents = new ArrayList<>();
+                    String facebookAppName = getString(R.string.facebokk_app_name);
+                    for (ResolveInfo currentInfo : activities) {
+                        String packageName = currentInfo.activityInfo.packageName;
+                        if (!facebookAppName.equals(packageName)) {
+                            Intent targetIntent = new Intent(Intent.ACTION_SEND);
+
+                            targetIntent.setType("image/*");
+                            targetIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION); // temp permission for receiving app to read this file
+                            targetIntent.putExtra(Intent.EXTRA_SUBJECT, "Play WinLine");
+                            targetIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
+
+                            targetIntent.setPackage(packageName);
+                            targetIntents.add(targetIntent);
+                        }
+                    }
+
+                    if(targetIntents.size() > 0) {
+                        Intent chooserIntent = Intent.createChooser(targetIntents.remove(0), "Share with");
+                        chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, targetIntents.toArray(new Parcelable[targetIntents.size()]));
+                        startActivity(chooserIntent);
+                    }
+                    else {
+                        Toast.makeText(this, "No app found", Toast.LENGTH_SHORT).show();
+                    }
+
+                    break;
+            }
+        });
+        builder.show();
     }
 
     public class ShareSavedGamesAsyncTask extends AsyncTask<List<Bitmap>, Integer, List<File>>{

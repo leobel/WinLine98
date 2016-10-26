@@ -91,6 +91,7 @@ public class MainActivity extends BaseActivity
 
     private ProgressDialog mProgressDialog;
     private boolean loadGameOnStart;
+    private boolean shouldStartChronometer;
 
 
     private MediaPlayer mp;
@@ -103,6 +104,8 @@ public class MainActivity extends BaseActivity
         setContentView(R.layout.activity_main);
 
         WinLineApp.getInstance().getComponent().inject(this);
+
+        shouldStartChronometer = true;
 
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setIndeterminate(false);
@@ -186,7 +189,14 @@ public class MainActivity extends BaseActivity
         endAlertHandler = new Handler(msg -> {
             pauseChronometer();
             scoreView.setText(game.getScore().toString());
+            setLoadGameOnStart(true);
+            setShouldStartChronometer(false);
             GameStatsDialog gameOver = GameStatsDialog.newInstance(game.getScore(), timeWhenStopped, preferenceService.getHighRecord(), true);
+            gameOver.setOnCloseListener(() -> {
+                setShouldStartChronometer(true);
+                stopChronometer();
+                createNewGame();
+            });
             gameOver.show(getSupportFragmentManager(), "game over");
             return false;
         });
@@ -195,8 +205,11 @@ public class MainActivity extends BaseActivity
 
         scoreImage.setOnClickListener( v -> {
             pauseChronometer();
+            setLoadGameOnStart(true);
+            setShouldStartChronometer(false);
             GameStatsDialog gameInfo = GameStatsDialog.newInstance(game.getScore(), timeWhenStopped, preferenceService.getHighRecord(), false);
             gameInfo.setOnCloseListener(() -> {
+                setShouldStartChronometer(true);
                 startChronometer();
             });
             gameInfo.show(getSupportFragmentManager(), "game info");
@@ -228,6 +241,8 @@ public class MainActivity extends BaseActivity
         });
 
         loadGame.setOnClickListener(v -> {
+            pauseChronometer();
+            loadGameOnStart = true;
             loadGame.startAnimation(ActivityUtils.buttonClick);
             if(preferenceService.getAllowTouchSoundPreference()){
                 mp.start();
@@ -360,13 +375,13 @@ public class MainActivity extends BaseActivity
     @Override
     protected void onPause() {
         super.onPause();
-        pauseChronometer();
+
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        loadGameOnStart = true;
+
     }
 
     private void createNewGame(){
@@ -388,7 +403,8 @@ public class MainActivity extends BaseActivity
         boardView.invalidate();
         nextView.invalidate();
         scoreImage.invalidate();
-        startChronometer();
+        if(shouldStartChronometer)
+            startChronometer();
     }
 
     @Override
@@ -419,77 +435,16 @@ public class MainActivity extends BaseActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.share) {
+            pauseChronometer();
             loadGameOnStart = true;
-            View view = findViewById(R.id.current_game);
-            view.setDrawingCacheEnabled(true);
-            view.buildDrawingCache();
-            Bitmap bitmap = Bitmap.createBitmap(view.getDrawingCache());
-            view.setDrawingCacheEnabled(false);
-            File file = ActivityUtils.storeScreenShot(bitmap, "share.png");
-
-
-
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle("Share with");
-                builder.setItems(new CharSequence[] {"Facebook", "Other"}, (dialog, which) -> {
-                    switch (which){
-                        case 0:
-                            ShareLinkContent linkContent = new ShareLinkContent.Builder()
-                                    .setContentTitle("WinLine")
-                                    .setContentDescription("Play WinLine")
-                                    //.setImageUrl(Uri.fromFile(file))
-                                    .build();
-
-                            ShareDialog.show(this, linkContent);
-                            break;
-                        case 1:
-                            Intent intent = new Intent();
-                            intent.setAction(Intent.ACTION_SEND);
-                            intent.putExtra(Intent.EXTRA_SUBJECT, "Play WinLine");
-                            intent.setType("image/*");
-                            Uri contentUri = Uri.fromFile(file);
-                            intent.putExtra(Intent.EXTRA_STREAM, contentUri);
-                            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-                            // Exclude Facebook from Apps
-                            List<ResolveInfo> activities = getPackageManager().queryIntentActivities(intent, 0);
-
-                            ArrayList<Intent> targetIntents = new ArrayList<>();
-                            String facebookAppName = getString(R.string.facebokk_app_name);
-                            for (ResolveInfo currentInfo : activities) {
-                                String packageName = currentInfo.activityInfo.packageName;
-                                if (!facebookAppName.equals(packageName)) {
-                                    Intent targetIntent = new Intent(android.content.Intent.ACTION_SEND);
-
-                                    targetIntent.setType("image/*");
-                                    targetIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION); // temp permission for receiving app to read this file
-                                    targetIntent.putExtra(Intent.EXTRA_SUBJECT, "Play WinLine");
-                                    targetIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
-
-                                    targetIntent.setPackage(packageName);
-                                    targetIntents.add(targetIntent);
-                                }
-                            }
-
-                            if(targetIntents.size() > 0) {
-                                Intent chooserIntent = Intent.createChooser(targetIntents.remove(0), "Share with");
-                                chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, targetIntents.toArray(new Parcelable[targetIntents.size()]));
-                                startActivity(chooserIntent);
-                            }
-                            else {
-                                Toast.makeText(this, "No app found", Toast.LENGTH_SHORT).show();
-                            }
-
-                            break;
-                    }
-                });
-                builder.show();
-
+            shareApp();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
+
+    
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
@@ -536,6 +491,14 @@ public class MainActivity extends BaseActivity
     private void animateInsertTile(List<AnimateChecker> tails, Runnable doAfter) {
         timerAnimateInsertTile = new Thread(new AnimateInsertTails(tails, boardHandler, doAfter));
         timerAnimateInsertTile.start();
+    }
+
+    public void setLoadGameOnStart(boolean loadGameOnStart) {
+        this.loadGameOnStart = loadGameOnStart;
+    }
+
+    public void setShouldStartChronometer(boolean shouldStartChronometer) {
+        this.shouldStartChronometer = shouldStartChronometer;
     }
 
 
