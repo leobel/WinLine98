@@ -148,7 +148,7 @@
             android:layout_below="@+id/game_over_dialog">
 
             <Button
-                android:id="@+id/load_game"
+                android:id="@+id/rate_game"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="@drawable/rate"
@@ -166,7 +166,7 @@
                 android:layout_centerVertical="true"/>
 
             <Button
-                android:id="@+id/save_game"
+                android:id="@+id/share_game"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:background="@drawable/share"

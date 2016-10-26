@@ -10,7 +10,9 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Chronometer;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import org.freelectron.leobel.winline98.R;
@@ -24,13 +26,20 @@ public class GameStatsDialog extends DialogFragment {
     private static final String ARG_SCORE = "ARG_SCORE";
     private static final String ARG_TIME = "ARG_TIME";
     private static final String ARG_HIGHSCORE = "ARG_HIGHSCORE";
+    private static final String ARG_ISGAMEOVER = "ARG_ISGAMEOVER";
 
     private Integer score;
     private Long time;
-    private Integer hihgScore;
+    private Integer highScore;
+    private Boolean isGameOver;
+
     private TextView scoreText;
     private Chronometer timeText;
     private TextView highScoreText;
+
+    private Button refresGame;
+    private Button rateGame;
+    private Button shareGame;
 
 
     private Runnable onCloseListener = () -> dismiss();
@@ -45,15 +54,17 @@ public class GameStatsDialog extends DialogFragment {
      *
      * @param score Parameter 1.
      * @param time Parameter 2.
-     * @param highScore Parameter 2.
+     * @param highScore Parameter 3.
+     * @param isGameOver Parameter 4.
      * @return A new instance of fragment GameStatsDialog.
      */
-    public static GameStatsDialog newInstance(Integer score, Long time, Integer highScore) {
+    public static GameStatsDialog newInstance(Integer score, Long time, Integer highScore, Boolean isGameOver) {
         GameStatsDialog fragment = new GameStatsDialog();
         Bundle args = new Bundle();
         args.putInt(ARG_SCORE, score);
         args.putLong(ARG_TIME, time);
         args.putInt(ARG_HIGHSCORE, highScore);
+        args.putBoolean(ARG_ISGAMEOVER, isGameOver);
         fragment.setArguments(args);
         return fragment;
     }
@@ -65,7 +76,8 @@ public class GameStatsDialog extends DialogFragment {
         if (getArguments() != null) {
             score = getArguments().getInt(ARG_SCORE);
             time = getArguments().getLong(ARG_TIME);
-            hihgScore = getArguments().getInt(ARG_HIGHSCORE);
+            highScore = getArguments().getInt(ARG_HIGHSCORE);
+            isGameOver = getArguments().getBoolean(ARG_ISGAMEOVER);
         }
     }
 
@@ -79,9 +91,25 @@ public class GameStatsDialog extends DialogFragment {
         timeText = (Chronometer) view.findViewById(R.id.time);
         highScoreText = (TextView) view.findViewById(R.id.high_score);
 
+        refresGame = (Button) view.findViewById(R.id.new_game);
+        rateGame = (Button) view.findViewById(R.id.rate_game);
+        shareGame = (Button) view.findViewById(R.id.share_game);
+
+        if(!isGameOver){
+            if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
+                refresGame.setBackgroundDrawable(getResources().getDrawable(R.drawable.play));
+            } else {
+                refresGame.setBackground(getResources().getDrawable(R.drawable.play));
+            }
+        }
+
+        refresGame.setOnClickListener( v -> {
+            onCloseListener.run();
+        });
+
         scoreText.setText(score.toString());
         timeText.setBase(SystemClock.elapsedRealtime() + time);
-        highScoreText.setText(hihgScore.toString());
+        highScoreText.setText(highScore.toString());
 
         return view;
     }

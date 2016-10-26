@@ -186,7 +186,7 @@ public class MainActivity extends BaseActivity
         endAlertHandler = new Handler(msg -> {
             pauseChronometer();
             scoreView.setText(game.getScore().toString());
-            GameStatsDialog gameOver = GameStatsDialog.newInstance(game.getScore(), timeWhenStopped, preferenceService.getHighRecord());
+            GameStatsDialog gameOver = GameStatsDialog.newInstance(game.getScore(), timeWhenStopped, preferenceService.getHighRecord(), true);
             gameOver.show(getSupportFragmentManager(), "game over");
             return false;
         });
@@ -195,7 +195,7 @@ public class MainActivity extends BaseActivity
 
         scoreImage.setOnClickListener( v -> {
             pauseChronometer();
-            GameStatsDialog gameInfo = GameStatsDialog.newInstance(game.getScore(), timeWhenStopped, preferenceService.getHighRecord());
+            GameStatsDialog gameInfo = GameStatsDialog.newInstance(game.getScore(), timeWhenStopped, preferenceService.getHighRecord(), false);
             gameInfo.setOnCloseListener(() -> {
                 startChronometer();
             });
@@ -416,10 +416,6 @@ public class MainActivity extends BaseActivity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        if(preferenceService.getAllowTouchSoundPreference()){
-            mp.start();
-        }
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.share) {
