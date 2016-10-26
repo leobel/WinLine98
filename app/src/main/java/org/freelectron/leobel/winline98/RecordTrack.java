@@ -53,7 +53,13 @@ public class RecordTrack extends View {
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
-        myShape.setStar(this);
+        float x = (getWidth())/2;
+        float y = (getHeight())/2;
+
+        float radius = Math.min(x, y);
+        float innerRadius = radius / 2;
+
+        myShape.setStar(x, y, radius, innerRadius);
 
         // Draw the STAR mask in a bitmap
         Path path = myShape.getPath();
@@ -79,6 +85,8 @@ public class RecordTrack extends View {
         q.setXfermode(porterDuffXfermode);
         canvas.drawBitmap(starBitmap, 0, 0, q);
         q.setXfermode(null);
+
+        //canvas.drawPath(myShape.getPath(), myShape.getPaint());
 
     }
 

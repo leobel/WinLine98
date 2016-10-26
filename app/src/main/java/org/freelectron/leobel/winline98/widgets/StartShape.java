@@ -55,27 +55,49 @@ public class StartShape {
         path.close();
     }
 
-    public void setStar(float x, float y, float radius, float innerRadius, int numOfPt, View v){
+    public void setStar(float x, float y, float radius, float innerRadius){
 
-        double section = 2.0 * Math.PI/numOfPt;
+        double angle = 2.0 * Math.PI/5;
 
         path.reset();
 
-        path.moveTo(
-                (float)(x + radius * Math.cos(0)),
-                (float)(y + radius * Math.sin(0)));
-        path.lineTo(
-                (float)(x + innerRadius * Math.cos(0 + section/2.0)),
-                (float)(y + innerRadius * Math.sin(0 + section/2.0)));
+//        path.moveTo(
+//                (float)(x + radius * Math.cos(0)),
+//                (float)(y + radius * Math.sin(0)));
+//        path.lineTo(
+//                (float)(x + innerRadius * Math.cos(0 + section/2.0)),
+//                (float)(y + innerRadius * Math.sin(0 + section/2.0)));
+//
+//        for(int i=1; i< numOfPt; i++){
+//            path.lineTo(
+//                    (float)(x + radius * Math.cos(section * i)),
+//                    (float)(y + radius * Math.sin(section * i)));
+//            path.lineTo(
+//                    (float)(x + innerRadius * Math.cos(section * i + section/2.0)),
+//                    (float)(y + innerRadius * Math.sin(section * i + section/2.0)));
+//        }
 
-        for(int i=1; i< numOfPt; i++){
-            path.lineTo(
-                    (float)(x + radius * Math.cos(section * i)),
-                    (float)(y + radius * Math.sin(section * i)));
-            path.lineTo(
-                    (float)(x + innerRadius * Math.cos(section * i + section/2.0)),
-                    (float)(y + innerRadius * Math.sin(section * i + section/2.0)));
-        }
+        path.moveTo(x, y + innerRadius); //p1
+
+        path.lineTo((float)(x + Math.sin(angle/2) * radius), (float)(y + Math.cos(angle/2) * radius)); //o1
+
+        path.lineTo((float)(x + Math.sin(angle) * innerRadius), (float)(y + Math.cos(angle) * innerRadius)); // p2
+
+        path.lineTo((float)(x + Math.sin(angle) * radius), (float)(y - Math.cos(angle) * radius)); // o2
+
+        path.lineTo((float)(x + Math.sin(angle/2) * innerRadius), (float)(y - Math.cos(angle/2) * innerRadius)); // p3
+
+        path.lineTo((float)(x), (float)(y - radius)); // o3
+
+        path.lineTo((float)(x - Math.sin(angle/2) * innerRadius), (float)(y - Math.cos(angle/2) * innerRadius)); // p4
+
+        path.lineTo((float)(x - Math.sin(angle) * radius), (float)(y - Math.cos(angle) * radius)); // o4
+
+        path.lineTo((float)(x - Math.sin(angle) * innerRadius), (float)(y + Math.cos(angle) * innerRadius)); // p5
+
+        path.lineTo((float)(x - Math.sin(angle/2) * radius), (float)(y + Math.cos(angle/2) * radius)); // o5
+
+
 
         path.close();
 
