@@ -39,4 +39,9 @@
     <!-- Record -->
     <string name="new_record_title">Congrats!</string>
     <string name="new_record_message">You have a new record, keep doing this way!</string>
+
+    <!-- Permissions -->
+    <string name="permission_title">Information</string>
+    <string name="use_external_storage_explanation">We use your external storage to save the games data.</string>
+
 </resources>

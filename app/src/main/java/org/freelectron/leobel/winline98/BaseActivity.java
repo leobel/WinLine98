@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -12,6 +13,7 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Parcelable;
 import android.os.SystemClock;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Gravity;
@@ -41,6 +43,8 @@ import java.util.List;
  * Created by leobel on 10/24/16.
  */
 public class BaseActivity extends AppCompatActivity {
+
+    public static final int MY_PERMISSIONS_REQUEST_ACCESS_STORAGE = 123;
 
     public void shareSavedGames(List<Bitmap> screenShots){
         ShareSavedGamesAsyncTask task = new ShareSavedGamesAsyncTask();
@@ -112,6 +116,42 @@ public class BaseActivity extends AppCompatActivity {
             }
         });
         builder.show();
+    }
+
+    public boolean checkPermission(int requestCode, int permissionExplanation, String... permissions) {
+        boolean permissionGranted = true;
+        for (String permission: permissions) {
+            if(ActivityCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED){
+                permissionGranted = false;
+                break;
+            }
+        }
+        if (!permissionGranted) {
+            // Should we show an explanation?
+            boolean shouldShowRequestPermissionRationale = true;
+            for (String permission: permissions) {
+                if(!ActivityCompat.shouldShowRequestPermissionRationale(this, permission)){
+                    shouldShowRequestPermissionRationale = false;
+                    break;
+                }
+            }
+            if (shouldShowRequestPermissionRationale) {
+                // Show an explanation to the user *asynchronously* -- don't block
+                // this thread waiting for the user's response! After the user
+                // sees the explanation, try again to request the permission.
+
+                ActivityUtils.showDialog(this, getString(permissionExplanation), getString(R.string.permission_title), false, () -> {
+                    ActivityCompat.requestPermissions(this, permissions, requestCode);
+                });
+
+            } else {
+
+                // No explanation needed, we can request the permission.
+                ActivityCompat.requestPermissions(this, permissions, requestCode);
+            }
+            return false;
+        }
+        return true;
     }
 
     public class ShareSavedGamesAsyncTask extends AsyncTask<List<Bitmap>, Integer, List<File>>{
