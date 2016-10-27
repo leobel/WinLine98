@@ -108,10 +108,10 @@ public class LoadGameActivity extends BaseActivity implements GameLoadFragment.O
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         if(id == R.id.delete_item){
-            ActivityUtils.showDialog(this, getString(selectedItems > 1 ? R.string.delete_games : R.string.delete_game), true, ok -> {
+            ActivityUtils.showDialog(this, getString(selectedItems > 1 ? R.string.delete_games : R.string.delete_game), true, () -> {
                 fragment.removeItems();
                 selectMultipleItems(false);
-            }, cancel -> {
+            }, () -> {
 
             });
         }

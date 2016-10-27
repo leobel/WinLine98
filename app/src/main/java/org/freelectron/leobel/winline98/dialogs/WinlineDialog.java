@@ -14,7 +14,7 @@ import android.widget.TextView;
 import org.freelectron.leobel.winline98.R;
 
 
-public class WinlineDialog extends DialogFragment {
+public class WinlineDialog extends BaseDialog {
     private static String SHOW_CANCEL_BUTTON = "SHOW_CANCEL_BUTTON";
     private static String MESSAGE = "MESSAGE";
     private static String TITLE = "TITLE";
@@ -28,8 +28,8 @@ public class WinlineDialog extends DialogFragment {
     private Button buttonCancel;
 
 
-    private View.OnClickListener onOkListener = (view) -> dismiss();
-    private View.OnClickListener onCancelListener = (view) -> dismiss();
+    private Runnable onOkListener = () -> dismiss();
+    private Runnable onCancelListener = () -> dismiss();
 
     public WinlineDialog() {
         // Required empty public constructor
@@ -115,10 +115,16 @@ public class WinlineDialog extends DialogFragment {
         }
 
         buttonOk = (Button) container.findViewById(R.id.buttonOk);
-        buttonOk.setOnClickListener(onOkListener);
+        buttonOk.setOnClickListener(v -> {
+            onOkListener.run();
+            dismiss();
+        });
 
         buttonCancel = (Button) container.findViewById(R.id.buttonCancel);
-        buttonCancel.setOnClickListener(onCancelListener);
+        buttonCancel.setOnClickListener(v -> {
+            onCancelListener.run();
+            dismiss();
+        });
 
         if(showCancelButton){
             buttonCancel.setVisibility(View.VISIBLE);
@@ -135,11 +141,11 @@ public class WinlineDialog extends DialogFragment {
         return container;
     }
 
-    public void setOnOkListener(View.OnClickListener listener) {
+    public void setOnOkListener(Runnable listener) {
         this.onOkListener = listener;
     }
 
-    public void setOnCancelListener(View.OnClickListener listener) {
+    public void setOnCancelListener(Runnable listener) {
         this.onCancelListener = listener;
     }
 

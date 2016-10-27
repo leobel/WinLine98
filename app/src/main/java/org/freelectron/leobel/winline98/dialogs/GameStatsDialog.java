@@ -23,7 +23,7 @@ import org.freelectron.leobel.winline98.R;
  * Use the {@link GameStatsDialog#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class GameStatsDialog extends DialogFragment {
+public class GameStatsDialog extends BaseDialog {
     private static final String ARG_SCORE = "ARG_SCORE";
     private static final String ARG_TIME = "ARG_TIME";
     private static final String ARG_HIGHSCORE = "ARG_HIGHSCORE";
@@ -43,7 +43,7 @@ public class GameStatsDialog extends DialogFragment {
     private Button shareGame;
 
 
-    private Runnable onCloseListener = () -> dismiss();
+
 
     public GameStatsDialog() {
         // Required empty public constructor
@@ -121,21 +121,5 @@ public class GameStatsDialog extends DialogFragment {
         return view;
     }
 
-    public void setOnCloseListener(Runnable listener) {
-        this.onCloseListener = () -> {
-            listener.run();
-            dismiss();
-        };
-    }
 
-    @NonNull
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        return new Dialog(getActivity(), getTheme()){
-            @Override
-            public void onBackPressed() {
-                onCloseListener.run();
-            }
-        };
-    }
 }

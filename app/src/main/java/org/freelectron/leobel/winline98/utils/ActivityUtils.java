@@ -45,6 +45,17 @@ public class ActivityUtils {
         dialogFragment.show(((AppCompatActivity)activity).getSupportFragmentManager(), "dialog");
     }
 
+    public static void showDialog(Activity activity, String message, String title, Boolean showCancelButton, Runnable okListener){
+        if (activity == null || !(activity instanceof AppCompatActivity)) return;
+
+        WinlineDialog dialogFragment = WinlineDialog.newInstance(message, title, showCancelButton);
+
+        dialogFragment.setOnOkListener(okListener);
+        dialogFragment.setOnCloseListener(okListener);
+
+        dialogFragment.show(((AppCompatActivity)activity).getSupportFragmentManager(), "dialog");
+    }
+
     public static void showDialog(Activity activity, String message, Boolean showCancelButton){
         if (activity == null || !(activity instanceof AppCompatActivity)) return;
 
@@ -52,32 +63,24 @@ public class ActivityUtils {
         dialogFragment.show(((AppCompatActivity)activity).getSupportFragmentManager(), "dialog");
     }
 
-    public static void showDialog(Activity activity, String message, Boolean showCancelButton, View.OnClickListener okListener){
+    public static void showDialog(Activity activity, String message, Boolean showCancelButton, Runnable okListener){
         if (activity == null || !(activity instanceof AppCompatActivity)) return;
 
         WinlineDialog dialogFragment = WinlineDialog.newInstance(message, showCancelButton);
 
-        dialogFragment.setOnOkListener(v -> {
-            okListener.onClick(v);
-            dialogFragment.dismiss();
-        });
+        dialogFragment.setOnOkListener(okListener);
 
         dialogFragment.show(((AppCompatActivity)activity).getSupportFragmentManager(), "dialog");
     }
 
-    public static void showDialog(Activity activity, String message, Boolean showCancelButton, View.OnClickListener okListener, View.OnClickListener cancelListener){
+    public static void showDialog(Activity activity, String message, Boolean showCancelButton, Runnable okListener, Runnable cancelListener){
         if (activity == null || !(activity instanceof AppCompatActivity)) return;
 
         WinlineDialog dialogFragment = WinlineDialog.newInstance(message, showCancelButton);
 
-        dialogFragment.setOnOkListener(v -> {
-            okListener.onClick(v);
-            dialogFragment.dismiss();
-        });
-        dialogFragment.setOnCancelListener(v -> {
-            cancelListener.onClick(v);
-            dialogFragment.dismiss();
-        });
+        dialogFragment.setOnOkListener(okListener);
+        dialogFragment.setOnCancelListener(cancelListener);
+        dialogFragment.setOnCloseListener(cancelListener);
 
         dialogFragment.show(((AppCompatActivity)activity).getSupportFragmentManager(), "dialog");
     }

@@ -3,20 +3,15 @@ package org.freelectron.leobel.winline98;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.pm.ResolveInfo;
-import android.graphics.Bitmap;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.os.Parcelable;
 import android.os.SystemClock;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -38,13 +33,9 @@ import org.freelectron.winline.Checker;
 import org.freelectron.winline.LogicWinLine;
 import org.freelectron.winline.MPoint;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import com.facebook.share.model.ShareLinkContent;
-import com.facebook.share.widget.ShareDialog;
 
 import javax.inject.Inject;
 
@@ -90,12 +81,12 @@ public class MainActivity extends BaseActivity
     public PreferenceService preferenceService;
 
     private ProgressDialog mProgressDialog;
-    private boolean loadGameOnStart;
-    private boolean shouldStartChronometer;
 
+    private boolean loadGameOnStart;
+    private boolean canPlay;
+    private boolean breakRecordAlert;
 
     private MediaPlayer mp;
-    private boolean breakRecordAlert;
 
 
     @Override
@@ -105,7 +96,7 @@ public class MainActivity extends BaseActivity
 
         WinLineApp.getInstance().getComponent().inject(this);
 
-        shouldStartChronometer = true;
+
 
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setIndeterminate(false);
@@ -128,6 +119,8 @@ public class MainActivity extends BaseActivity
         chronometer = (Chronometer) findViewById(R.id.chronometer);
         scoreImage = (RecordTrack) findViewById(R.id.score_image);
 
+        loadGameOnStart = false;
+        canPlay = true;
         breakRecordAlert = true;
 
         scoreImage.setMax(preferenceService.getHighRecord());
@@ -170,8 +163,14 @@ public class MainActivity extends BaseActivity
                     preferenceService.setHighRecord(game.getScore());
                     scoreImage.setMax(game.getScore());
                     if(breakRecordAlert){
-                        ActivityUtils.showDialog(this, getString(R.string.new_record_message), getString(R.string.new_record_title));
+                        pauseChronometer();
+                        setCanPlay(false);
                         breakRecordAlert = false; // only once during a game
+                        ActivityUtils.showDialog(this, getString(R.string.new_record_message), getString(R.string.new_record_title), false, () -> {
+                            setCanPlay(true);
+                            startChronometer();
+                        });
+
 
                     }
                 }
@@ -188,12 +187,11 @@ public class MainActivity extends BaseActivity
 
         endAlertHandler = new Handler(msg -> {
             pauseChronometer();
+            setCanPlay(false);
             scoreView.setText(game.getScore().toString());
-            setLoadGameOnStart(true);
-            setShouldStartChronometer(false);
             GameStatsDialog gameOver = GameStatsDialog.newInstance(game.getScore(), timeWhenStopped, preferenceService.getHighRecord(), true);
             gameOver.setOnCloseListener(() -> {
-                setShouldStartChronometer(true);
+                setCanPlay(true);
                 stopChronometer();
                 createNewGame();
             });
@@ -205,11 +203,10 @@ public class MainActivity extends BaseActivity
 
         scoreImage.setOnClickListener( v -> {
             pauseChronometer();
-            setLoadGameOnStart(true);
-            setShouldStartChronometer(false);
+            setCanPlay(false);
             GameStatsDialog gameInfo = GameStatsDialog.newInstance(game.getScore(), timeWhenStopped, preferenceService.getHighRecord(), false);
             gameInfo.setOnCloseListener(() -> {
-                setShouldStartChronometer(true);
+                setCanPlay(true);
                 startChronometer();
             });
             gameInfo.show(getSupportFragmentManager(), "game info");
@@ -223,17 +220,22 @@ public class MainActivity extends BaseActivity
             }
             if(savedCurrentState){
                 stopChronometer();
+                loadGameOnStart = false;
                 createNewGame();
                 savedCurrentState = false;
                 breakRecordAlert = true;
             }
             else{
                 pauseChronometer();
-                ActivityUtils.showDialog(this, getString(R.string.unsaved_current_state), true, v1 -> {
+                setCanPlay(false);
+                ActivityUtils.showDialog(this, getString(R.string.unsaved_current_state), true, () -> {
+                    setCanPlay(true);
                     stopChronometer();
+                    loadGameOnStart = false;
                     createNewGame();
                     breakRecordAlert = true;
-                }, v2 -> {
+                }, () -> {
+                    setCanPlay(true);
                     startChronometer();
                 });
             }
@@ -242,7 +244,7 @@ public class MainActivity extends BaseActivity
 
         loadGame.setOnClickListener(v -> {
             pauseChronometer();
-            loadGameOnStart = true;
+            setCanPlay(false);
             loadGame.startAnimation(ActivityUtils.buttonClick);
             if(preferenceService.getAllowTouchSoundPreference()){
                 mp.start();
@@ -255,7 +257,6 @@ public class MainActivity extends BaseActivity
             if(preferenceService.getAllowTouchSoundPreference()){
                 mp.start();
             }
-            mProgressDialog.show();
             if(gameService.save(game, (int)(SystemClock.elapsedRealtime() - chronometer.getBase()))){
                 savedCurrentState = true;
                 mProgressDialog.hide();
@@ -263,8 +264,7 @@ public class MainActivity extends BaseActivity
 
             }
             else {
-                mProgressDialog.hide();
-                ActivityUtils.showDialog(this, "Your game can\'t be saved.");
+                Toast.makeText(this, "Your game can\'t be saved.", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -341,13 +341,15 @@ public class MainActivity extends BaseActivity
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(requestCode == LOAD_GAME && resultCode == Activity.RESULT_OK){
-            loadGameOnStart = true;
-            savedCurrentState = true;
-            WinLine loadedGame = (WinLine) data.getSerializableExtra(LoadGameActivity.GAME_LOADED);
-            timeWhenStopped = -1L * loadedGame.getTime();
-            game = new LogicWinLine(loadedGame.getBoard(), loadedGame.getNext(), loadedGame.getScore());
-            breakRecordAlert = true;
+        if(requestCode == LOAD_GAME){
+            setCanPlay(true);
+            if(resultCode == Activity.RESULT_OK){
+                savedCurrentState = true;
+                WinLine loadedGame = (WinLine) data.getSerializableExtra(LoadGameActivity.GAME_LOADED);
+                timeWhenStopped = -1L * loadedGame.getTime();
+                game = new LogicWinLine(loadedGame.getBoard(), loadedGame.getNext(), loadedGame.getScore());
+                breakRecordAlert = true;
+            }
         }
     }
 
@@ -375,19 +377,16 @@ public class MainActivity extends BaseActivity
     @Override
     protected void onPause() {
         super.onPause();
-
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-
+        if(canPlay){
+            pauseChronometer();
+        }
     }
 
     private void createNewGame(){
         if(!loadGameOnStart){
             try {
                 game = new LogicWinLine(dimension);
+                loadGameOnStart = true;
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -403,7 +402,7 @@ public class MainActivity extends BaseActivity
         boardView.invalidate();
         nextView.invalidate();
         scoreImage.invalidate();
-        if(shouldStartChronometer)
+        if(canPlay)
             startChronometer();
     }
 
@@ -412,7 +411,7 @@ public class MainActivity extends BaseActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-
+            setCanPlay(true);
         }
         else {
             super.onBackPressed();
@@ -433,10 +432,11 @@ public class MainActivity extends BaseActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
+        pauseChronometer();
+        setCanPlay(false);
+
         //noinspection SimplifiableIfStatement
         if (id == R.id.share) {
-            pauseChronometer();
-            loadGameOnStart = true;
             shareApp();
             return true;
         }
@@ -497,8 +497,8 @@ public class MainActivity extends BaseActivity
         this.loadGameOnStart = loadGameOnStart;
     }
 
-    public void setShouldStartChronometer(boolean shouldStartChronometer) {
-        this.shouldStartChronometer = shouldStartChronometer;
+    public void setCanPlay(boolean canPlay) {
+        this.canPlay = canPlay;
     }
 
 
