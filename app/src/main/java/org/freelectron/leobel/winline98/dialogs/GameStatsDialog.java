@@ -134,7 +134,7 @@ public class GameStatsDialog extends BaseDialog {
                 mp.start();
             }
             MainActivity activity =  (MainActivity)getActivity();
-            activity.shareApp();
+            activity.shareApp(() -> {});
         });
 
         scoreText.setText(score.toString());

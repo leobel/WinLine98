@@ -44,6 +44,7 @@ import java.util.List;
  */
 public class BaseActivity extends AppCompatActivity {
 
+    public static final int SHARE_APP = 89;
     public static final int MY_PERMISSIONS_REQUEST_ACCESS_STORAGE = 123;
 
     public void shareSavedGames(List<Bitmap> screenShots){
@@ -51,7 +52,7 @@ public class BaseActivity extends AppCompatActivity {
         task.execute(screenShots);
     }
 
-    public void shareApp() {
+    public void shareApp(Runnable onCancelListener) {
 
         View view = findViewById(R.id.current_game);
         view.setDrawingCacheEnabled(true);
@@ -62,6 +63,9 @@ public class BaseActivity extends AppCompatActivity {
 
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setOnCancelListener(dialog -> {
+           onCancelListener.run();
+        });
         builder.setTitle("Share with");
         builder.setItems(new CharSequence[] {"Facebook", "Other"}, (dialog, which) -> {
             switch (which){
@@ -115,6 +119,7 @@ public class BaseActivity extends AppCompatActivity {
                     break;
             }
         });
+
         builder.show();
     }
 

@@ -438,7 +438,10 @@ public class MainActivity extends BaseActivity
         //noinspection SimplifiableIfStatement
         if (id == R.id.share) {
             if(checkPermission(MY_PERMISSIONS_REQUEST_ACCESS_STORAGE, R.string.use_external_storage_explanation, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                shareApp();
+                shareApp(() -> {
+                    setCanPlay(true);
+                    startChronometer();
+                });
             }
             return true;
         }
@@ -454,7 +457,10 @@ public class MainActivity extends BaseActivity
 
                     // permission was granted, yay! Do the
                     // storage-related task you need to do.
-                    shareApp();
+                    shareApp(() -> {
+                        setCanPlay(true);
+                        startChronometer();
+                    });
 
                 } else {
 
