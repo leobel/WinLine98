@@ -147,29 +147,32 @@
             android:layout_marginTop="15dp"
             android:layout_below="@+id/game_over_dialog">
 
-            <Button
+            <ImageButton
                 android:id="@+id/rate_game"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:background="@drawable/rate"
+                app:srcCompat="@drawable/ic_star"
+                style="@style/actionButton"
                 android:layout_centerVertical="true"
                 android:layout_toLeftOf="@+id/new_game"/>
 
-            <Button
+            <ImageButton
                 android:id="@+id/new_game"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
                 android:layout_marginLeft="30dp"
                 android:layout_marginRight="30dp"
-                android:background="@drawable/replay"
+                app:srcCompat="@drawable/ic_replay"
+                style="@style/actionButton"
                 android:layout_centerHorizontal="true"
                 android:layout_centerVertical="true"/>
 
-            <Button
+            <ImageButton
                 android:id="@+id/share_game"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:background="@drawable/share"
+                app:srcCompat="@drawable/ic_share"
+                style="@style/actionButton"
                 android:layout_centerVertical="true"
                 android:layout_toRightOf="@+id/new_game"/>
 

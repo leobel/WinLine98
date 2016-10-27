@@ -1,5 +1,6 @@
 package org.freelectron.leobel.winline98;
 
+import org.freelectron.leobel.winline98.dialogs.GameStatsDialog;
 import org.freelectron.leobel.winline98.modules.AppModule;
 import org.freelectron.leobel.winline98.modules.ServicesModule;
 
@@ -19,4 +20,6 @@ public interface ApplicationComponent {
     void inject(MainActivity activity);
 
     void inject(GameLoadFragment fragment);
+
+    void inject(GameStatsDialog dialogFragment);
 }

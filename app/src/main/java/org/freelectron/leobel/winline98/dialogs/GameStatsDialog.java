@@ -2,6 +2,7 @@ package org.freelectron.leobel.winline98.dialogs;
 
 
 import android.app.Dialog;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
@@ -17,6 +18,11 @@ import android.widget.TextView;
 
 import org.freelectron.leobel.winline98.MainActivity;
 import org.freelectron.leobel.winline98.R;
+import org.freelectron.leobel.winline98.WinLineApp;
+import org.freelectron.leobel.winline98.services.PreferenceService;
+import org.freelectron.leobel.winline98.utils.ActivityUtils;
+
+import javax.inject.Inject;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -38,11 +44,15 @@ public class GameStatsDialog extends BaseDialog {
     private Chronometer timeText;
     private TextView highScoreText;
 
-    private Button refresGame;
-    private Button rateGame;
-    private Button shareGame;
+    private ImageButton refresGame;
+    private ImageButton rateGame;
+    private ImageButton shareGame;
 
 
+    @Inject
+    public PreferenceService preferenceService;
+
+    private MediaPlayer mp;
 
 
     public GameStatsDialog() {
@@ -73,7 +83,13 @@ public class GameStatsDialog extends BaseDialog {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        WinLineApp.getInstance().getComponent().inject(this);
+
         setStyle(DialogFragment.STYLE_NO_TITLE, R.style.AppTheme_AlertDialog);
+
+        mp = MediaPlayer.create(getActivity(), R.raw.buton_click);
+
         if (getArguments() != null) {
             score = getArguments().getInt(ARG_SCORE);
             time = getArguments().getLong(ARG_TIME);
@@ -92,25 +108,32 @@ public class GameStatsDialog extends BaseDialog {
         timeText = (Chronometer) view.findViewById(R.id.time);
         highScoreText = (TextView) view.findViewById(R.id.high_score);
 
-        refresGame = (Button) view.findViewById(R.id.new_game);
-        rateGame = (Button) view.findViewById(R.id.rate_game);
-        shareGame = (Button) view.findViewById(R.id.share_game);
+        refresGame = (ImageButton) view.findViewById(R.id.new_game);
+        rateGame = (ImageButton) view.findViewById(R.id.rate_game);
+        shareGame = (ImageButton) view.findViewById(R.id.share_game);
 
         if(!isGameOver){
-            if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN) {
-                refresGame.setBackgroundDrawable(getResources().getDrawable(R.drawable.play));
-            } else {
-                refresGame.setBackground(getResources().getDrawable(R.drawable.play));
-            }
+            refresGame.setImageResource(R.drawable.ic_play);
         }
 
+        rateGame.setOnClickListener( v -> {
+            if(preferenceService.getAllowTouchSoundPreference()){
+                mp.start();
+            }
+        });
+
         refresGame.setOnClickListener( v -> {
+            if(preferenceService.getAllowTouchSoundPreference()){
+                mp.start();
+            }
             onCloseListener.run();
         });
 
         shareGame.setOnClickListener(v -> {
+            if(preferenceService.getAllowTouchSoundPreference()){
+                mp.start();
+            }
             MainActivity activity =  (MainActivity)getActivity();
-
             activity.shareApp();
         });
 

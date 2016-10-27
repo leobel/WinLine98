@@ -19,6 +19,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Chronometer;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -54,9 +55,9 @@ public class MainActivity extends BaseActivity
     private BoardView boardView;
     private TextView scoreView;
     private NextView nextView;
-    private Button newGame;
-    private Button loadGame;
-    private Button saveGame;
+    private ImageButton newGame;
+    private ImageButton loadGame;
+    private ImageButton saveGame;
     private ImageView timer;
     private Chronometer chronometer;
     private RecordTrack scoreImage;
@@ -112,9 +113,9 @@ public class MainActivity extends BaseActivity
         boardView = (BoardView) findViewById(R.id.board);
         nextView = (NextView) findViewById(R.id.next);
         scoreView = (TextView) findViewById(R.id.score);
-        newGame = (Button)findViewById(R.id.new_game);
-        loadGame = (Button)findViewById(R.id.load_game);
-        saveGame = (Button)findViewById(R.id.save_game);
+        newGame = (ImageButton)findViewById(R.id.new_game);
+        loadGame = (ImageButton)findViewById(R.id.load_game);
+        saveGame = (ImageButton)findViewById(R.id.save_game);
         timer = (ImageView) findViewById(R.id.timer);
         chronometer = (Chronometer) findViewById(R.id.chronometer);
         scoreImage = (RecordTrack) findViewById(R.id.score_image);
@@ -214,7 +215,6 @@ public class MainActivity extends BaseActivity
         });
 
         newGame.setOnClickListener(v -> {
-            newGame.startAnimation(ActivityUtils.buttonClick);
             if(preferenceService.getAllowTouchSoundPreference()){
                 mp.start();
             }
@@ -245,7 +245,6 @@ public class MainActivity extends BaseActivity
         loadGame.setOnClickListener(v -> {
             pauseChronometer();
             setCanPlay(false);
-            loadGame.startAnimation(ActivityUtils.buttonClick);
             if(preferenceService.getAllowTouchSoundPreference()){
                 mp.start();
             }
@@ -253,7 +252,6 @@ public class MainActivity extends BaseActivity
         });
 
         saveGame.setOnClickListener(v -> {
-            saveGame.startAnimation(ActivityUtils.buttonClick);
             if(preferenceService.getAllowTouchSoundPreference()){
                 mp.start();
             }

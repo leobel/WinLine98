@@ -8,6 +8,7 @@ import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.animation.AlphaAnimation;
+import android.view.animation.ScaleAnimation;
 
 import org.freelectron.leobel.winline98.dialogs.WinlineDialog;
 
@@ -122,4 +123,6 @@ public class ActivityUtils {
     }
 
     public static AlphaAnimation buttonClick = new AlphaAnimation(1F, 0.5F);
+
+    public static ScaleAnimation scaleAnimation = new ScaleAnimation(1F, 1.4F, 1F, 1.4F, 50, 50);
 }

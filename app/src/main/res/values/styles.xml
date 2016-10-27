@@ -43,4 +43,10 @@
         <item name="android:gravity">center</item>
     </style>
 
+    <style name="actionButton" parent="Widget.AppCompat.Button">
+        <item name="android:padding">5dp</item>
+        <item name="android:scaleType">fitXY</item>
+        <item name="android:background">@drawable/background_action_button</item>
+    </style>
+
 </resources>

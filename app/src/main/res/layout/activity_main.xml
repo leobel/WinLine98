@@ -132,29 +132,32 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
-                    <Button
+                    <ImageButton
                         android:id="@+id/load_game"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:background="@drawable/replay"
+                        app:srcCompat="@drawable/ic_replay"
+                        style="@style/actionButton"
                         android:layout_centerVertical="true"
                         android:layout_toLeftOf="@+id/new_game"/>
 
-                    <Button
+                    <ImageButton
                         android:id="@+id/new_game"
                         android:layout_width="55dp"
                         android:layout_height="55dp"
                         android:layout_marginLeft="30dp"
                         android:layout_marginRight="30dp"
-                        android:background="@drawable/replay"
+                        app:srcCompat="@drawable/ic_replay"
+                        style="@style/actionButton"
                         android:layout_centerHorizontal="true"
                         android:layout_centerVertical="true"/>
 
-                    <Button
+                    <ImageButton
                         android:id="@+id/save_game"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:background="@drawable/load"
+                        app:srcCompat="@drawable/ic_load"
+                        style="@style/actionButton"
                         android:layout_centerVertical="true"
                         android:layout_toRightOf="@+id/new_game"/>
                 </RelativeLayout>
