@@ -32,8 +32,8 @@ public class RecordTrack extends View {
     private int progress;
     private Canvas starCanvas;
     private Canvas backCanvas;
-    private Rect recordProgress;
-    private Rect backRect;
+    private RectF recordProgress;
+    private RectF backRect;
     private PorterDuffXfermode porterDuffXfermode;
     private Paint backPaint;
 
@@ -55,13 +55,15 @@ public class RecordTrack extends View {
 
         float min = Math.min(getWidth(), getHeight());
 
-        float x = getWidth()/2;
-        float y = getHeight()/2;
+        float x = getWidth()/2f;
+        float y = getHeight()/2f;
 
         float radius = min * ratioRadius;
         float innerRadius = min * ratioInnerRadius;
 
         myShape.setStar(x, y, radius, innerRadius);
+
+        float startHeight = myShape.getHeight();
 
         // Draw the STAR mask in a bitmap
         Path path = myShape.getPath();
@@ -72,7 +74,8 @@ public class RecordTrack extends View {
         // Draw the background rectangle in a bitmap
         backCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
         if(max > 0 && progress > 0){
-            int divider = backBitmap.getHeight() - (progress * backBitmap.getHeight()/ max);
+            float divider = backBitmap.getHeight() - (progress * backBitmap.getHeight()/ max) - (backBitmap.getHeight() - startHeight);
+
             recordProgress.set(0, divider, backBitmap.getWidth(), backBitmap.getHeight());
             backRect.set(0, 0, backBitmap.getWidth(), divider);
 
@@ -87,9 +90,6 @@ public class RecordTrack extends View {
         q.setXfermode(porterDuffXfermode);
         canvas.drawBitmap(starBitmap, 0, 0, q);
         q.setXfermode(null);
-
-        //canvas.drawPath(myShape.getPath(), myShape.getPaint());
-
     }
 
     private void initMyView(Context context, AttributeSet attrs) {
@@ -127,8 +127,8 @@ public class RecordTrack extends View {
         starCanvas = new Canvas(starBitmap);
         backCanvas = new Canvas(backBitmap);
 
-        recordProgress = new Rect(0, 0, backBitmap.getWidth(), backBitmap.getHeight());
-        backRect = new Rect(0, 0, backBitmap.getWidth(), backBitmap.getHeight());
+        recordProgress = new RectF(0, 0, backBitmap.getWidth(), backBitmap.getHeight());
+        backRect = new RectF(0, 0, backBitmap.getWidth(), backBitmap.getHeight());
     }
 
     public void setMax(int max){this.max = max;}

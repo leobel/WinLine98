@@ -16,6 +16,7 @@ public class StartShape {
 
     private int minDim, topXPoint, topYPoint;
     private double bigHypot, bigA, bigB, littleHypot, littleA, littleB;
+    private float height;
 
     public StartShape() {
         paint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -49,8 +50,6 @@ public class StartShape {
         path.lineTo((int) (topXPoint + littleA + littleB), (int) (topYPoint + littleB));
         path.lineTo((int) (topXPoint - bigA), (int) (topYPoint + bigB));
         path.lineTo(topXPoint, topYPoint);
-        path.close();
-
 
         path.close();
     }
@@ -97,11 +96,15 @@ public class StartShape {
 
         path.lineTo((float)(x - Math.sin(angle/2) * radius), (float)(y + Math.cos(angle/2) * radius)); // o5
 
-
+        height = radius* (1 + (float) Math.cos(angle/2));
 
         path.close();
 
 
+    }
+
+    public float getHeight(){
+        return height;
     }
 
     public Path getPath(){
