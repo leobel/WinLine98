@@ -52,7 +52,11 @@ public class BaseActivity extends AppCompatActivity {
         task.execute(screenShots);
     }
 
-    public void shareApp(Runnable onCancelListener) {
+    public void shareApp(){
+        shareApp(null, null);
+    }
+
+    public void shareApp(Runnable onCancelListener, Runnable onDismissListener) {
 
         View view = findViewById(R.id.current_game);
         view.setDrawingCacheEnabled(true);
@@ -63,9 +67,16 @@ public class BaseActivity extends AppCompatActivity {
 
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setOnCancelListener(dialog -> {
-           onCancelListener.run();
-        });
+        if(onCancelListener != null){
+            builder.setOnCancelListener(dialog -> {
+                onCancelListener.run();
+            });
+        }
+        if(onDismissListener != null){
+            builder.setOnDismissListener(dialog -> {
+               onDismissListener.run();
+            });
+        }
         builder.setTitle("Share with");
         builder.setItems(new CharSequence[] {"Facebook", "Other"}, (dialog, which) -> {
             switch (which){

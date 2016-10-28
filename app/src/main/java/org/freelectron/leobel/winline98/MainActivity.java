@@ -42,6 +42,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
 
+import timber.log.Timber;
+
 //import timber.log.Timber;
 
 public class MainActivity extends BaseActivity
@@ -195,6 +197,7 @@ public class MainActivity extends BaseActivity
             GameStatsDialog gameOver = GameStatsDialog.newInstance(game.getScore(), timeWhenStopped, preferenceService.getHighRecord(), true);
             gameOver.setOnCloseListener(() -> {
                 setCanPlay(true);
+                loadGameOnStart = false;
                 stopChronometer();
                 createNewGame();
             });
@@ -441,6 +444,8 @@ public class MainActivity extends BaseActivity
                 shareApp(() -> {
                     setCanPlay(true);
                     startChronometer();
+                },() -> {
+                    setCanPlay(true);
                 });
             }
             return true;
@@ -460,14 +465,16 @@ public class MainActivity extends BaseActivity
                     shareApp(() -> {
                         setCanPlay(true);
                         startChronometer();
+                    },() -> {
+                        setCanPlay(true);
                     });
 
                 } else {
 
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
-                    startChronometer();
                     setCanPlay(true);
+                    startChronometer();
                 }
                 return;
             }
