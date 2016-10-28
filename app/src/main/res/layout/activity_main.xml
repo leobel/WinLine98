@@ -13,15 +13,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <android.support.design.widget.NavigationView
-        android:id="@+id/nav_view"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-
-        app:headerLayout="@layout/nav_header_main"
-        app:menu="@menu/activity_main_drawer" />
-
     <LinearLayout
         android:orientation="vertical"
         android:layout_width="match_parent"
@@ -73,14 +64,6 @@
                         android:id="@+id/score_image"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"/>
-
-                    <!--<ImageView-->
-                        <!--android:id="@+id/score_image"-->
-                        <!--android:layout_width="wrap_content"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--app:srcCompat="@drawable/ic_star"-->
-                        <!--android:tint="@color/yellow"/>-->
-
 
                     <TextView
                         android:id="@+id/score"
@@ -173,5 +156,16 @@
         </LinearLayout>
 
     </LinearLayout>
+
+    <android.support.design.widget.NavigationView
+        android:id="@+id/nav_view"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+
+        app:headerLayout="@layout/nav_header_main"
+        app:menu="@menu/activity_main_drawer" />
+
+
 
 </android.support.v4.widget.DrawerLayout>

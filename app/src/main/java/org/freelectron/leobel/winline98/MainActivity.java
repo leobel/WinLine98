@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -15,6 +16,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
+import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -324,6 +326,7 @@ public class MainActivity extends BaseActivity
             @Override
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
+                setCanPlay(false);
                 pauseChronometer();
 
             }
@@ -331,6 +334,7 @@ public class MainActivity extends BaseActivity
             @Override
             public void onDrawerClosed(View drawerView) {
                 super.onDrawerClosed(drawerView);
+                setCanPlay(true);
                 startChronometer();
             }
         };
@@ -338,8 +342,14 @@ public class MainActivity extends BaseActivity
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        MenuItem toggleSound = navigationView.getMenu().findItem(R.id.toggle_sound);
+        toggleMenuSound(toggleSound);
         navigationView.setNavigationItemSelectedListener(this);
 
+    }
+
+    private void toggleMenuSound(MenuItem toggleSound) {
+        toggleSound.setIcon(preferenceService.getAllowTouchSoundPreference() ? R.drawable.ic_sound_on : R.drawable.ic_sound_off);
     }
 
     @Override
@@ -414,7 +424,7 @@ public class MainActivity extends BaseActivity
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
-            setCanPlay(true);
+
         }
         else {
             super.onBackPressed();
@@ -425,6 +435,7 @@ public class MainActivity extends BaseActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
+
         return true;
     }
 
@@ -450,6 +461,7 @@ public class MainActivity extends BaseActivity
             }
             return true;
         }
+
 
         return super.onOptionsItemSelected(item);
     }
@@ -482,28 +494,23 @@ public class MainActivity extends BaseActivity
         }
     }
 
-    
 
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
+        if (id == R.id.toggle_sound) {
+            boolean useSound = preferenceService.getAllowTouchSoundPreference();
+            preferenceService.setAllowTouchSoundPreference(!useSound);
+            toggleMenuSound(item);
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {
 
         } else if (id == R.id.nav_manage) {
 
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
         }
-
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
