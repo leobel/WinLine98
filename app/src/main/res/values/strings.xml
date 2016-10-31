@@ -45,6 +45,6 @@
     <string name="use_external_storage_explanation">We use your external storage to save the games data.</string>
 
     <!-- Drawer Menu-->
-    <string name="drawer_menu_toggle_sound">Touch Sound</string>
+    <string name="drawer_menu_toggle_sound">Sound</string>
 
 </resources>

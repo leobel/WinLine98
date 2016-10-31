@@ -499,11 +499,15 @@ public class MainActivity extends BaseActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-
+        boolean closeDrawer = true;
         if (id == R.id.toggle_sound) {
             boolean useSound = preferenceService.getAllowTouchSoundPreference();
             preferenceService.setAllowTouchSoundPreference(!useSound);
             toggleMenuSound(item);
+            if(preferenceService.getAllowTouchSoundPreference()){
+                mp.start();
+            }
+            closeDrawer = false;
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {
@@ -511,8 +515,10 @@ public class MainActivity extends BaseActivity
         } else if (id == R.id.nav_manage) {
 
         }
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        drawer.closeDrawer(GravityCompat.START);
+        if(closeDrawer){
+            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+            drawer.closeDrawer(GravityCompat.START);
+        }
         return true;
     }
 
