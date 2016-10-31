@@ -109,7 +109,7 @@ public class RecordTrack extends View {
         porterDuffXfermode = new PorterDuffXfermode(PorterDuff.Mode.DST_IN);
 
         starPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        starPaint.setColor(getResources().getColor(R.color.yellow));
+        starPaint.setColor(getResources().getColor(R.color.star_color));
         starPaint.setStyle(Paint.Style.FILL_AND_STROKE);
 
         backPaint = new Paint(Paint.ANTI_ALIAS_FLAG);

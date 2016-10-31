@@ -139,6 +139,7 @@ public class TileView extends View {
     public void loadTile(AnimateChecker.AnimateColor key, Drawable tile) {
         Bitmap bitmap = Bitmap.createBitmap(this.mTileSize, this.mTileSize, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
+
         tile.setBounds(0, 0, this.mTileSize, this.mTileSize);
         tile.draw(canvas);
         this.mGifArray.put(key, bitmap);

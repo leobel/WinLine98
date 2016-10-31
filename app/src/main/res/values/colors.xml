@@ -13,12 +13,16 @@
     <color name="windowBackgroundPopup">#50000000</color>
     <color name="divider">#B6B6B6</color>
 
-    <color name="pink">#FF4081</color>
+    <color name="pink">#FF8b0f78</color>
     <color name="empty">#fff1f1f1</color>
     <color name="black">#000000</color>
-    <color name="red">#ffcc0000</color>
-    <color name="yellow">#ffffbb33</color>
-    <color name="green">#ff669900</color>
+    <color name="red">#FFBC1C1C</color>
+    <color name="yellow">#FFc17b03</color>
+    <color name="green">#FF167b16</color>
     <color name="blue">#FF0C158B</color>
-    <color name="brown">#FF312327</color>
+    <color name="brown">#FF21181B</color>
+    <color name="start_cold_color">#C0C0C0</color>
+    <color name="start_hot_color">#F8F8F8</color>
+
+    <color name="star_color">#FFf7cb1a</color>
 </resources>

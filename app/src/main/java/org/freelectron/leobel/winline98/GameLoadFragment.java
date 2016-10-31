@@ -318,7 +318,7 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
             start.setLayoutParams(scoreImageView.getLayoutParams());
             start.setId(scoreImageView.getId());
             start.setImageResource(R.drawable.ic_star);
-            start.setColorFilter(getResources().getColor(R.color.yellow));
+            start.setColorFilter(getResources().getColor(R.color.star_color));
 
             TextView score = new TextView(getContext());
             score.setLayoutParams(scoreView.getLayoutParams());

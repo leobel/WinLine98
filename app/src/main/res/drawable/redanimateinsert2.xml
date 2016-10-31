@@ -11,9 +11,6 @@
             <solid android:color="@color/empty"/>
         </shape>
     </item>
-    <item android:right="14dp" android:bottom="14dp" android:top="14dp" android:left="14dp">
-        <shape  android:shape="oval" >
-            <solid android:color="@color/red"/>
-        </shape>
+    <item android:right="14dp" android:bottom="14dp" android:top="14dp" android:left="14dp" android:drawable="@drawable/red_ball">
     </item>
 </layer-list>

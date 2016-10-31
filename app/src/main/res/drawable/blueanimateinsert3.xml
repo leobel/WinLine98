@@ -11,9 +11,6 @@
             <solid android:color="@color/empty"/>
         </shape>
     </item>
-    <item android:right="10dp" android:bottom="10dp" android:top="10dp" android:left="10dp">
-        <shape  android:shape="oval" >
-            <solid android:color="@color/blue"/>
-        </shape>
+    <item android:right="10dp" android:bottom="10dp" android:top="10dp" android:left="10dp" android:drawable="@drawable/blue_ball">
     </item>
 </layer-list>
