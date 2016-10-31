@@ -120,7 +120,8 @@
                         android:id="@+id/load_game"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        app:srcCompat="@drawable/ic_replay"
+                        android:padding="10dp"
+                        app:srcCompat="@drawable/ic_load"
                         style="@style/actionButton"
                         android:layout_centerVertical="true"
                         android:layout_toLeftOf="@+id/new_game"/>
@@ -131,6 +132,7 @@
                         android:layout_height="55dp"
                         android:layout_marginLeft="30dp"
                         android:layout_marginRight="30dp"
+                        android:padding="10dp"
                         app:srcCompat="@drawable/ic_replay"
                         style="@style/actionButton"
                         android:layout_centerHorizontal="true"
@@ -140,7 +142,8 @@
                         android:id="@+id/save_game"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        app:srcCompat="@drawable/ic_load"
+                        android:padding="10dp"
+                        app:srcCompat="@drawable/ic_save"
                         style="@style/actionButton"
                         android:layout_centerVertical="true"
                         android:layout_toRightOf="@+id/new_game"/>
