@@ -152,7 +152,7 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:padding="10dp"
-                app:srcCompat="@drawable/ic_star"
+                app:srcCompat="@drawable/ic_rate"
                 style="@style/actionButton"
                 android:layout_centerVertical="true"
                 android:layout_toLeftOf="@+id/new_game"/>

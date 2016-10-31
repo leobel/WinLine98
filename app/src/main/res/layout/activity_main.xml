@@ -120,7 +120,7 @@
                         android:id="@+id/load_game"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:padding="10dp"
+                        android:padding="5dp"
                         app:srcCompat="@drawable/ic_load"
                         style="@style/actionButton"
                         android:layout_centerVertical="true"

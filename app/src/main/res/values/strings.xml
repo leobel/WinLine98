@@ -46,5 +46,7 @@
 
     <!-- Drawer Menu-->
     <string name="drawer_menu_toggle_sound">Sound</string>
+    <string name="drawer_menu_rate_game">Rate</string>
+    <string name="drawer_menu_ranking_game">Ranking</string>
 
 </resources>
