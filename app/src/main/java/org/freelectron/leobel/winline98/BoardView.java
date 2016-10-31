@@ -21,9 +21,6 @@ import java.lang.reflect.Array;
  */
 public class BoardView extends TileView implements TileView.OnTileViewListener {
 
-    int dimension;
-    LogicWinLine game;
-    Checker[][] mTileGrid;
     Runnable doAfterSetPosition;
 
     public BoardView(Context context){
@@ -51,30 +48,6 @@ public class BoardView extends TileView implements TileView.OnTileViewListener {
 
     public void setBoard(Checker[][] board) {
         this.mTileGrid = board;
-    }
-
-    public void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        for (int x = 0; x < this.mXTileCount; x++) {
-            for (int y = 0; y < this.mYTileCount; y++) {
-                Checker f = this.mTileGrid[x][y];
-                LogicWinLine.Color c = LogicWinLine.Color.Empty;
-                if (f != null) {
-                    c = f.Color();
-                }
-//                AnimationDrawable drawable = (AnimationDrawable) mGifArray.get(c);
-//                drawable.start();
-                Bitmap bitmap;
-                if(f instanceof AnimateChecker){
-                    bitmap = this.mGifArray.get(((AnimateChecker) f).getAnimateColor());
-                }
-                else{
-                    bitmap = this.mTileArray.get(c);
-                }
-
-                canvas.drawBitmap(bitmap, (float) (this.mXOffset + (this.mTileSize * y)), (float) (this.mYOffset + (this.mTileSize * x)), this.mPaint);
-            }
-        }
     }
 
     @Override

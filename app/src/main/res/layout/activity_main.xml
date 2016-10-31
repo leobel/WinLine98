@@ -91,7 +91,8 @@
                 <org.freelectron.leobel.winline98.BoardView
                     android:id="@+id/board"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    >
 
                 </org.freelectron.leobel.winline98.BoardView>
             </LinearLayout>

@@ -9,6 +9,7 @@ import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
 import android.view.View;
 
+import org.freelectron.winline.Checker;
 import org.freelectron.winline.LogicWinLine;
 
 import java.util.HashMap;
@@ -25,6 +26,8 @@ public class TileView extends View {
     protected int mXTileCount;
     protected int mYOffset;
     protected int mYTileCount;
+    protected int dimension;
+    protected Checker[][] mTileGrid;
     private Context context;
     private OnTileViewListener listener;
 
@@ -32,6 +35,7 @@ public class TileView extends View {
         super(context);
         this.context = context;
         this.mPaint = new Paint();
+        mPaint.setStrokeWidth(2);
         this.mTileSize = 60;
         this.mTileArray = new HashMap();
         this.mGifArray = new HashMap();
@@ -43,6 +47,7 @@ public class TileView extends View {
         super(context, attrs);
         this.context = context;
         this.mPaint = new Paint();
+        mPaint.setStrokeWidth(2);
         this.mTileSize = 60;
         this.mTileArray = new HashMap();
         this.mGifArray = new HashMap();
@@ -54,6 +59,7 @@ public class TileView extends View {
         super(context, attrs, defStyle);
         this.context = context;
         this.mPaint = new Paint();
+        mPaint.setStrokeWidth(2);
         this.mTileSize = 60;
         this.mTileArray = new HashMap();
         this.mGifArray = new HashMap();
@@ -126,7 +132,33 @@ public class TileView extends View {
 
     public int getRightPosition(){return getLeft() + mXOffset + (mTileSize * mXTileCount);}
 
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
 
+        for (int x = 0; x < this.mXTileCount; x++) {
+            for (int y = 0; y < this.mYTileCount; y++) {
+                Checker f = this.mTileGrid[x][y];
+                LogicWinLine.Color c = LogicWinLine.Color.Empty;
+                if (f != null) {
+                    c = f.Color();
+                }
+                Bitmap bitmap;
+                if(f instanceof AnimateChecker){
+                    bitmap = this.mGifArray.get(((AnimateChecker) f).getAnimateColor());
+                }
+                else{
+                    bitmap = this.mTileArray.get(c);
+                }
+
+                canvas.drawBitmap(bitmap, (float) (this.mXOffset + (this.mTileSize * y)), (float) (this.mYOffset + (this.mTileSize * x)), this.mPaint);
+            }
+        }
+        float right = mXOffset + mYTileCount * mTileSize;
+        float bottom = mYOffset + mXTileCount * mTileSize;
+        canvas.drawLine(mXOffset, bottom, right , bottom, this.mPaint);
+        canvas.drawLine(right, mYOffset, right , bottom, this.mPaint);
+    }
 
     public void loadTile(LogicWinLine.Color key, Drawable tile) {
         Bitmap bitmap = Bitmap.createBitmap(this.mTileSize, this.mTileSize, Bitmap.Config.ARGB_8888);
@@ -146,9 +178,9 @@ public class TileView extends View {
     }
 
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        this.mTileSize = Math.min(w / this.mXTileCount, h / this.mYTileCount);
-        int measuredWidth = this.mTileSize * this.mXTileCount;
-        int measuredHeight = this.mTileSize * this.mYTileCount;
+        this.mTileSize = Math.min(w / this.mYTileCount, h / this.mXTileCount);
+        int measuredWidth = this.mTileSize * this.mYTileCount;
+        int measuredHeight = this.mTileSize * this.mXTileCount;
         load();
         this.mXOffset = Math.abs(w - measuredWidth) / 2;
         this.mYOffset = Math.abs(h - measuredHeight) / 2;
@@ -163,5 +195,4 @@ public class TileView extends View {
     public interface OnTileViewListener{
         void onSetPosition();
     }
-
 }
