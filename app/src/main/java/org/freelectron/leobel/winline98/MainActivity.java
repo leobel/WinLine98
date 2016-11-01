@@ -55,6 +55,7 @@ public class MainActivity extends BaseActivity
     private Thread timerMoveTile;
     private Thread timerAnimateTile;
     private Thread timerAnimateInsertTile;
+    private Thread timerAnimateScoreTile;
     private AnimateSelectedTail animateSelectedTail;
 
     private View boardContainer;
@@ -106,8 +107,6 @@ public class MainActivity extends BaseActivity
 
         WinLineApp.getInstance().getComponent().inject(this);
 
-
-
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setIndeterminate(false);
         mProgressDialog.setMessage("Your request is being processes");
@@ -153,11 +152,6 @@ public class MainActivity extends BaseActivity
             scoreImage.setLayoutParams(scoreLayout);
             scoreView.setWidth(boardView.getRightPosition() - scoreLayout.width - nextView.getRight());
         });
-
-
-
-
-        //timer.setLeft(timer.getLeft() + 300);
 
         boardHandler = new Handler(msg -> {
             boardView.invalidate();
@@ -279,7 +273,6 @@ public class MainActivity extends BaseActivity
             }
         });
 
-        //createNewGame();
         boardView.setOnTouchListener((v, event) -> {
             boolean emptyPlace = false;
             if (v.getId() != R.id.board) {
@@ -542,7 +535,7 @@ public class MainActivity extends BaseActivity
 
     private void animateTail(MPoint point){
         Checker tail = game.getBoard()[point.getX()][point.getY()];
-        animateSelectedTail = new AnimateSelectedTail(new AnimateChecker(tail), boardHandler);
+        animateSelectedTail = new AnimateSelectedTail(new AnimateChecker(tail, 0), boardHandler);
         timerAnimateTile = new Thread(animateSelectedTail);
         timerAnimateTile.start();
     }
@@ -557,6 +550,11 @@ public class MainActivity extends BaseActivity
         timerAnimateInsertTile.start();
     }
 
+    private void animateScoreTile(List<AnimateChecker> tiles, Runnable doAfter){
+        timerAnimateScoreTile = new Thread(new AnimateScore(tiles, boardHandler, doAfter));
+        timerAnimateScoreTile.start();
+    }
+
     public void setLoadGameOnStart(boolean loadGameOnStart) {
         this.loadGameOnStart = loadGameOnStart;
     }
@@ -564,7 +562,6 @@ public class MainActivity extends BaseActivity
     public void setCanPlay(boolean canPlay) {
         this.canPlay = canPlay;
     }
-
 
     class AnimateMoveTails implements Runnable {
         Handler alertHandler;
@@ -618,24 +615,35 @@ public class MainActivity extends BaseActivity
             MPoint[] limit = new MPoint[8];
             int[] score = new int[4];
             if (game.canDelete(dest, limit, score)) {
+                List<AnimateChecker> tiles = new ArrayList<>();
+                Checker[][]board = game.getBoard(true);
+                int index = AnimateChecker.getScoreIndex();
                 for (int k = 0; k < score.length; k++) {
                     if (score[k] >= 5) {
-                        game.deleteSequence(limit[k * 2], limit[(k * 2) + 1], (k * 2) + 1);
                         game.addScore(score[k]);
+                        List<Integer> positions = game.deleteSequence(limit[k * 2], limit[(k * 2) + 1], (k * 2) + 1);
+                        for(Integer pos: positions){
+                            int x = pos / dimension;
+                            int y = pos % dimension;
+                            tiles.add(new AnimateChecker(board[x][y], index));
+                        }
                     }
                 }
-                boardView.setBoard(game.getBoard());
-                boardHandler.sendMessage(new Message());
-                scoreHandler.sendMessage(new Message());
+                animateScoreTile(tiles, () -> {
+                    boardView.setBoard(game.getBoard());
+                    boardHandler.sendMessage(new Message());
+                    scoreHandler.sendMessage(new Message());
+                });
             } else {
                 try {
                     List<Integer> positions = game.addCheckers();
                     Checker[][]board = game.getBoard();
+                    int index = AnimateChecker.getInsertIndex();
                     List<AnimateChecker> tails = new ArrayList<>(3);
                     for(Integer pos: positions){
                         int x = pos / dimension;
                         int y = pos % dimension;
-                        tails.add(new AnimateInsertChecker(board[x][y]));
+                        tails.add(new AnimateChecker(board[x][y], index));
                     }
                     game.buildNext(3);
                     animateInsertTile(tails, () -> {
@@ -675,7 +683,7 @@ public class MainActivity extends BaseActivity
             for (AnimateChecker checker: tails){
                 originals.add(checker.getChecker());
             }
-            for(int i = 0; i< AnimateChecker.FRAMES_COUNT; i++){
+            for(int i = 0; i < AnimateChecker.FRAMES_COUNT; i++){
                 for (AnimateChecker checker: tails){
                     checker.setAnimateColor(i);
                     MPoint position = checker.getPosition();
@@ -744,6 +752,46 @@ public class MainActivity extends BaseActivity
         }
     }
 
+    class AnimateScore implements Runnable{
 
+        private final List<AnimateChecker> tiles;
+        private final Handler boardHandler;
+        private final Runnable doAfter;
+
+        public AnimateScore(List<AnimateChecker> tiles, Handler boardHandler, Runnable doAfter){
+            this.tiles = tiles;
+            this.boardHandler = boardHandler;
+            this.doAfter = doAfter;
+        }
+
+        @Override
+        public void run() {
+            Checker[][] board = game.getBoard();
+            List<Checker> originals = new ArrayList<>(3);
+            for (AnimateChecker checker: tiles){
+                originals.add(checker.getChecker());
+            }
+            for(int i=0; i < AnimateChecker.FRAMES_COUNT; i++){
+                for(AnimateChecker checker: tiles){
+                    checker.setAnimateColor(i);
+                    MPoint position = checker.getPosition();
+                    board[position.getX()][position.getY()] = checker;
+                }
+                this.boardHandler.sendMessage(new Message());
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            for (Checker orig: originals){
+                MPoint position = orig.getPosition();
+                board[position.getX()][position.getY()] = null;
+            }
+            if(doAfter != null){
+                doAfter.run();
+            }
+        }
+    }
 
 }

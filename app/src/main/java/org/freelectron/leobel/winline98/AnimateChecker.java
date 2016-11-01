@@ -12,18 +12,30 @@ public class AnimateChecker extends Checker {
     public static int FRAMES_COUNT = 3;
     public static int CHECKER_COUNT = 6;
     Checker checker;
+    protected int index;
 
-    public AnimateChecker(MPoint p, LogicWinLine.Color color) {
+    public AnimateChecker(MPoint p, LogicWinLine.Color color, int index) {
         super(p, color);
+        this.index = index;
     }
 
-    public AnimateChecker(LogicWinLine.Color color) {
+    public AnimateChecker(LogicWinLine.Color color, int index) {
         super(color);
+        this.index = index;
     }
 
-    public AnimateChecker(Checker checker) {
+    public AnimateChecker(Checker checker , int index) {
         super(checker.getPosition(), checker.Color());
         this.checker = checker;
+        this.index = index;
+    }
+
+    public static int getInsertIndex() {
+        return FRAMES_COUNT*CHECKER_COUNT;
+    }
+
+    public static int getScoreIndex() {
+        return 2 * getInsertIndex();
     }
 
     public AnimateColor getAnimateColor(){
@@ -35,22 +47,22 @@ public class AnimateChecker extends Checker {
     public void setAnimateColor(int i){
         switch (Color()){
             case RED:
-                animateColor = AnimateColor.values()[i];
+                animateColor = AnimateColor.values()[index + i];
                 break;
             case WHITE: // pink
-                animateColor = AnimateColor.values()[FRAMES_COUNT + i];
+                animateColor = AnimateColor.values()[index + FRAMES_COUNT + i];
                 break;
-            case BLUE: // pink
-                animateColor = AnimateColor.values()[2*FRAMES_COUNT + i];
+            case BLUE:
+                animateColor = AnimateColor.values()[index + 2*FRAMES_COUNT + i];
                 break;
-            case BLACK:
-                animateColor = AnimateColor.values()[3*FRAMES_COUNT + i];
+            case BLACK: // brown
+                animateColor = AnimateColor.values()[index + 3*FRAMES_COUNT + i];
                 break;
             case GREEN:
-                animateColor = AnimateColor.values()[4*FRAMES_COUNT + i];
+                animateColor = AnimateColor.values()[index + 4*FRAMES_COUNT + i];
                 break;
             case YELLOW:
-                animateColor = AnimateColor.values()[5*FRAMES_COUNT + i];
+                animateColor = AnimateColor.values()[index + 5*FRAMES_COUNT + i];
                 break;
         }
 
@@ -95,6 +107,25 @@ public class AnimateChecker extends Checker {
         YELLOW_INSERT1,
         YELLOW_INSERT2,
         YELLOW_INSERT3,
+        RED_SCORE1,
+        RED_SCORE2,
+        RED_SCORE3,
+        PINK_SCORE1,
+        PINK_SCORE2,
+        PINK_SCORE3,
+        BLUE_SCORE1,
+        BLUE_SCORE2,
+        BLUE_SCORE3,
+        BROWN_SCORE1,
+        BROWN_SCORE2,
+        BROWN_SCORE3,
+        GREEN_SCORE1,
+        GREEN_SCORE2,
+        GREEN_SCORE3,
+        YELLOW_SCORE1,
+        YELLOW_SCORE2,
+        YELLOW_SCORE3
+
     }
 
 

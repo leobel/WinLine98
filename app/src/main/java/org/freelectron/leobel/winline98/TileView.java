@@ -3,9 +3,13 @@ package org.freelectron.leobel.winline98;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
+import android.graphics.drawable.VectorDrawable;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -123,6 +127,30 @@ public class TileView extends View {
         loadTile(AnimateChecker.AnimateColor.YELLOW_INSERT1,  ContextCompat.getDrawable(context, R.drawable.yellowanimateinsert1));
         loadTile(AnimateChecker.AnimateColor.YELLOW_INSERT2,  ContextCompat.getDrawable(context, R.drawable.yellowanimateinsert2));
         loadTile(AnimateChecker.AnimateColor.YELLOW_INSERT3,  ContextCompat.getDrawable(context, R.drawable.yellowanimateinsert3));
+
+        loadTile(AnimateChecker.AnimateColor.RED_SCORE1,  ContextCompat.getDrawable(context, R.drawable.red_score_one));
+        loadTile(AnimateChecker.AnimateColor.RED_SCORE2,  ContextCompat.getDrawable(context, R.drawable.red_score_two));
+        loadTile(AnimateChecker.AnimateColor.RED_SCORE3,  ContextCompat.getDrawable(context, R.drawable.red_score_three));
+
+        loadTile(AnimateChecker.AnimateColor.PINK_SCORE1,  ContextCompat.getDrawable(context, R.drawable.pink_score_one));
+        loadTile(AnimateChecker.AnimateColor.PINK_SCORE2,  ContextCompat.getDrawable(context, R.drawable.pink_score_two));
+        loadTile(AnimateChecker.AnimateColor.PINK_SCORE3,  ContextCompat.getDrawable(context, R.drawable.pink_score_three));
+
+        loadTile(AnimateChecker.AnimateColor.BLUE_SCORE1,  ContextCompat.getDrawable(context, R.drawable.blue_score_one));
+        loadTile(AnimateChecker.AnimateColor.BLUE_SCORE2,  ContextCompat.getDrawable(context, R.drawable.blue_score_two));
+        loadTile(AnimateChecker.AnimateColor.BLUE_SCORE3,  ContextCompat.getDrawable(context, R.drawable.blue_score_three));
+
+        loadTile(AnimateChecker.AnimateColor.BROWN_SCORE1,  ContextCompat.getDrawable(context, R.drawable.brown_score_one));
+        loadTile(AnimateChecker.AnimateColor.BROWN_SCORE2,  ContextCompat.getDrawable(context, R.drawable.brown_score_two));
+        loadTile(AnimateChecker.AnimateColor.BROWN_SCORE3,  ContextCompat.getDrawable(context, R.drawable.brown_score_three));
+
+        loadTile(AnimateChecker.AnimateColor.GREEN_SCORE1,  ContextCompat.getDrawable(context, R.drawable.green_score_one));
+        loadTile(AnimateChecker.AnimateColor.GREEN_SCORE2,  ContextCompat.getDrawable(context, R.drawable.green_score_two));
+        loadTile(AnimateChecker.AnimateColor.GREEN_SCORE3,  ContextCompat.getDrawable(context, R.drawable.green_score_three));
+
+        loadTile(AnimateChecker.AnimateColor.YELLOW_SCORE1,  ContextCompat.getDrawable(context, R.drawable.yellow_score_one));
+        loadTile(AnimateChecker.AnimateColor.YELLOW_SCORE2,  ContextCompat.getDrawable(context, R.drawable.yellow_score_two));
+        loadTile(AnimateChecker.AnimateColor.YELLOW_SCORE3,  ContextCompat.getDrawable(context, R.drawable.yellow_score_three));
 
     }
 
