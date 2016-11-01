@@ -94,6 +94,9 @@ public class MainActivity extends BaseActivity
     private boolean breakRecordAlert;
 
     private MediaPlayer mp;
+    private MediaPlayer ballSelect;
+    private MediaPlayer ballMoving;
+    private MediaPlayer ballMoveFailure;
 
 
     @Override
@@ -111,6 +114,9 @@ public class MainActivity extends BaseActivity
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 
         mp = MediaPlayer.create(this, R.raw.buton_click);
+        ballSelect = MediaPlayer.create(this, R.raw.ball_select);
+        ballMoving = MediaPlayer.create(this, R.raw.ball_moving);
+        ballMoveFailure = MediaPlayer.create(this, R.raw.ball_move_failure);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -295,16 +301,25 @@ public class MainActivity extends BaseActivity
                 MPoint dest = new MPoint(i, j);
                 path = game.getPath(orig, dest);
                 if (path == null) { // can't move there!!!
+                    if(preferenceService.getAllowTouchSoundPreference()){
+                        ballMoveFailure.start();
+                    }
                     return true;
                 }
                 savedCurrentState = false;
                 stopAnimateTail(() -> {
                     MoveTile(board);
+                    if(preferenceService.getAllowTouchSoundPreference()){
+                        ballMoving.start();
+                    }
                 });
                 return true;
             } else if (emptyPlace) {
                 return true;
             } else { // select ball
+                if(preferenceService.getAllowTouchSoundPreference()){
+                    ballSelect.start();
+                }
                 orig = new MPoint(i, j);
                 if(animateSelectedTail != null && animateSelectedTail.isRunning()){ // there is one ball selected already
                     stopAnimateTail(()-> {
@@ -589,7 +604,7 @@ public class MainActivity extends BaseActivity
                 boardView.setBoard(t);
                 this.boardHandler.sendMessage(new Message());
                 try {
-                    Thread.sleep(30);
+                    Thread.sleep(25);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
