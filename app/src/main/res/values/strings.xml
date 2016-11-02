@@ -50,6 +50,6 @@
     <string name="drawer_menu_ranking_game">Ranking</string>
 
     <!-- Combo Score -->
-    <string name="combo_score">Great +%d!</string>
+    <string name="combo_score">Great! +%d</string>
 
 </resources>

@@ -16,6 +16,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -263,7 +264,9 @@ public class MainActivity extends BaseActivity
             Bundle data = msg.getData();
             boolean highlightScore = data.getBoolean(HIGHLIGHT_COMBO_SCORE);
             if(highlightScore){
-                Toast.makeText(this, getString(R.string.combo_score, game.getScore() - data.getInt(PREVIOUS_GAME_SCORE)), Toast.LENGTH_SHORT).show();
+                Toast toast = Toast.makeText(this, getString(R.string.combo_score, game.getScore() - data.getInt(PREVIOUS_GAME_SCORE)), Toast.LENGTH_SHORT);
+                toast.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL, 0, 0);
+                toast.show();
             }
             return false;
         });
