@@ -120,8 +120,8 @@
                         android:id="@+id/load_game"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:padding="5dp"
-                        app:srcCompat="@drawable/ic_load"
+                        android:padding="10dp"
+                        app:srcCompat="@drawable/ic_game_center"
                         style="@style/actionButton"
                         android:layout_centerVertical="true"
                         android:layout_toLeftOf="@+id/new_game"/>
@@ -130,8 +130,8 @@
                         android:id="@+id/new_game"
                         android:layout_width="55dp"
                         android:layout_height="55dp"
-                        android:layout_marginLeft="30dp"
-                        android:layout_marginRight="30dp"
+                        android:layout_marginLeft="20dp"
+                        android:layout_marginRight="20dp"
                         android:padding="10dp"
                         app:srcCompat="@drawable/ic_replay"
                         style="@style/actionButton"
@@ -147,6 +147,46 @@
                         style="@style/actionButton"
                         android:layout_centerVertical="true"
                         android:layout_toRightOf="@+id/new_game"/>
+
+                    <LinearLayout
+                        android:id="@+id/combo_track"
+                        android:layout_width="75dp"
+                        android:layout_height="35dp"
+                        android:background="@drawable/combo_background"
+                        android:layout_alignParentLeft="true"
+                        android:layout_centerVertical="true"
+                        android:visibility="invisible">
+
+                        <TextView
+                            android:id="@+id/combo_size"
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_marginLeft="5dp"
+                            android:layout_alignParentLeft="true"
+                            android:gravity="center"
+                            android:textColor="#FFFFFF"
+                            android:textSize="14dp"
+                            android:text="2x"/>
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="match_parent"
+                            android:gravity="center"
+                            app:srcCompat="@drawable/ic_star"
+                            android:tint="@color/star_color"/>
+
+                        <TextView
+                            android:id="@+id/combo_timer"
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:layout_marginRight="5dp"
+                            android:layout_toRightOf="@+id/combo_size"
+                            android:gravity="center|left"
+                            android:textColor="#FFFFFF"/>
+
+                    </LinearLayout>
+
                 </RelativeLayout>
 
             </LinearLayout>

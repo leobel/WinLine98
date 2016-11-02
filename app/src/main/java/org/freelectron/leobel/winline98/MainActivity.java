@@ -5,9 +5,9 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
@@ -16,12 +16,12 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
-import android.view.ContextMenu;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Chronometer;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -44,12 +44,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
 
-import timber.log.Timber;
-
 //import timber.log.Timber;
 
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    private String HIGHLIGHT_COMBO_SCORE = "HIGHLIGHT_COMBO_SCORE";
+    private String PREVIOUS_GAME_SCORE = "PREVIOUS_GAME_SCORE";
+
 
     private static final int LOAD_GAME = 1;
     private Thread timerMoveTile;
@@ -99,6 +101,18 @@ public class MainActivity extends BaseActivity
     private MediaPlayer ballMoving;
     private MediaPlayer ballMoveFailure;
 
+    private CountDownTimer countDownTimer;
+    private long comboCount;
+    private int combo;
+    private boolean comboIsRunning;
+
+    private Animation scaleAnimation;
+    private Animation fadeInAnimation;
+    private Animation fadeOutAnimation;
+    private View comboTrack;
+    private TextView comboSize;
+    private TextView chrono;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -130,6 +144,55 @@ public class MainActivity extends BaseActivity
         timer = (ImageView) findViewById(R.id.timer);
         chronometer = (Chronometer) findViewById(R.id.chronometer);
         scoreImage = (RecordTrack) findViewById(R.id.score_image);
+
+        comboTrack = findViewById(R.id.combo_track);
+        comboSize = (TextView) findViewById(R.id.combo_size);
+        chrono = (TextView) findViewById(R.id.combo_timer);
+
+        comboCount = 10000;
+        combo = 2;
+
+        scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scale);
+        fadeInAnimation = AnimationUtils.loadAnimation(this, R.anim.fade_in);
+        fadeOutAnimation = AnimationUtils.loadAnimation(this, R.anim.fade_out);
+        scaleAnimation.setRepeatCount(Animation.INFINITE);
+
+        fadeInAnimation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                comboTrack.setVisibility(View.VISIBLE);
+                comboTrack.startAnimation(scaleAnimation);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+
+        fadeOutAnimation.setAnimationListener(new Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                comboTrack.setVisibility(View.INVISIBLE);
+                comboTrack.clearAnimation();
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+        });
+
 
         loadGameOnStart = false;
         canPlay = true;
@@ -172,10 +235,12 @@ public class MainActivity extends BaseActivity
                     if(breakRecordAlert){
                         pauseChronometer();
                         setCanPlay(false);
+                        pauseCombo();
                         breakRecordAlert = false; // only once during a game
                         ActivityUtils.showDialog(this, getString(R.string.new_record_message), getString(R.string.new_record_title), false, () -> {
                             setCanPlay(true);
                             startChronometer();
+                            startCombo();
                         });
 
 
@@ -189,12 +254,24 @@ public class MainActivity extends BaseActivity
             }
 
             scoreView.setText(game.getScore().toString());
+            if(comboIsRunning){
+                incrementCombo();
+            }
+            else{
+                startComboAnimation(true);
+            }
+            Bundle data = msg.getData();
+            boolean highlightScore = data.getBoolean(HIGHLIGHT_COMBO_SCORE);
+            if(highlightScore){
+                Toast.makeText(this, getString(R.string.combo_score, game.getScore() - data.getInt(PREVIOUS_GAME_SCORE)), Toast.LENGTH_SHORT).show();
+            }
             return false;
         });
 
         endAlertHandler = new Handler(msg -> {
             pauseChronometer();
             setCanPlay(false);
+            pauseCombo();
             scoreView.setText(game.getScore().toString());
             GameStatsDialog gameOver = GameStatsDialog.newInstance(game.getScore(), timeWhenStopped, preferenceService.getHighRecord(), true);
             gameOver.setOnCloseListener(() -> {
@@ -202,6 +279,7 @@ public class MainActivity extends BaseActivity
                 loadGameOnStart = false;
                 stopChronometer();
                 createNewGame();
+                stopCombo();
             });
             gameOver.show(getSupportFragmentManager(), "game over");
             return false;
@@ -212,10 +290,12 @@ public class MainActivity extends BaseActivity
         scoreImage.setOnClickListener( v -> {
             pauseChronometer();
             setCanPlay(false);
+            pauseCombo();
             GameStatsDialog gameInfo = GameStatsDialog.newInstance(game.getScore(), timeWhenStopped, preferenceService.getHighRecord(), false);
             gameInfo.setOnCloseListener(() -> {
                 setCanPlay(true);
                 startChronometer();
+                startCombo();
             });
             gameInfo.show(getSupportFragmentManager(), "game info");
 
@@ -231,19 +311,23 @@ public class MainActivity extends BaseActivity
                 createNewGame();
                 savedCurrentState = false;
                 breakRecordAlert = true;
+                stopCombo();
             }
             else{
                 pauseChronometer();
                 setCanPlay(false);
+                pauseCombo();
                 ActivityUtils.showDialog(this, getString(R.string.unsaved_current_state), true, () -> {
                     setCanPlay(true);
                     stopChronometer();
                     loadGameOnStart = false;
                     createNewGame();
                     breakRecordAlert = true;
+                    stopCombo();
                 }, () -> {
                     setCanPlay(true);
                     startChronometer();
+                    startCombo();
                 });
             }
 
@@ -252,6 +336,7 @@ public class MainActivity extends BaseActivity
         loadGame.setOnClickListener(v -> {
             pauseChronometer();
             setCanPlay(false);
+            pauseCombo();
             if(preferenceService.getAllowTouchSoundPreference()){
                 mp.start();
             }
@@ -336,7 +421,7 @@ public class MainActivity extends BaseActivity
                 super.onDrawerOpened(drawerView);
                 setCanPlay(false);
                 pauseChronometer();
-
+                pauseCombo();
             }
 
             @Override
@@ -344,6 +429,7 @@ public class MainActivity extends BaseActivity
                 super.onDrawerClosed(drawerView);
                 setCanPlay(true);
                 startChronometer();
+                startCombo();
             }
         };
         drawer.setDrawerListener(toggle);
@@ -354,6 +440,55 @@ public class MainActivity extends BaseActivity
         toggleMenuSound(toggleSound);
         navigationView.setNavigationItemSelectedListener(this);
 
+    }
+
+    private void startComboAnimation(boolean startVisualAnimation) {
+        countDownTimer = new CountDownTimer(comboCount, 100) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+                comboCount = millisUntilFinished;
+                chrono.setText(String.format("%.1f", millisUntilFinished/1000f));
+            }
+
+            @Override
+            public void onFinish() {
+                chrono.setText("0.0");
+                stopCombo();
+            }
+        };
+        comboSize.setText(String.format("%dx", combo));
+        countDownTimer.start();
+        if(startVisualAnimation){
+            comboTrack.startAnimation(comboIsRunning ? scaleAnimation : fadeInAnimation);
+        }
+        comboIsRunning = true;
+    }
+
+    private void startCombo(){
+        if(comboIsRunning){
+            startComboAnimation(true);
+        }
+    }
+
+    private void stopCombo(){
+        comboIsRunning = false;
+        comboCount = 10000;
+        combo = 2;
+        comboTrack.startAnimation(fadeOutAnimation);
+    }
+
+    private void pauseCombo(){
+        if(comboIsRunning){
+            countDownTimer.cancel();
+            comboTrack.clearAnimation();
+        }
+    }
+
+    private void incrementCombo(){
+        countDownTimer.cancel();
+        combo++;
+        comboCount = 10000;
+        startComboAnimation(false);
     }
 
     private void toggleMenuSound(MenuItem toggleSound) {
@@ -370,6 +505,7 @@ public class MainActivity extends BaseActivity
                 timeWhenStopped = -1L * loadedGame.getTime();
                 game = new LogicWinLine(loadedGame.getBoard(), loadedGame.getNext(), loadedGame.getScore());
                 breakRecordAlert = true;
+                stopCombo();
             }
         }
     }
@@ -400,6 +536,7 @@ public class MainActivity extends BaseActivity
         super.onPause();
         if(canPlay){
             pauseChronometer();
+            pauseCombo();
         }
     }
 
@@ -423,8 +560,10 @@ public class MainActivity extends BaseActivity
         boardView.invalidate();
         nextView.invalidate();
         scoreImage.invalidate();
-        if(canPlay)
+        if(canPlay){
             startChronometer();
+            startCombo();
+        }
     }
 
     @Override
@@ -456,6 +595,7 @@ public class MainActivity extends BaseActivity
 
         pauseChronometer();
         setCanPlay(false);
+        pauseCombo();
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.share) {
@@ -463,6 +603,7 @@ public class MainActivity extends BaseActivity
                 shareApp(() -> {
                     setCanPlay(true);
                     startChronometer();
+                    startCombo();
                 },() -> {
                     setCanPlay(true);
                 });
@@ -485,6 +626,7 @@ public class MainActivity extends BaseActivity
                     shareApp(() -> {
                         setCanPlay(true);
                         startChronometer();
+                        startCombo();
                     },() -> {
                         setCanPlay(true);
                     });
@@ -495,6 +637,7 @@ public class MainActivity extends BaseActivity
                     // functionality that depends on this permission.
                     setCanPlay(true);
                     startChronometer();
+                    startCombo();
                 }
                 return;
             }
@@ -618,9 +761,12 @@ public class MainActivity extends BaseActivity
                 List<AnimateChecker> tiles = new ArrayList<>();
                 Checker[][]board = game.getBoard(true);
                 int index = AnimateChecker.getScoreIndex();
+                int comboMultiple = comboIsRunning ? combo : 1;
+                int previousScore = game.getScore();
+
                 for (int k = 0; k < score.length; k++) {
                     if (score[k] >= 5) {
-                        game.addScore(score[k]);
+                        game.addScore(comboMultiple * score[k]);
                         List<Integer> positions = game.deleteSequence(limit[k * 2], limit[(k * 2) + 1], (k * 2) + 1);
                         for(Integer pos: positions){
                             int x = pos / dimension;
@@ -629,10 +775,16 @@ public class MainActivity extends BaseActivity
                         }
                     }
                 }
+
                 animateScoreTile(tiles, () -> {
                     boardView.setBoard(game.getBoard());
                     boardHandler.sendMessage(new Message());
-                    scoreHandler.sendMessage(new Message());
+                    Message m = new Message();
+                    Bundle bundle = new Bundle();
+                    bundle.putBoolean(HIGHLIGHT_COMBO_SCORE, comboMultiple > 1);
+                    bundle.putInt(PREVIOUS_GAME_SCORE, previousScore);
+                    m.setData(bundle);
+                    scoreHandler.sendMessage(m);
                 });
             } else {
                 try {
