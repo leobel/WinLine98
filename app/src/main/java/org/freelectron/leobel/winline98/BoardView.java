@@ -50,12 +50,6 @@ public class BoardView extends TileView implements TileView.OnTileViewListener {
         this.mTileGrid = board;
     }
 
-    @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
-        super.onSizeChanged(w, h, oldw, oldh);
-        this.mYOffset = 0;
-    }
-
     private void initBoardView() {
         this.mTileGrid = (Checker[][]) Array.newInstance(Checker.class, this.dimension, this.dimension);
     }

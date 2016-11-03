@@ -22,10 +22,9 @@
             android:id="@+id/current_game"
             android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="0.75 "
+            android:layout_height="wrap_content"
             android:layout_marginTop="?attr/actionBarSize"
-            android:background="@color/colorAccent">
+            android:background="@color/windowBackground">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -80,7 +79,7 @@
 
 
             <LinearLayout
-                android:id="@+id/boardContainer"
+                android:id="@+id/board_container"
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -103,14 +102,15 @@
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="0.25"
+            android:layout_weight="1"
             android:background="@color/windowBackground">
 
             <LinearLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.5">
+                android:layout_height="wrap_content"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp">
 
                 <RelativeLayout
                     android:layout_width="match_parent"
@@ -128,15 +128,16 @@
 
                     <ImageButton
                         android:id="@+id/new_game"
-                        android:layout_width="55dp"
-                        android:layout_height="55dp"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
                         android:layout_marginLeft="20dp"
                         android:layout_marginRight="20dp"
+                        android:layout_marginBottom="5dp"
                         android:padding="10dp"
                         app:srcCompat="@drawable/ic_replay"
                         style="@style/actionButton"
                         android:layout_centerHorizontal="true"
-                        android:layout_centerVertical="true"/>
+                        />
 
                     <ImageButton
                         android:id="@+id/save_game"
@@ -193,8 +194,8 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="0.5">
+                android:layout_height="wrap_content"
+                >
 
             </LinearLayout>
         </LinearLayout>

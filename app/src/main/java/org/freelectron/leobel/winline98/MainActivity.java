@@ -26,6 +26,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.Chronometer;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -138,7 +139,7 @@ public class MainActivity extends BaseActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        boardContainer = findViewById(R.id.boardContainer);
+        boardContainer = findViewById(R.id.board_container);
         boardView = (BoardView) findViewById(R.id.board);
         nextView = (NextView) findViewById(R.id.next);
         scoreView = (TextView) findViewById(R.id.score);
@@ -218,6 +219,10 @@ public class MainActivity extends BaseActivity
             scoreLayout.setMargins(boardView.getRightPosition() - scoreLayout.width, 0, 0, 0);
             scoreImage.setLayoutParams(scoreLayout);
             scoreView.setWidth(boardView.getRightPosition() - scoreLayout.width - nextView.getRight());
+
+            LinearLayout.LayoutParams containerParams = (LinearLayout.LayoutParams) boardContainer.getLayoutParams();
+            containerParams.height = boardView.getWidth();
+            boardContainer.setLayoutParams(containerParams);
         });
 
         boardHandler = new Handler(msg -> {
