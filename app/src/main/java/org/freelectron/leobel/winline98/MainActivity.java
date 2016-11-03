@@ -407,6 +407,14 @@ public class MainActivity extends BaseActivity
                 handleBoardTouch = true;
                 return true;
             } else { // select ball
+                if(orig != null && orig.getX() == i && orig.getY() == j){
+                    orig = null;
+                    stopAnimateTail(() -> {
+                        boardHandler.sendMessage(new Message()); // refresh the board state
+                    });
+                    handleBoardTouch = true;
+                    return true;
+                }
                 if(preferenceService.getAllowTouchSoundPreference()){
                     ballSelect.start();
                 }
