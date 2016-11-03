@@ -25,4 +25,5 @@
     <color name="start_hot_color">#F8F8F8</color>
 
     <color name="star_color">#FFf7cb1a</color>
+    <color name="main_background_color">#7eb3df</color>
 </resources>

@@ -45,6 +45,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
 
+import timber.log.Timber;
+
 //import timber.log.Timber;
 
 public class MainActivity extends BaseActivity
@@ -113,6 +115,7 @@ public class MainActivity extends BaseActivity
     private View comboTrack;
     private TextView comboSize;
     private TextView chrono;
+    private boolean handleBoardTouch;
 
 
     @Override
@@ -361,7 +364,9 @@ public class MainActivity extends BaseActivity
             }
         });
 
+        handleBoardTouch = true;
         boardView.setOnTouchListener((v, event) -> {
+            if(!handleBoardTouch) return false;
             boolean emptyPlace = false;
             if (v.getId() != R.id.board) {
                 return false;
@@ -374,6 +379,8 @@ public class MainActivity extends BaseActivity
             if (i < 0 || i >= dimension || j < 0 || j >= dimension) {
                 return true;
             }
+            Timber.d("Handling board touch");
+            handleBoardTouch = false;
             BoardView board = (BoardView) v;
             if (game.getBoard()[i][j] == null) {
                 emptyPlace = true;
@@ -385,6 +392,7 @@ public class MainActivity extends BaseActivity
                     if(preferenceService.getAllowTouchSoundPreference()){
                         ballMoveFailure.start();
                     }
+                    handleBoardTouch = true;
                     return true;
                 }
                 savedCurrentState = false;
@@ -396,6 +404,7 @@ public class MainActivity extends BaseActivity
                 });
                 return true;
             } else if (emptyPlace) {
+                handleBoardTouch = true;
                 return true;
             } else { // select ball
                 if(preferenceService.getAllowTouchSoundPreference()){
@@ -410,6 +419,7 @@ public class MainActivity extends BaseActivity
                 else {
                     animateTail(orig);
                 }
+                handleBoardTouch = true;
                 return true;
             }
         });
@@ -788,6 +798,7 @@ public class MainActivity extends BaseActivity
                     bundle.putInt(PREVIOUS_GAME_SCORE, previousScore);
                     m.setData(bundle);
                     scoreHandler.sendMessage(m);
+                    handleBoardTouch = true;
                 });
             } else {
                 try {
@@ -806,9 +817,11 @@ public class MainActivity extends BaseActivity
                         nextView.setBoard(game.getNext());
                         this.boardHandler.sendMessage(new Message());
                         this.nextHandler.sendMessage(new Message());
+                        handleBoardTouch = true;
                     });
                 } catch (Exception ex) {
                     ex.printStackTrace();
+                    handleBoardTouch = true;
                 }
             }
             orig = null;
