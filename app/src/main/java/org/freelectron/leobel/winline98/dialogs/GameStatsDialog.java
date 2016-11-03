@@ -1,17 +1,14 @@
 package org.freelectron.leobel.winline98.dialogs;
 
 
-import android.app.Dialog;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.ImageButton;
 import android.widget.TextView;
@@ -20,7 +17,6 @@ import org.freelectron.leobel.winline98.MainActivity;
 import org.freelectron.leobel.winline98.R;
 import org.freelectron.leobel.winline98.WinLineApp;
 import org.freelectron.leobel.winline98.services.PreferenceService;
-import org.freelectron.leobel.winline98.utils.ActivityUtils;
 
 import javax.inject.Inject;
 
@@ -32,17 +28,20 @@ import javax.inject.Inject;
 public class GameStatsDialog extends BaseDialog {
     private static final String ARG_SCORE = "ARG_SCORE";
     private static final String ARG_TIME = "ARG_TIME";
-    private static final String ARG_HIGHSCORE = "ARG_HIGHSCORE";
-    private static final String ARG_ISGAMEOVER = "ARG_ISGAMEOVER";
+    private static final String ARG_HIGH_SCORE = "ARG_HIGH_SCORE";
+    private static final String ARG_IS_GAME_OVER = "ARG_IS_GAME_OVER";
+    private static final String ARG_SHOW_RECORD_INFO = "ARG_SHOW_RECORD_INFO";
 
     private Integer score;
     private Long time;
     private Integer highScore;
     private Boolean isGameOver;
+    private Boolean showRecordInfo;
 
     private TextView scoreText;
     private Chronometer timeText;
     private TextView highScoreText;
+    private ViewGroup newRecordView;
 
     private ImageButton refresGame;
     private ImageButton rateGame;
@@ -70,12 +69,17 @@ public class GameStatsDialog extends BaseDialog {
      * @return A new instance of fragment GameStatsDialog.
      */
     public static GameStatsDialog newInstance(Integer score, Long time, Integer highScore, Boolean isGameOver) {
+        return newInstance(score, time, highScore, isGameOver, false);
+    }
+
+    public static GameStatsDialog newInstance(Integer score, Long time, Integer highScore, Boolean isGameOver, Boolean showRecordInfo) {
         GameStatsDialog fragment = new GameStatsDialog();
         Bundle args = new Bundle();
         args.putInt(ARG_SCORE, score);
         args.putLong(ARG_TIME, time);
-        args.putInt(ARG_HIGHSCORE, highScore);
-        args.putBoolean(ARG_ISGAMEOVER, isGameOver);
+        args.putInt(ARG_HIGH_SCORE, highScore);
+        args.putBoolean(ARG_IS_GAME_OVER, isGameOver);
+        args.putBoolean(ARG_SHOW_RECORD_INFO, showRecordInfo);
         fragment.setArguments(args);
         return fragment;
     }
@@ -93,8 +97,9 @@ public class GameStatsDialog extends BaseDialog {
         if (getArguments() != null) {
             score = getArguments().getInt(ARG_SCORE);
             time = getArguments().getLong(ARG_TIME);
-            highScore = getArguments().getInt(ARG_HIGHSCORE);
-            isGameOver = getArguments().getBoolean(ARG_ISGAMEOVER);
+            highScore = getArguments().getInt(ARG_HIGH_SCORE);
+            isGameOver = getArguments().getBoolean(ARG_IS_GAME_OVER);
+            showRecordInfo = getArguments().getBoolean(ARG_SHOW_RECORD_INFO, false);
         }
     }
 
@@ -107,10 +112,15 @@ public class GameStatsDialog extends BaseDialog {
         scoreText = (TextView) view.findViewById(R.id.score);
         timeText = (Chronometer) view.findViewById(R.id.time);
         highScoreText = (TextView) view.findViewById(R.id.high_score);
+        newRecordView = (ViewGroup) view.findViewById(R.id.new_record_view);
 
         refresGame = (ImageButton) view.findViewById(R.id.new_game);
         rateGame = (ImageButton) view.findViewById(R.id.rate_game);
         shareGame = (ImageButton) view.findViewById(R.id.share_game);
+
+        if(showRecordInfo){
+            newRecordView.setVisibility(View.VISIBLE);
+        }
 
         if(!isGameOver){
             refresGame.setImageResource(R.drawable.ic_play);

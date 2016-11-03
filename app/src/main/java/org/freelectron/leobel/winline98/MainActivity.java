@@ -246,13 +246,13 @@ public class MainActivity extends BaseActivity
                         setCanPlay(false);
                         pauseCombo();
                         breakRecordAlert = false; // only once during a game
-                        ActivityUtils.showDialog(this, getString(R.string.new_record_message), getString(R.string.new_record_title), false, () -> {
+                        GameStatsDialog gameRecord = GameStatsDialog.newInstance(game.getScore(), timeWhenStopped, preferenceService.getHighRecord(), false, true);
+                        gameRecord.setOnCloseListener(() -> {
                             setCanPlay(true);
                             startChronometer();
                             startCombo();
                         });
-
-
+                        gameRecord.show(getSupportFragmentManager(), "new record");
                     }
                 }
                 scoreImage.setProgress(game.getScore());

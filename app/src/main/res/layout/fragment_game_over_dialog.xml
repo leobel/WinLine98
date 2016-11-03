@@ -17,14 +17,32 @@
             android:id="@+id/game_over_dialog"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
-            android:layout_marginRight="10dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="20dp"
             android:background="@drawable/background_alert_dialog">
+
+            <RelativeLayout
+                android:id="@+id/new_record_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="5dp"
+                    android:textSize="25dp"
+                    android:textColor="@color/green"
+                    android:gravity="center"
+                    android:text="@string/new_record_message"/>
+
+            </RelativeLayout>
 
             <RelativeLayout
                 android:id="@+id/game_info"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/new_record_view">
 
                 <RelativeLayout
                     android:layout_width="wrap_content"

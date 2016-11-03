@@ -132,7 +132,6 @@
                         android:layout_height="50dp"
                         android:layout_marginLeft="20dp"
                         android:layout_marginRight="20dp"
-                        android:layout_marginBottom="5dp"
                         android:padding="10dp"
                         app:srcCompat="@drawable/ic_replay"
                         style="@style/actionButton"

@@ -34,11 +34,11 @@
     <string name="game_over_score">Score</string>
     <string name="game_over_time">Time</string>
     <string name="game_over_high_score">Record</string>
-    <string name="game_over_text">If you enjoy playing WinLine please take a moment and rate it.\nWe will appreciate your support, thanks!</string>
+    <string name="game_over_text">If you enjoy playing WinLine please take a moment and rate it.\n\nWe will appreciate your support, thanks!</string>
 
     <!-- Record -->
     <string name="new_record_title">Great!</string>
-    <string name="new_record_message">You have a new record, keep doing this way!</string>
+    <string name="new_record_message">Great, new record!</string>
 
     <!-- Permissions -->
     <string name="permission_title">Information</string>
