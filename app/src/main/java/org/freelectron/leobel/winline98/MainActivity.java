@@ -237,6 +237,12 @@ public class MainActivity extends BaseActivity
 
         scoreHandler = new Handler(msg -> {
             int highScore = preferenceService.getHighRecord();
+            if(comboIsRunning){
+                incrementCombo();
+            }
+            else{
+                startComboAnimation(true);
+            }
             if(highScore > 0){
                 if(game.getScore() > highScore){
                     preferenceService.setHighRecord(game.getScore());
@@ -263,12 +269,6 @@ public class MainActivity extends BaseActivity
             }
 
             scoreView.setText(game.getScore().toString());
-            if(comboIsRunning){
-                incrementCombo();
-            }
-            else{
-                startComboAnimation(true);
-            }
             Bundle data = msg.getData();
             boolean highlightScore = data.getBoolean(HIGHLIGHT_COMBO_SCORE);
             if(highlightScore){
@@ -384,7 +384,6 @@ public class MainActivity extends BaseActivity
             if (i < 0 || i >= dimension || j < 0 || j >= dimension) {
                 return true;
             }
-            Timber.d("Handling board touch");
             handleBoardTouch = false;
             BoardView board = (BoardView) v;
             if (game.getBoard()[i][j] == null) {
