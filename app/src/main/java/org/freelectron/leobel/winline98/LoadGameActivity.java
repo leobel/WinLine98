@@ -194,4 +194,9 @@ public class LoadGameActivity extends BaseActivity implements GameLoadFragment.O
         }
     }
 
+    @Override
+    public boolean isSelectMultipleItemsStatus(){
+        return selectMultipleItems;
+    }
+
 }

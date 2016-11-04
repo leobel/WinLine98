@@ -26,6 +26,7 @@ import org.freelectron.leobel.winline98.adapters.GameRecyclerViewAdapter;
 import org.freelectron.leobel.winline98.adapters.RecyclerViewGameLoadAdapterListener;
 import org.freelectron.leobel.winline98.models.WinLine;
 import org.freelectron.leobel.winline98.services.GameService;
+import org.freelectron.leobel.winline98.services.PreferenceService;
 import org.freelectron.leobel.winline98.utils.ActivityUtils;
 import org.freelectron.leobel.winline98.utils.CollectionsUtils;
 import org.freelectron.leobel.winline98.widgets.DividerItemDecoration;
@@ -55,6 +56,10 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
 
     @Inject
     public GameService gameService;
+
+    @Inject
+    public PreferenceService preferenceService;
+
     private HashMap<Integer, WinLine> selectedItems;
     private ProgressDialog mProgressDialog;
 
@@ -88,8 +93,7 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
 
         mpTrash = MediaPlayer.create(getActivity(), R.raw.trash);
 
-        if (getArguments() != null) {
-        }
+        selectedItems = new HashMap<>();
     }
 
     @Override
@@ -201,7 +205,7 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
 
     @Override
     public void onItemLongClicked(int adapterPosition, WinLine mItem) {
-        selectedItems = new HashMap<>();
+        selectedItems.clear();
         selectedItems.put(adapterPosition, mItem);
         mListener.selectMultipleItems(true);
     }
@@ -220,12 +224,16 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
     @Override
     public void removeItem(int adapterPosition, WinLine mItem) {
         if(gameService.remove(mItem.getId())){
-            mpTrash.start();
-            adapter.removeItem(adapterPosition);
-            if(selectedItems.containsKey(adapterPosition)){
-                selectedItems.remove(adapterPosition);
+            if(preferenceService.getAllowTouchSoundPreference()){
+                mpTrash.start();
             }
-            mListener.notifySelectMultipleItemsClicked(selectedItems.size());
+            adapter.removeItem(adapterPosition);
+            if(mListener.isSelectMultipleItemsStatus()){ // verify that are in multiple delete status
+                if(selectedItems.containsKey(adapterPosition)){
+                    selectedItems.remove(adapterPosition);
+                }
+                mListener.notifySelectMultipleItemsClicked(selectedItems.size());
+            }
             ActivityUtils.showDialog(getActivity(), getString(R.string.delete_game_success), getString(R.string.success_title));
         }
         else{
@@ -236,7 +244,9 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
     public void removeItems() {
         int size = selectedItems.values().size();
         if(gameService.remove(CollectionsUtils.map(selectedItems.values(), WinLine::getId))){
-            mpTrash.start();
+            if(preferenceService.getAllowTouchSoundPreference()){
+                mpTrash.start();
+            }
             adapter.setSelectMultipleItemsMode(false);
             adapter.removeItem(new ArrayList<>(selectedItems.keySet()));
             selectedItems.clear();
@@ -363,5 +373,7 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
         void selectMultipleItems(boolean status);
 
         void notifySelectMultipleItemsClicked(Integer count);
+
+        boolean isSelectMultipleItemsStatus();
     }
 }
