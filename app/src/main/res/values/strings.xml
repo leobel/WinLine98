@@ -37,8 +37,8 @@
     <string name="game_over_text">If you enjoy playing WinLine please take a moment and rate it.\n\nWe\'ll appreciate your support, thanks!</string>
 
     <!-- Record -->
-    <string name="new_record_title">Great!</string>
-    <string name="new_record_message">new record</string>
+    <string name="new_record_title">Great</string>
+    <string name="new_record_message">New record</string>
 
     <!-- Permissions -->
     <string name="permission_title">Information</string>

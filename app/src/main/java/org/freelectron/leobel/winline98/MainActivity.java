@@ -289,8 +289,8 @@ public class MainActivity extends BaseActivity
                 setCanPlay(true);
                 loadGameOnStart = false;
                 stopChronometer();
-                createNewGame();
                 stopCombo();
+                createNewGame();
             });
             gameOver.show(getSupportFragmentManager(), "game over");
             return false;
@@ -318,11 +318,11 @@ public class MainActivity extends BaseActivity
             }
             if(savedCurrentState){
                 stopChronometer();
+                stopCombo();
                 loadGameOnStart = false;
                 createNewGame();
                 savedCurrentState = false;
                 breakRecordAlert = true;
-                stopCombo();
             }
             else{
                 pauseChronometer();
@@ -331,10 +331,10 @@ public class MainActivity extends BaseActivity
                 ActivityUtils.showDialog(this, getString(R.string.unsaved_current_state), true, () -> {
                     setCanPlay(true);
                     stopChronometer();
+                    stopCombo();
                     loadGameOnStart = false;
                     createNewGame();
                     breakRecordAlert = true;
-                    stopCombo();
                 }, () -> {
                     setCanPlay(true);
                     startChronometer();
@@ -468,11 +468,12 @@ public class MainActivity extends BaseActivity
     }
 
     private void startComboAnimation(boolean startVisualAnimation) {
+        chrono.setText(String.format("%.1f", comboCount/1000f));
         countDownTimer = new CountDownTimer(comboCount, 100) {
             @Override
             public void onTick(long millisUntilFinished) {
                 comboCount = millisUntilFinished;
-                chrono.setText(String.format("%.1f", millisUntilFinished/1000f));
+                chrono.setText(String.format("%.1f", comboCount/1000f));
             }
 
             @Override
@@ -496,16 +497,20 @@ public class MainActivity extends BaseActivity
     }
 
     private void stopCombo(){
+        if(comboIsRunning){
+            comboTrack.startAnimation(fadeOutAnimation);
+        }
         comboIsRunning = false;
         comboCount = 10000;
         combo = 2;
-        comboTrack.startAnimation(fadeOutAnimation);
+
     }
 
     private void pauseCombo(){
         if(comboIsRunning){
             countDownTimer.cancel();
             comboTrack.clearAnimation();
+            comboTrack.setVisibility(View.VISIBLE);
         }
     }
 
