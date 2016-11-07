@@ -64,6 +64,7 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
     private ProgressDialog mProgressDialog;
 
     private MediaPlayer mpTrash;
+    private Integer record;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -94,6 +95,8 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
         mpTrash = MediaPlayer.create(getActivity(), R.raw.trash);
 
         selectedItems = new HashMap<>();
+
+        record = preferenceService.getHighRecord();
     }
 
     @Override
@@ -159,7 +162,7 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
 
         List<WinLine> items = (List<WinLine>)(List<?>) gameService.findAll();
         Collections.sort(items, (lhs, rhs) -> -lhs.getScore().compareTo(rhs.getScore()));
-        adapter = new GameRecyclerViewAdapter(items, this);
+        adapter = new GameRecyclerViewAdapter(items, record, this);
         recyclerView.setAdapter(adapter);
         return view;
     }

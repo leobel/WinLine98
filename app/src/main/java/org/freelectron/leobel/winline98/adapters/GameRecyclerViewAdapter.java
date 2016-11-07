@@ -27,14 +27,16 @@ import java.util.List;
  */
 public class GameRecyclerViewAdapter extends RecyclerView.Adapter<GameRecyclerViewAdapter.GameViewHolder> {
 
+    private final Integer record;
     private List<WinLine> mValues;
     private final RecyclerViewGameLoadAdapterListener mListener;
     private List<Boolean> leftContainers;
     private List<Boolean> checkedItems;
     private boolean selectMultipleItemsMode;
 
-    public GameRecyclerViewAdapter(List<WinLine> items, RecyclerViewGameLoadAdapterListener listener) {
+    public GameRecyclerViewAdapter(List<WinLine> items, Integer record, RecyclerViewGameLoadAdapterListener listener) {
         mValues = items;
+        this.record = record;
         mListener = listener;
         leftContainers = new ArrayList<>(Arrays.asList(new Boolean[items.size()]));
         checkedItems = new ArrayList<>(Arrays.asList(new Boolean[items.size()]));
@@ -51,7 +53,7 @@ public class GameRecyclerViewAdapter extends RecyclerView.Adapter<GameRecyclerVi
 
     @Override
     public void onBindViewHolder(final GameViewHolder holder, int position) {
-        holder.setItem(mValues.get(position));
+        holder.setItem(mValues.get(position), record);
         holder.setLeftContainerVisibility(leftContainers.get(position));
         holder.setCheckBoxVisibility(selectMultipleItemsMode);
         if(selectMultipleItemsMode){
@@ -171,6 +173,7 @@ public class GameRecyclerViewAdapter extends RecyclerView.Adapter<GameRecyclerVi
         private TextView gameDate;
         private Chronometer chronometer;
         private TextView score;
+        private View recordMark;
         private View leftContainer;
         private WinLine mItem;
         private int checkBoxVisibility = View.GONE;
@@ -190,6 +193,8 @@ public class GameRecyclerViewAdapter extends RecyclerView.Adapter<GameRecyclerVi
             score = (TextView) view.findViewById(R.id.score);
             checkbox = (AppCompatCheckBox) view.findViewById(R.id.delete_mark);
 
+            recordMark = view.findViewById(R.id.record_mark);
+
             leftContainer = view.findViewById(R.id.left_container);
             deleteGame = (Button) view.findViewById(R.id.delete_game);
             cancelDeleteGame = (Button) view.findViewById(R.id.cancel_delete_action);
@@ -199,13 +204,14 @@ public class GameRecyclerViewAdapter extends RecyclerView.Adapter<GameRecyclerVi
 
         }
 
-        public void setItem(WinLine item){
+        public void setItem(WinLine item, Integer record){
             this.mItem = item;
             boardView.setBoard(mItem.getBoard());
             gameDate.setText(ActivityUtils.formatFullDate(mItem.getId()));
             long timeWhenStopped = -1L * mItem.getTime();
             chronometer.setBase(SystemClock.elapsedRealtime() + timeWhenStopped);
             score.setText(mItem.getScore().toString());
+            recordMark.setVisibility(record > 0 && item.getScore().equals(record) ? View.VISIBLE : View.INVISIBLE);
         }
 
         @Override
