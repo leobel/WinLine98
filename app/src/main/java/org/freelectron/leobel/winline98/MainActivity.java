@@ -253,7 +253,7 @@ public class MainActivity extends BaseActivity
                         setCanPlay(false);
                         pauseCombo();
                         breakRecordAlert = false; // only once during a game
-                        GameStatsDialog gameRecord = GameStatsDialog.newInstance(game.getScore(), timeWhenStopped, preferenceService.getHighRecord(), false, true);
+                        GameStatsDialog gameRecord = GameStatsDialog.newInstance(game.getScore(), chronometer.getText().toString(), preferenceService.getHighRecord(), false, true);
                         gameRecord.setOnCloseListener(() -> {
                             setCanPlay(true);
                             startChronometer();
@@ -285,7 +285,7 @@ public class MainActivity extends BaseActivity
             setCanPlay(false);
             pauseCombo();
             scoreView.setText(game.getScore().toString());
-            GameStatsDialog gameOver = GameStatsDialog.newInstance(game.getScore(), timeWhenStopped, preferenceService.getHighRecord(), true);
+            GameStatsDialog gameOver = GameStatsDialog.newInstance(game.getScore(), chronometer.getText().toString(), preferenceService.getHighRecord(), true);
             gameOver.setOnCloseListener(() -> {
                 setCanPlay(true);
                 loadGameOnStart = false;
@@ -303,7 +303,7 @@ public class MainActivity extends BaseActivity
             pauseChronometer();
             setCanPlay(false);
             pauseCombo();
-            GameStatsDialog gameInfo = GameStatsDialog.newInstance(game.getScore(), timeWhenStopped, preferenceService.getHighRecord(), false);
+            GameStatsDialog gameInfo = GameStatsDialog.newInstance(game.getScore(), chronometer.getText().toString(), preferenceService.getHighRecord(), false);
             gameInfo.setOnCloseListener(() -> {
                 setCanPlay(true);
                 startChronometer();

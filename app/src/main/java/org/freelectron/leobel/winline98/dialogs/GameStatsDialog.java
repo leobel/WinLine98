@@ -33,13 +33,13 @@ public class GameStatsDialog extends BaseDialog {
     private static final String ARG_SHOW_RECORD_INFO = "ARG_SHOW_RECORD_INFO";
 
     private Integer score;
-    private Long time;
+    private String time;
     private Integer highScore;
     private Boolean isGameOver;
     private Boolean showRecordInfo;
 
     private TextView scoreText;
-    private Chronometer timeText;
+    private TextView timeText;
     private TextView highScoreText;
     private ViewGroup newRecordView;
 
@@ -68,15 +68,15 @@ public class GameStatsDialog extends BaseDialog {
      * @param isGameOver Parameter 4.
      * @return A new instance of fragment GameStatsDialog.
      */
-    public static GameStatsDialog newInstance(Integer score, Long time, Integer highScore, Boolean isGameOver) {
+    public static GameStatsDialog newInstance(Integer score, String time, Integer highScore, Boolean isGameOver) {
         return newInstance(score, time, highScore, isGameOver, false);
     }
 
-    public static GameStatsDialog newInstance(Integer score, Long time, Integer highScore, Boolean isGameOver, Boolean showRecordInfo) {
+    public static GameStatsDialog newInstance(Integer score, String time, Integer highScore, Boolean isGameOver, Boolean showRecordInfo) {
         GameStatsDialog fragment = new GameStatsDialog();
         Bundle args = new Bundle();
         args.putInt(ARG_SCORE, score);
-        args.putLong(ARG_TIME, time);
+        args.putString(ARG_TIME, time);
         args.putInt(ARG_HIGH_SCORE, highScore);
         args.putBoolean(ARG_IS_GAME_OVER, isGameOver);
         args.putBoolean(ARG_SHOW_RECORD_INFO, showRecordInfo);
@@ -96,7 +96,7 @@ public class GameStatsDialog extends BaseDialog {
 
         if (getArguments() != null) {
             score = getArguments().getInt(ARG_SCORE);
-            time = getArguments().getLong(ARG_TIME);
+            time = getArguments().getString(ARG_TIME);
             highScore = getArguments().getInt(ARG_HIGH_SCORE);
             isGameOver = getArguments().getBoolean(ARG_IS_GAME_OVER);
             showRecordInfo = getArguments().getBoolean(ARG_SHOW_RECORD_INFO, false);
@@ -110,7 +110,7 @@ public class GameStatsDialog extends BaseDialog {
         View view = inflater.inflate(R.layout.fragment_game_over_dialog, container, false);
 
         scoreText = (TextView) view.findViewById(R.id.score);
-        timeText = (Chronometer) view.findViewById(R.id.time);
+        timeText = (TextView) view.findViewById(R.id.time);
         highScoreText = (TextView) view.findViewById(R.id.high_score);
         newRecordView = (ViewGroup) view.findViewById(R.id.new_record_view);
 
@@ -148,7 +148,7 @@ public class GameStatsDialog extends BaseDialog {
         });
 
         scoreText.setText(score.toString());
-        timeText.setBase(SystemClock.elapsedRealtime() + time);
+        timeText.setText(time);
         highScoreText.setText(highScore.toString());
 
         return view;
