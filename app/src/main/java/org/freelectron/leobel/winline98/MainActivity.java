@@ -42,6 +42,7 @@ import org.freelectron.winline.MPoint;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
@@ -468,17 +469,17 @@ public class MainActivity extends BaseActivity
     }
 
     private void startComboAnimation(boolean startVisualAnimation) {
-        chrono.setText(String.format("%.1f", comboCount/1000f));
+        chrono.setText(String.format(Locale.US, "%.1f", comboCount/1000f));
         countDownTimer = new CountDownTimer(comboCount, 100) {
             @Override
             public void onTick(long millisUntilFinished) {
                 comboCount = millisUntilFinished;
-                chrono.setText(String.format("%.1f", comboCount/1000f));
+                chrono.setText(String.format(Locale.US, "%.1f", comboCount/1000f));
             }
 
             @Override
             public void onFinish() {
-                chrono.setText("0.0");
+                chrono.setText(String.format(Locale.US, "%.1f", 0f));
                 stopCombo();
             }
         };

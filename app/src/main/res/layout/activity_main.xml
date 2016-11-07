@@ -150,7 +150,7 @@
 
                     <LinearLayout
                         android:id="@+id/combo_track"
-                        android:layout_width="75dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="35dp"
                         android:background="@drawable/combo_background"
                         android:layout_alignParentLeft="true"
