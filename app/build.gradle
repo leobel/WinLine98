@@ -24,7 +24,12 @@ android {
 
 
     buildTypes {
+
+        debug{
+            buildConfigField ("String", "EMAIL_CONTACT", "\"androidstudio@gmail.com\"")
+        }
         release {
+            buildConfigField ("String", "EMAIL_CONTACT", "\"" + System.getenv("EMAIL_CONTACT") + "\"")
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }

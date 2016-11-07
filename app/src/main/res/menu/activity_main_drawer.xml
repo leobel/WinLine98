@@ -13,11 +13,6 @@
         <item android:id="@+id/help_game"
             android:title="@string/drawer_menu_help_game"
             android:icon="@drawable/ic_help"/>
-
-        <item android:id="@+id/about_game"
-            android:title="@string/drawer_menu_about_game"
-            android:icon="@drawable/ic_about"/>
-
     </group>
 
 

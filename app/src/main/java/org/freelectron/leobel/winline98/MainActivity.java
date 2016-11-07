@@ -462,6 +462,10 @@ public class MainActivity extends BaseActivity
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        TextView appVersion = (TextView) navigationView.getHeaderView(0).findViewById(R.id.version);
+        TextView appContact = (TextView) navigationView.getHeaderView(0).findViewById(R.id.contact);
+        appVersion.setText(String.format(appVersion.getText().toString(), BuildConfig.VERSION_NAME));
+        appContact.setText(String.format(BuildConfig.EMAIL_CONTACT));
         MenuItem toggleSound = navigationView.getMenu().findItem(R.id.toggle_sound);
         toggleMenuSound(toggleSound);
         navigationView.setNavigationItemSelectedListener(this);

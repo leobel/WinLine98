@@ -54,4 +54,8 @@
     <!-- Combo Score -->
     <string name="combo_score">Great! +%d</string>
 
+    <!--About -->
+    <string name="app_version">v%s</string>
+    <string name="app_contact">Contact</string>
+
 </resources>
