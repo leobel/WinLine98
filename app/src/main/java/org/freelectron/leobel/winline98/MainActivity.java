@@ -283,10 +283,8 @@ public class MainActivity extends BaseActivity
             if(highScore > 0){
                 if(game.getScore() > highScore){
                     preferenceService.setHighRecord(game.getScore());
-                    gameProgress.setScore(game.getScore());
-                    if(gameServiceIsConnected(GameServiceRequest.NOTIFY_SCORE)){
-                        Games.Leaderboards.submitScore(googleApiClient, getString(R.string.leaderboard_high_score_id), gameProgress.getScore());
-                    }
+
+
                     scoreImage.setMax(game.getScore());
                     if(breakRecordAlert){
                         pauseChronometer();
@@ -307,10 +305,10 @@ public class MainActivity extends BaseActivity
             }
             else{
                 preferenceService.setHighRecord(game.getScore());
-                gameProgress.setScore(game.getScore());
-                if(gameServiceIsConnected(GameServiceRequest.NOTIFY_SCORE)){
-                    Games.Leaderboards.submitScore(googleApiClient, getString(R.string.leaderboard_high_score_id), gameProgress.getScore());
-                }
+            }
+            gameProgress.setScore(game.getScore());
+            if(gameServiceIsConnected(GameServiceRequest.NOTIFY_SCORE)){
+                Games.Leaderboards.submitScore(googleApiClient, getString(R.string.leaderboard_high_score_id), gameProgress.getScore());
             }
 
             scoreView.setText(game.getScore().toString());
