@@ -1,17 +1,23 @@
 package org.freelectron.leobel.winline98;
 
 import android.Manifest;
-import android.app.Activity;
+import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.graphics.Rect;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -19,6 +25,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -31,7 +38,13 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.games.Games;
+
 import org.freelectron.leobel.winline98.dialogs.GameStatsDialog;
+import org.freelectron.leobel.winline98.models.GameProgress;
 import org.freelectron.leobel.winline98.models.WinLine;
 import org.freelectron.leobel.winline98.services.GameService;
 import org.freelectron.leobel.winline98.services.PreferenceService;
@@ -52,13 +65,18 @@ import timber.log.Timber;
 //import timber.log.Timber;
 
 public class MainActivity extends BaseActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener,  GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+
+    private static final int REQUEST_RESOLVE_ERROR = 101;
+    private static final int LOAD_GAME = 1;
+    private static final String DIALOG_ERROR = "DIALOG_ERROR";
+    private static final String STATE_RESOLVING_ERROR = "STATE_RESOLVING_ERROR";
+    private static final int REQUEST_LEADER_BOARD = 102;
 
     private String HIGHLIGHT_COMBO_SCORE = "HIGHLIGHT_COMBO_SCORE";
     private String PREVIOUS_GAME_SCORE = "PREVIOUS_GAME_SCORE";
 
 
-    private static final int LOAD_GAME = 1;
     private Thread timerMoveTile;
     private Thread timerAnimateTile;
     private Thread timerAnimateInsertTile;
@@ -119,6 +137,12 @@ public class MainActivity extends BaseActivity
     private TextView chrono;
     private boolean handleBoardTouch;
 
+    private GoogleApiClient googleApiClient;
+    private boolean mResolvingError;
+
+    private GameServiceRequest gameServiceRequest;
+    private GameProgress gameProgress;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -126,6 +150,18 @@ public class MainActivity extends BaseActivity
         setContentView(R.layout.activity_main);
 
         WinLineApp.getInstance().getComponent().inject(this);
+
+        mResolvingError = savedInstanceState != null && savedInstanceState.getBoolean(STATE_RESOLVING_ERROR, false);
+
+        gameServiceRequest = GameServiceRequest.NONE;
+        gameProgress = new GameProgress();
+
+        googleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(Games.API)
+                .addScope(Games.SCOPE_GAMES)
+                .build();
 
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setIndeterminate(false);
@@ -201,7 +237,7 @@ public class MainActivity extends BaseActivity
 
 
         loadGameOnStart = false;
-        canPlay = true;
+        setCanPlay(true);
         breakRecordAlert = true;
 
         scoreImage.setMax(preferenceService.getHighRecord());
@@ -247,6 +283,10 @@ public class MainActivity extends BaseActivity
             if(highScore > 0){
                 if(game.getScore() > highScore){
                     preferenceService.setHighRecord(game.getScore());
+                    gameProgress.setScore(game.getScore());
+                    if(gameServiceIsConnected(GameServiceRequest.NOTIFY_SCORE)){
+                        Games.Leaderboards.submitScore(googleApiClient, getString(R.string.leaderboard_high_score_id), gameProgress.getScore());
+                    }
                     scoreImage.setMax(game.getScore());
                     if(breakRecordAlert){
                         pauseChronometer();
@@ -267,6 +307,10 @@ public class MainActivity extends BaseActivity
             }
             else{
                 preferenceService.setHighRecord(game.getScore());
+                gameProgress.setScore(game.getScore());
+                if(gameServiceIsConnected(GameServiceRequest.NOTIFY_SCORE)){
+                    Games.Leaderboards.submitScore(googleApiClient, getString(R.string.leaderboard_high_score_id), gameProgress.getScore());
+                }
             }
 
             scoreView.setText(game.getScore().toString());
@@ -285,6 +329,10 @@ public class MainActivity extends BaseActivity
             setCanPlay(false);
             pauseCombo();
             scoreView.setText(game.getScore().toString());
+            gameProgress.setScore(game.getScore());
+            if(gameServiceIsConnected(GameServiceRequest.NOTIFY_SCORE)){
+                Games.Leaderboards.submitScore(googleApiClient, getString(R.string.leaderboard_high_score_id), gameProgress.getScore());
+            }
             GameStatsDialog gameOver = GameStatsDialog.newInstance(game.getScore(), chronometer.getText().toString(), preferenceService.getHighRecord(), true);
             gameOver.setOnCloseListener(() -> {
                 setCanPlay(true);
@@ -457,8 +505,11 @@ public class MainActivity extends BaseActivity
                 startChronometer();
                 startCombo();
             }
+
+
+
         };
-        drawer.setDrawerListener(toggle);
+        drawer.addDrawerListener(toggle);
         toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
@@ -471,6 +522,29 @@ public class MainActivity extends BaseActivity
         navigationView.setNavigationItemSelectedListener(this);
 
     }
+
+//    @Override
+//    public boolean dispatchTouchEvent(MotionEvent event) {
+//        if (event.getAction() == MotionEvent.ACTION_UP) {
+//            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+//            if (isDrawerOpen(drawer)) { //Your code here to check whether drawer is open or not.
+//
+//                View content = findViewById(R.id.nav_view); //drawer view id
+//                int[] contentLocation = new int[2];
+//                content.getLocationOnScreen(contentLocation);
+//                Rect rect = new Rect(contentLocation[0],
+//                        contentLocation[1],
+//                        contentLocation[0] + content.getWidth(),
+//                        contentLocation[1] + content.getHeight());
+//
+//                if (!(rect.contains((int) event.getX(), (int) event.getY()))) {
+//                    setCanPlay(true);
+//                }
+//
+//            }
+//        }
+//        return super.dispatchTouchEvent(event);
+//    }
 
     private void startComboAnimation(boolean startVisualAnimation) {
         chrono.setText(String.format(Locale.US, "%.1f", comboCount/1000f));
@@ -534,13 +608,25 @@ public class MainActivity extends BaseActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == LOAD_GAME){
             setCanPlay(true);
-            if(resultCode == Activity.RESULT_OK){
+            if(resultCode == RESULT_OK){
                 savedCurrentState = true;
                 WinLine loadedGame = (WinLine) data.getSerializableExtra(LoadGameActivity.GAME_LOADED);
                 timeWhenStopped = -1L * loadedGame.getTime();
                 game = new LogicWinLine(loadedGame.getBoard(), loadedGame.getNext(), loadedGame.getScore());
                 breakRecordAlert = true;
                 stopCombo();
+            }
+        }
+        else if(requestCode == REQUEST_RESOLVE_ERROR){
+            mResolvingError = false;
+            if(resultCode == RESULT_OK){
+                // Make sure the app is not already connected or attempting to connect
+                if (!googleApiClient.isConnecting() && !googleApiClient.isConnected()) {
+                    googleApiClient.connect();
+                }
+            }
+            else{
+                ActivityUtils.showDialog(this, getString(R.string.game_service_not_available), getString(R.string.error_title));
             }
         }
     }
@@ -575,6 +661,18 @@ public class MainActivity extends BaseActivity
         }
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        googleApiClient.disconnect();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(STATE_RESOLVING_ERROR, mResolvingError);
+    }
+
     private void createNewGame(){
         if(!loadGameOnStart){
             try {
@@ -604,9 +702,8 @@ public class MainActivity extends BaseActivity
     @Override
     public void onBackPressed() {
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
+        if (isDrawerOpen(drawer)) {
             drawer.closeDrawer(GravityCompat.START);
-
         }
         else {
             super.onBackPressed();
@@ -697,13 +794,28 @@ public class MainActivity extends BaseActivity
         } else if (id == R.id.rate_game) {
 
         } else if (id == R.id.ranking_game) {
-
+            closeDrawer = false;
+            if(gameServiceIsConnected(GameServiceRequest.OPEN_LEADER_BOARD)){
+                startActivityForResult(Games.Leaderboards.getLeaderboardIntent(googleApiClient, getString(R.string.leaderboard_high_score_id)), REQUEST_LEADER_BOARD);
+            }
         }
         if(closeDrawer){
             DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
             drawer.closeDrawer(GravityCompat.START);
         }
         return true;
+    }
+
+    private boolean isDrawerOpen(DrawerLayout drawer){
+        return drawer.isDrawerOpen(GravityCompat.START);
+    }
+
+    private boolean gameServiceIsConnected(GameServiceRequest request) {
+        if(googleApiClient.isConnected())
+            return true;
+        gameServiceRequest = request;
+        googleApiClient.connect();
+        return false;
     }
 
     private void MoveTile(BoardView board) {
@@ -739,6 +851,77 @@ public class MainActivity extends BaseActivity
 
     public void setCanPlay(boolean canPlay) {
         this.canPlay = canPlay;
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        if (mResolvingError) {
+            // Already attempting to resolve an error.
+            return;
+        } else if (connectionResult.hasResolution()) {
+            try {
+                mResolvingError = true;
+                connectionResult.startResolutionForResult(this, REQUEST_RESOLVE_ERROR);
+            } catch (IntentSender.SendIntentException e) {
+                // There was an error with the resolution intent. Try again.
+                googleApiClient.connect();
+            }
+        } else {
+            // Show dialog using GoogleApiAvailability.getErrorDialog()
+            showErrorDialog(connectionResult.getErrorCode());
+            mResolvingError = true;
+        }
+    }
+
+    private void showErrorDialog(int errorCode) {
+        // Create a fragment for the error dialog
+        ErrorDialogFragment dialogFragment = new ErrorDialogFragment();
+        // Pass the error that should be displayed
+        Bundle args = new Bundle();
+        args.putInt(DIALOG_ERROR, errorCode);
+        dialogFragment.setArguments(args);
+        dialogFragment.show(getSupportFragmentManager(), "errordialog");
+    }
+
+    /* Called from ErrorDialogFragment when the dialog is dismissed. */
+    public void onDialogDismissed() {
+        mResolvingError = false;
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        switch (gameServiceRequest){
+            case NOTIFY_SCORE:
+                Games.Leaderboards.submitScore(googleApiClient, getString(R.string.leaderboard_high_score_id), gameProgress.getScore());
+                break;
+            case OPEN_LEADER_BOARD:
+                startActivityForResult(Games.Leaderboards.getLeaderboardIntent(googleApiClient, getString(R.string.leaderboard_high_score_id)), REQUEST_LEADER_BOARD);
+                break;
+        }
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        mResolvingError = false;
+        gameServiceRequest = GameServiceRequest.NONE;
+    }
+
+    /* A fragment to display an error dialog */
+    public static class ErrorDialogFragment extends DialogFragment {
+        public ErrorDialogFragment() { }
+
+        @Override
+        public Dialog onCreateDialog(Bundle savedInstanceState) {
+            // Get the error code and retrieve the appropriate dialog
+            int errorCode = this.getArguments().getInt(DIALOG_ERROR);
+            return GoogleApiAvailability.getInstance().getErrorDialog(
+                    this.getActivity(), errorCode, REQUEST_RESOLVE_ERROR);
+        }
+
+        @Override
+        public void onDismiss(DialogInterface dialog) {
+            ((MainActivity) getActivity()).onDialogDismissed();
+        }
     }
 
     class AnimateMoveTails implements Runnable {
@@ -982,6 +1165,12 @@ public class MainActivity extends BaseActivity
                 doAfter.run();
             }
         }
+    }
+
+    public enum GameServiceRequest{
+        NONE,
+        NOTIFY_SCORE,
+        OPEN_LEADER_BOARD;
     }
 
 }
