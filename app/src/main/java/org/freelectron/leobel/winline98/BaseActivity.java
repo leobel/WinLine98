@@ -13,6 +13,7 @@ import android.os.AsyncTask;
 import android.os.Handler;
 import android.os.Parcelable;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -52,19 +53,22 @@ public class BaseActivity extends AppCompatActivity {
         task.execute(screenShots);
     }
 
+    public void rateApp() {
+        Uri uri = Uri.parse(getString(R.string.play_store_direct_url) + getPackageName());
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        // To count with Play market backstack, After pressing back button,
+        // to taken back to our application, we need to add following flags to intent.
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_NEW_DOCUMENT | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
+        startActivity(intent);
+    }
+
     public void shareApp(){
         shareApp(null, null);
     }
 
     public void shareApp(Runnable onCancelListener, Runnable onDismissListener) {
 
-        View view = findViewById(R.id.current_game);
-        view.setDrawingCacheEnabled(true);
-        view.buildDrawingCache();
-        Bitmap bitmap = Bitmap.createBitmap(view.getDrawingCache());
-        view.setDrawingCacheEnabled(false);
-        File file = ActivityUtils.storeScreenShot(bitmap, "share.png");
-
+        String shareLink = getAppLink();
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         if(onCancelListener != null){
@@ -82,9 +86,9 @@ public class BaseActivity extends AppCompatActivity {
             switch (which){
                 case 0:
                     ShareLinkContent linkContent = new ShareLinkContent.Builder()
-                            .setContentTitle("WinLine")
-                            .setContentDescription("Play WinLine")
-                            //.setImageUrl(Uri.fromFile(file))
+                            .setContentTitle(getString(R.string.share_title))
+                            .setContentDescription(getString(R.string.share_description))
+                            .setContentUrl(Uri.parse(shareLink))
                             .build();
 
                     ShareDialog.show(this, linkContent);
@@ -92,11 +96,10 @@ public class BaseActivity extends AppCompatActivity {
                 case 1:
                     Intent intent = new Intent();
                     intent.setAction(Intent.ACTION_SEND);
-                    intent.putExtra(Intent.EXTRA_SUBJECT, "Play WinLine");
-                    intent.setType("image/*");
-                    Uri contentUri = Uri.fromFile(file);
-                    intent.putExtra(Intent.EXTRA_STREAM, contentUri);
-                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                    intent.setType("text/plain");
+                    intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_title));
+                    intent.putExtra(Intent.EXTRA_TEXT, shareLink);
+
 
                     // Exclude Facebook from Apps
                     List<ResolveInfo> activities = getPackageManager().queryIntentActivities(intent, 0);
@@ -107,11 +110,9 @@ public class BaseActivity extends AppCompatActivity {
                         String packageName = currentInfo.activityInfo.packageName;
                         if (!facebookAppName.equals(packageName)) {
                             Intent targetIntent = new Intent(Intent.ACTION_SEND);
-
-                            targetIntent.setType("image/*");
-                            targetIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION); // temp permission for receiving app to read this file
-                            targetIntent.putExtra(Intent.EXTRA_SUBJECT, "Play WinLine");
-                            targetIntent.putExtra(Intent.EXTRA_STREAM, contentUri);
+                            targetIntent.setType("text/plain");
+                            targetIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_title));
+                            targetIntent.putExtra(Intent.EXTRA_TEXT, shareLink);
 
                             targetIntent.setPackage(packageName);
                             targetIntents.add(targetIntent);
@@ -132,6 +133,12 @@ public class BaseActivity extends AppCompatActivity {
         });
 
         builder.show();
+    }
+
+    @NonNull
+    private String getAppLink() {
+        String appPackageName = getPackageName();
+        return getString(R.string.play_store_url) + appPackageName;
     }
 
     public boolean checkPermission(int requestCode, int permissionExplanation, String... permissions) {
@@ -207,6 +214,7 @@ public class BaseActivity extends AppCompatActivity {
             Handler handler = new Handler();
             handler.postDelayed(() -> {
                 mProgressDialog.hide();
+                String shareLink = getAppLink();
                 String facebookAppName = getString(R.string.facebokk_app_name);
                 if(ActivityUtils.isAppInstalled(getActivity(), facebookAppName)){
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
@@ -218,7 +226,7 @@ public class BaseActivity extends AppCompatActivity {
                                 for(File file : files) {
                                     SharePhoto photo = new SharePhoto.Builder()
                                             .setImageUrl(Uri.fromFile(file))
-                                            .setCaption("WinLine")
+                                            .setCaption(getString(R.string.share_title))
                                             .build();
                                     photos.add(photo);
                                 }
@@ -230,8 +238,8 @@ public class BaseActivity extends AppCompatActivity {
                             case 1:
                                 Intent intent = new Intent();
                                 intent.setAction(Intent.ACTION_SEND_MULTIPLE);
-                                intent.putExtra(Intent.EXTRA_SUBJECT, "Play WinLine");
-                                //intent.putExtra(Intent.EXTRA_TEXT, "http://winline.org");
+                                intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_title));
+                                intent.putExtra(Intent.EXTRA_TEXT, shareLink);
                                 intent.setType("image/*");
                                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                                 ArrayList<Uri> uris = new ArrayList<>(files.size());
@@ -249,7 +257,8 @@ public class BaseActivity extends AppCompatActivity {
                                     if (!facebookAppName.equals(packageName)) {
                                         Intent targetIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
 
-                                        targetIntent.putExtra(Intent.EXTRA_SUBJECT, "Play WinLine");
+                                        targetIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_title));
+                                        targetIntent.putExtra(Intent.EXTRA_TEXT, shareLink);
                                         targetIntent.setType("image/*");
                                         targetIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION); // temp permission for receiving app to read this file
                                         targetIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
@@ -277,8 +286,8 @@ public class BaseActivity extends AppCompatActivity {
                 else{
                     Intent intent = new Intent();
                     intent.setAction(Intent.ACTION_SEND_MULTIPLE);
-                    intent.putExtra(Intent.EXTRA_SUBJECT, "Play WinLine");
-                    //intent.putExtra(Intent.EXTRA_TEXT, "http://winline.org");
+                    intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_title));
+                    intent.putExtra(Intent.EXTRA_TEXT, shareLink);
                     intent.setType("image/*");
                     intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     ArrayList<Uri> uris = new ArrayList<>(files.size());

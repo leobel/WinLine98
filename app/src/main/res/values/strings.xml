@@ -57,6 +57,12 @@
     <!--About -->
     <string name="app_version">v%s</string>
     <string name="app_contact">Contact</string>
+    
+    <!-- Share App -->
+    <string name="play_store_url">https://play.google.com/store/apps/details?id=</string>
+    <string name="play_store_direct_url">market://details?id=</string>
+    <string name="share_title">Play Winline</string>
+    <string name="share_description">Puzzle game where you\'ll have to improve your self to score more every time.</string>
 
     <!-- Google Play Games Services -->
     <string name="game_service_not_available">Google Play Games Services is not available at this moment, please try again later.</string>

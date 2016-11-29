@@ -9,6 +9,7 @@ import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -790,6 +791,8 @@ public class MainActivity extends BaseActivity
             }
             closeDrawer = false;
         } else if (id == R.id.rate_game) {
+            closeDrawer = false;
+            rateApp();
 
         } else if (id == R.id.ranking_game) {
             closeDrawer = false;
@@ -803,6 +806,8 @@ public class MainActivity extends BaseActivity
         }
         return true;
     }
+
+
 
     private boolean isDrawerOpen(DrawerLayout drawer){
         return drawer.isDrawerOpen(GravityCompat.START);

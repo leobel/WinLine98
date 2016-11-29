@@ -130,6 +130,8 @@ public class GameStatsDialog extends BaseDialog {
             if(preferenceService.getAllowTouchSoundPreference()){
                 mp.start();
             }
+            MainActivity activity =  (MainActivity)getActivity();
+            activity.rateApp();
         });
 
         refresGame.setOnClickListener( v -> {
