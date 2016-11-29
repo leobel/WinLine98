@@ -18,6 +18,7 @@
     <string name="dialog_ok">Ok</string>
     <string name="dialog_cancel">No</string>
     <string name="unsaved_current_state">Your current game state isn\'t saved yet. New game will reset it.\n\nDo you want to proceed any way?</string>
+    <string name="dialog_process_request">Your request is being processes</string>
 
 
     <!-- Delete game -->
@@ -63,6 +64,12 @@
     <string name="play_store_direct_url">market://details?id=</string>
     <string name="share_title">Play Winline</string>
     <string name="share_description">Puzzle game where you\'ll have to improve your self to score more every time.</string>
+    <string name="share_with">Share with</string>
+    <string name="share_app_not_found">No app found</string>
+    <string name="share_facebook">Facebook</string>
+    <string name="share_other">Other</string>
+    <string name="share_text_plain">text/plain</string>
+    <string name="share_image">image/*</string>
 
     <!-- Google Play Games Services -->
     <string name="game_service_not_available">Google Play Games Services is not available at this moment, please try again later.</string>

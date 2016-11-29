@@ -10,8 +10,10 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
+import android.os.PersistableBundle;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -48,8 +50,17 @@ public class BaseActivity extends AppCompatActivity {
     public static final int SHARE_APP = 89;
     public static final int MY_PERMISSIONS_REQUEST_ACCESS_STORAGE = 123;
 
+    private  ShareSavedGamesAsyncTask task;
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+    }
+
     public void shareSavedGames(List<Bitmap> screenShots){
-        ShareSavedGamesAsyncTask task = new ShareSavedGamesAsyncTask();
+        task = new ShareSavedGamesAsyncTask();
         task.execute(screenShots);
     }
 
@@ -81,8 +92,8 @@ public class BaseActivity extends AppCompatActivity {
                onDismissListener.run();
             });
         }
-        builder.setTitle("Share with");
-        builder.setItems(new CharSequence[] {"Facebook", "Other"}, (dialog, which) -> {
+        builder.setTitle(getString(R.string.share_with));
+        builder.setItems(new CharSequence[] {getString(R.string.share_facebook), getString(R.string.share_other)}, (dialog, which) -> {
             switch (which){
                 case 0:
                     ShareLinkContent linkContent = new ShareLinkContent.Builder()
@@ -96,7 +107,7 @@ public class BaseActivity extends AppCompatActivity {
                 case 1:
                     Intent intent = new Intent();
                     intent.setAction(Intent.ACTION_SEND);
-                    intent.setType("text/plain");
+                    intent.setType(getString(R.string.share_text_plain));
                     intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_title));
                     intent.putExtra(Intent.EXTRA_TEXT, shareLink);
 
@@ -110,7 +121,7 @@ public class BaseActivity extends AppCompatActivity {
                         String packageName = currentInfo.activityInfo.packageName;
                         if (!facebookAppName.equals(packageName)) {
                             Intent targetIntent = new Intent(Intent.ACTION_SEND);
-                            targetIntent.setType("text/plain");
+                            targetIntent.setType(getString(R.string.share_text_plain));
                             targetIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_title));
                             targetIntent.putExtra(Intent.EXTRA_TEXT, shareLink);
 
@@ -120,12 +131,12 @@ public class BaseActivity extends AppCompatActivity {
                     }
 
                     if(targetIntents.size() > 0) {
-                        Intent chooserIntent = Intent.createChooser(targetIntents.remove(0), "Share with");
+                        Intent chooserIntent = Intent.createChooser(targetIntents.remove(0), getString(R.string.share_with));
                         chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, targetIntents.toArray(new Parcelable[targetIntents.size()]));
                         startActivity(chooserIntent);
                     }
                     else {
-                        Toast.makeText(this, "No app found", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, getString(R.string.share_app_not_found), Toast.LENGTH_SHORT).show();
                     }
 
                     break;
@@ -133,6 +144,15 @@ public class BaseActivity extends AppCompatActivity {
         });
 
         builder.show();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(task != null){
+            task.dispose();
+            task = null;
+        }
     }
 
     @NonNull
@@ -179,14 +199,17 @@ public class BaseActivity extends AppCompatActivity {
 
     public class ShareSavedGamesAsyncTask extends AsyncTask<List<Bitmap>, Integer, List<File>>{
 
-        private final ProgressDialog mProgressDialog;
+        private ProgressDialog mProgressDialog;
 
         public ShareSavedGamesAsyncTask(){
-
             mProgressDialog = new ProgressDialog(getActivity());
             mProgressDialog.setIndeterminate(false);
-            mProgressDialog.setMessage("Your request is being processes");
+            mProgressDialog.setMessage(getString(R.string.dialog_process_request));
             mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        }
+
+        public void dispose(){
+            mProgressDialog.dismiss();
         }
 
         public Activity getActivity() {
@@ -218,8 +241,8 @@ public class BaseActivity extends AppCompatActivity {
                 String facebookAppName = getString(R.string.facebokk_app_name);
                 if(ActivityUtils.isAppInstalled(getActivity(), facebookAppName)){
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                    builder.setTitle("Share with");
-                    builder.setItems(new CharSequence[] {"Facebook", "Other"}, (dialog, which) -> {
+                    builder.setTitle(getString(R.string.share_with));
+                    builder.setItems(new CharSequence[] {getString(R.string.share_facebook), getString(R.string.share_other)}, (dialog, which) -> {
                         switch (which){
                             case 0:
                                 List<SharePhoto> photos = new ArrayList<>(files.size());
@@ -240,7 +263,7 @@ public class BaseActivity extends AppCompatActivity {
                                 intent.setAction(Intent.ACTION_SEND_MULTIPLE);
                                 intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_title));
                                 intent.putExtra(Intent.EXTRA_TEXT, shareLink);
-                                intent.setType("image/*");
+                                intent.setType(getString(R.string.share_image));
                                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                                 ArrayList<Uri> uris = new ArrayList<>(files.size());
                                 for(File file : files) {
@@ -259,7 +282,7 @@ public class BaseActivity extends AppCompatActivity {
 
                                         targetIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_title));
                                         targetIntent.putExtra(Intent.EXTRA_TEXT, shareLink);
-                                        targetIntent.setType("image/*");
+                                        targetIntent.setType(getString(R.string.share_image));
                                         targetIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION); // temp permission for receiving app to read this file
                                         targetIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
 
@@ -269,12 +292,12 @@ public class BaseActivity extends AppCompatActivity {
                                 }
 
                                 if(targetIntents.size() > 0) {
-                                    Intent chooserIntent = Intent.createChooser(targetIntents.remove(0), "Share with");
+                                    Intent chooserIntent = Intent.createChooser(targetIntents.remove(0), getString(R.string.share_with));
                                     chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, targetIntents.toArray(new Parcelable[targetIntents.size()]));
                                     startActivity(chooserIntent);
                                 }
                                 else {
-                                    Toast.makeText(getActivity(), "No app found", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getActivity(), getString(R.string.share_app_not_found), Toast.LENGTH_SHORT).show();
                                 }
 
                                 break;
@@ -288,7 +311,7 @@ public class BaseActivity extends AppCompatActivity {
                     intent.setAction(Intent.ACTION_SEND_MULTIPLE);
                     intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_title));
                     intent.putExtra(Intent.EXTRA_TEXT, shareLink);
-                    intent.setType("image/*");
+                    intent.setType(getString(R.string.share_image));
                     intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     ArrayList<Uri> uris = new ArrayList<>(files.size());
                     for(File file : files) {
@@ -296,7 +319,7 @@ public class BaseActivity extends AppCompatActivity {
                     }
                     intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
 
-                    startActivity(Intent.createChooser(intent, "Share with"));
+                    startActivity(Intent.createChooser(intent, getString(R.string.share_with)));
                 }
             }, 500); // 1/2 seconds delay
         }
