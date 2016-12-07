@@ -7,9 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
-import android.graphics.Rect;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -26,7 +24,6 @@ import android.support.v7.widget.Toolbar;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
@@ -43,6 +40,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.games.Games;
+import com.google.android.gms.games.GamesActivityResultCodes;
 
 import org.freelectron.leobel.winline98.dialogs.GameStatsDialog;
 import org.freelectron.leobel.winline98.models.GameProgress;
@@ -61,18 +59,21 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
 
-import timber.log.Timber;
-
 //import timber.log.Timber;
 
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener,  GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
-    private static final int REQUEST_RESOLVE_ERROR = 101;
     private static final int LOAD_GAME = 1;
     private static final String DIALOG_ERROR = "DIALOG_ERROR";
     private static final String STATE_RESOLVING_ERROR = "STATE_RESOLVING_ERROR";
+    private static final int REQUEST_RESOLVE_ERROR = 101;
     private static final int REQUEST_LEADER_BOARD = 102;
+    private static final int REQUEST_ACHIEVEMENTS = 103;
+    private static final int ACHIEVEMENT_BEGINNER_SCORER_THRESHOLD = 500;
+    private static final int ACHIEVEMENT_INTERMEDIATE_SCORER_THRESHOLD = 1000;
+    private static final int ACHIEVEMENT_GOOD_SCORER_THRESHOLD = 5000;
+    private static final int ACHIEVEMENT_GREAT_SCORER_THRESHOLD = 10000;
 
     private String HIGHLIGHT_COMBO_SCORE = "HIGHLIGHT_COMBO_SCORE";
     private String PREVIOUS_GAME_SCORE = "PREVIOUS_GAME_SCORE";
@@ -107,6 +108,8 @@ public class MainActivity extends BaseActivity
     private Handler nextHandler;
     private Handler scoreHandler;
     private Handler endAlertHandler;
+
+    private boolean pendingShowGameServicePopup;
 
     @Inject
     public GameService gameService;
@@ -163,6 +166,11 @@ public class MainActivity extends BaseActivity
                 .addApi(Games.API)
                 .addScope(Games.SCOPE_GAMES)
                 .build();
+
+        if(gameServiceIsConnected(GameServiceRequest.NOTIFY_ACHIEVEMENT_SUPPORTER_PLAYER)){
+            Games.Achievements.increment(googleApiClient, getString(R.string.achievement_enthusiast_player), 1);
+            Games.Achievements.increment(googleApiClient, getString(R.string.achievement_fanatic_player), 1);
+        }
 
         mProgressDialog = new ProgressDialog(this);
         mProgressDialog.setIndeterminate(false);
@@ -309,7 +317,7 @@ public class MainActivity extends BaseActivity
             }
             gameProgress.setScore(game.getScore());
             if(gameServiceIsConnected(GameServiceRequest.NOTIFY_SCORE)){
-                Games.Leaderboards.submitScore(googleApiClient, getString(R.string.leaderboard_high_score_id), gameProgress.getScore());
+                notifyGameServiceScore();
             }
 
             scoreView.setText(game.getScore().toString());
@@ -330,7 +338,7 @@ public class MainActivity extends BaseActivity
             scoreView.setText(game.getScore().toString());
             gameProgress.setScore(game.getScore());
             if(gameServiceIsConnected(GameServiceRequest.NOTIFY_SCORE)){
-                Games.Leaderboards.submitScore(googleApiClient, getString(R.string.leaderboard_high_score_id), gameProgress.getScore());
+                notifyGameServiceScore();
             }
             GameStatsDialog gameOver = GameStatsDialog.newInstance(game.getScore(), chronometer.getText().toString(), preferenceService.getHighRecord(), true);
             gameOver.setOnCloseListener(() -> {
@@ -522,6 +530,23 @@ public class MainActivity extends BaseActivity
 
     }
 
+    private void notifyGameServiceScore() {
+        Games.Leaderboards.submitScore(googleApiClient, getString(R.string.leaderboard_high_score_id), gameProgress.getScore());
+        int score = gameProgress.getScore();
+        if(ACHIEVEMENT_BEGINNER_SCORER_THRESHOLD <= score){
+            Games.Achievements.unlock(googleApiClient, getString(R.string.achievement_beginner_scorer));
+        }
+        if(ACHIEVEMENT_INTERMEDIATE_SCORER_THRESHOLD <= score){
+            Games.Achievements.unlock(googleApiClient, getString(R.string.achievement_intermediate_scorer));
+        }
+        if(ACHIEVEMENT_GOOD_SCORER_THRESHOLD <= score){
+            Games.Achievements.unlock(googleApiClient, getString(R.string.achievement_good_scorer));
+        }
+        if(ACHIEVEMENT_GREAT_SCORER_THRESHOLD <= score){
+            Games.Achievements.unlock(googleApiClient, getString(R.string.achievement_great_scorer));
+        }
+    }
+
 //    @Override
 //    public boolean dispatchTouchEvent(MotionEvent event) {
 //        if (event.getAction() == MotionEvent.ACTION_UP) {
@@ -625,8 +650,11 @@ public class MainActivity extends BaseActivity
                 }
             }
             else{
-                ActivityUtils.showDialog(this, getString(R.string.game_service_not_available), getString(R.string.error_title));
+                pendingShowGameServicePopup = true;
             }
+        }
+        else if(resultCode == GamesActivityResultCodes.RESULT_RECONNECT_REQUIRED && (requestCode == REQUEST_LEADER_BOARD || requestCode == REQUEST_ACHIEVEMENTS)){
+            googleApiClient.disconnect();
         }
     }
 
@@ -649,6 +677,10 @@ public class MainActivity extends BaseActivity
     protected void onResume() {
         super.onResume();
         createNewGame();
+        if(pendingShowGameServicePopup){
+            pendingShowGameServicePopup = false;
+            ActivityUtils.showDialog(this, getString(R.string.game_service_not_available), getString(R.string.error_title));
+        }
     }
 
     @Override
@@ -799,6 +831,11 @@ public class MainActivity extends BaseActivity
             if(gameServiceIsConnected(GameServiceRequest.OPEN_LEADER_BOARD)){
                 startActivityForResult(Games.Leaderboards.getLeaderboardIntent(googleApiClient, getString(R.string.leaderboard_high_score_id)), REQUEST_LEADER_BOARD);
             }
+        } else if (id == R.id.achievement_game){
+            closeDrawer = false;
+            if(gameServiceIsConnected(GameServiceRequest.OPEN_ACHIEVEMENT)){
+                startActivityForResult(Games.Achievements.getAchievementsIntent(googleApiClient), REQUEST_ACHIEVEMENTS);
+            }
         }
         if(closeDrawer){
             DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
@@ -806,8 +843,6 @@ public class MainActivity extends BaseActivity
         }
         return true;
     }
-
-
 
     private boolean isDrawerOpen(DrawerLayout drawer){
         return drawer.isDrawerOpen(GravityCompat.START);
@@ -895,10 +930,17 @@ public class MainActivity extends BaseActivity
     public void onConnected(@Nullable Bundle bundle) {
         switch (gameServiceRequest){
             case NOTIFY_SCORE:
-                Games.Leaderboards.submitScore(googleApiClient, getString(R.string.leaderboard_high_score_id), gameProgress.getScore());
+                notifyGameServiceScore();
                 break;
             case OPEN_LEADER_BOARD:
                 startActivityForResult(Games.Leaderboards.getLeaderboardIntent(googleApiClient, getString(R.string.leaderboard_high_score_id)), REQUEST_LEADER_BOARD);
+                break;
+            case OPEN_ACHIEVEMENT:
+                startActivityForResult(Games.Achievements.getAchievementsIntent(googleApiClient), REQUEST_ACHIEVEMENTS);
+                break;
+            case NOTIFY_ACHIEVEMENT_SUPPORTER_PLAYER:
+                Games.Achievements.increment(googleApiClient, getString(R.string.achievement_enthusiast_player), 1);
+                Games.Achievements.increment(googleApiClient, getString(R.string.achievement_fanatic_player), 1);
                 break;
         }
     }
@@ -917,8 +959,7 @@ public class MainActivity extends BaseActivity
         public Dialog onCreateDialog(Bundle savedInstanceState) {
             // Get the error code and retrieve the appropriate dialog
             int errorCode = this.getArguments().getInt(DIALOG_ERROR);
-            return GoogleApiAvailability.getInstance().getErrorDialog(
-                    this.getActivity(), errorCode, REQUEST_RESOLVE_ERROR);
+            return GoogleApiAvailability.getInstance().getErrorDialog(this.getActivity(), errorCode, REQUEST_RESOLVE_ERROR);
         }
 
         @Override
@@ -1173,7 +1214,13 @@ public class MainActivity extends BaseActivity
     public enum GameServiceRequest{
         NONE,
         NOTIFY_SCORE,
-        OPEN_LEADER_BOARD;
+        OPEN_LEADER_BOARD,
+        OPEN_ACHIEVEMENT,
+        NOTIFY_ACHIEVEMENT_BEGINNER_SCORER,
+        NOTIFY_ACHIEVEMENT_INTERMEDIATE_SCORER,
+        NOTIFY_ACHIEVEMENT_GOOD_SCORER,
+        NOTIFY_ACHIEVEMENT_GREAT_SCORER,
+        NOTIFY_ACHIEVEMENT_SUPPORTER_PLAYER
     }
 
 }

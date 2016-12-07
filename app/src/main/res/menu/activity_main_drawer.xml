@@ -10,6 +10,10 @@
             android:title="@string/drawer_menu_ranking_game"
             android:icon="@drawable/ic_ranking"/>
 
+        <item android:id="@+id/achievement_game"
+            android:title="@string/drawer_menu_achievement_game"
+            android:icon="@drawable/ic_achievement"/>
+
         <item android:id="@+id/help_game"
             android:title="@string/drawer_menu_help_game"
             android:icon="@drawable/ic_help"/>
