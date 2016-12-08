@@ -146,6 +146,7 @@ public class MainActivity extends BaseActivity
     private boolean handleBoardTouch;
 
     private GoogleApiClient googleApiClient;
+    private ErrorDialogFragment dialogFragment;
     private boolean mResolvingError;
 
     private GameServiceRequest gameServiceRequest;
@@ -926,7 +927,7 @@ public class MainActivity extends BaseActivity
 
     private void showErrorDialog(int errorCode) {
         // Create a fragment for the error dialog
-        ErrorDialogFragment dialogFragment = new ErrorDialogFragment();
+        dialogFragment = new ErrorDialogFragment();
         // Pass the error that should be displayed
         Bundle args = new Bundle();
         args.putInt(DIALOG_ERROR, errorCode);
@@ -936,6 +937,7 @@ public class MainActivity extends BaseActivity
 
     /* Called from ErrorDialogFragment when the dialog is dismissed. */
     public void onDialogDismissed() {
+        dialogFragment.dismiss();
         mResolvingError = false;
     }
 
