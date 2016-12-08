@@ -76,6 +76,7 @@
     <string name="game_service_not_available">Google Play Games Services is not available at this moment, please try again later.</string>
     
     <!-- Ads -->
-    <string name="banner_ad_unit_id"></string>
+    <string name="admob_app_id">ca-app-pub-7647623315832735~1693148401</string>
+    <string name="banner_ad_unit_id">ca-app-pub-7647623315832735/3169881604</string>
 
 </resources>

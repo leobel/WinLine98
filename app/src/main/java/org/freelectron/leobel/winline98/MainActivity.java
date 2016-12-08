@@ -36,6 +36,9 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -59,7 +62,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
 
-//import timber.log.Timber;
+import timber.log.Timber;
 
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener,  GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
@@ -139,6 +142,7 @@ public class MainActivity extends BaseActivity
     private View comboTrack;
     private TextView comboSize;
     private TextView chrono;
+    private AdView bottomAdView;
     private boolean handleBoardTouch;
 
     private GoogleApiClient googleApiClient;
@@ -167,6 +171,8 @@ public class MainActivity extends BaseActivity
                 .addScope(Games.SCOPE_GAMES)
                 .build();
 
+        MobileAds.initialize(getApplicationContext(), getString(R.string.admob_app_id));
+
         if(gameServiceIsConnected(GameServiceRequest.NOTIFY_ACHIEVEMENT_SUPPORTER_PLAYER)){
             Games.Achievements.increment(googleApiClient, getString(R.string.achievement_enthusiast_player), 1);
             Games.Achievements.increment(googleApiClient, getString(R.string.achievement_fanatic_player), 1);
@@ -185,6 +191,7 @@ public class MainActivity extends BaseActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        bottomAdView = (AdView) findViewById(R.id.adView);
         boardContainer = findViewById(R.id.board_container);
         boardView = (BoardView) findViewById(R.id.board);
         nextView = (NextView) findViewById(R.id.next);
@@ -199,6 +206,14 @@ public class MainActivity extends BaseActivity
         comboTrack = findViewById(R.id.combo_track);
         comboSize = (TextView) findViewById(R.id.combo_size);
         chrono = (TextView) findViewById(R.id.combo_timer);
+
+        AdRequest adRequest = new AdRequest.Builder()
+                .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+                .addTestDevice("8DDE4A81B682B0D4E89B7D11A7B893FF")
+                .addTestDevice("AD276AD2D1CB10BE5142B2786D4C3817")
+                .addTestDevice("E03390F6D86E80375CCF82C18576611C")
+                .build();
+        bottomAdView.loadAd(adRequest);
 
         comboCount = 10000;
         combo = 2;
