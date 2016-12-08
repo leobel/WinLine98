@@ -36,8 +36,10 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdListener;
 import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.InterstitialAd;
 import com.google.android.gms.ads.MobileAds;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
@@ -62,8 +64,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
 
-import timber.log.Timber;
-
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener,  GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
@@ -74,9 +74,10 @@ public class MainActivity extends BaseActivity
     private static final int REQUEST_LEADER_BOARD = 102;
     private static final int REQUEST_ACHIEVEMENTS = 103;
     private static final int ACHIEVEMENT_BEGINNER_SCORER_THRESHOLD = 500;
-    private static final int ACHIEVEMENT_INTERMEDIATE_SCORER_THRESHOLD = 1000;
-    private static final int ACHIEVEMENT_GOOD_SCORER_THRESHOLD = 5000;
-    private static final int ACHIEVEMENT_GREAT_SCORER_THRESHOLD = 10000;
+    private static final int ACHIEVEMENT_GOOD_SCORER_THRESHOLD = 1000;
+    private static final int ACHIEVEMENT_GREAT_SCORER_THRESHOLD = 5000;
+    private static final int ACHIEVEMENT_AWESOME_SCORER_THRESHOLD = 50000;
+    private static final int ACHIEVEMENT_NINJA_SCORER_THRESHOLD = 100000;
 
     private String HIGHLIGHT_COMBO_SCORE = "HIGHLIGHT_COMBO_SCORE";
     private String PREVIOUS_GAME_SCORE = "PREVIOUS_GAME_SCORE";
@@ -143,6 +144,7 @@ public class MainActivity extends BaseActivity
     private TextView comboSize;
     private TextView chrono;
     private AdView bottomAdView;
+    private InterstitialAd newGameAdView;
     private boolean handleBoardTouch;
 
     private GoogleApiClient googleApiClient;
@@ -208,13 +210,22 @@ public class MainActivity extends BaseActivity
         comboSize = (TextView) findViewById(R.id.combo_size);
         chrono = (TextView) findViewById(R.id.combo_timer);
 
-        AdRequest adRequest = new AdRequest.Builder()
-                .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
-                .addTestDevice("8DDE4A81B682B0D4E89B7D11A7B893FF")
-                .addTestDevice("AD276AD2D1CB10BE5142B2786D4C3817")
-                .addTestDevice("E03390F6D86E80375CCF82C18576611C")
-                .build();
-        bottomAdView.loadAd(adRequest);
+
+        bottomAdView.loadAd(requestNewAdRequest());
+
+        newGameAdView = new InterstitialAd(this);
+
+        newGameAdView.setAdUnitId(getString(R.string.new_game_interstitial_ad_unit_id));
+
+        newGameAdView.setAdListener(new AdListener() {
+            @Override
+            public void onAdClosed() {
+                newGameAdView.loadAd(requestNewAdRequest());
+                setUpNewGame();
+            }
+        });
+
+        newGameAdView.loadAd(requestNewAdRequest());
 
         comboCount = 10000;
         combo = 2;
@@ -389,24 +400,24 @@ public class MainActivity extends BaseActivity
                 mp.start();
             }
             if(savedCurrentState){
-                stopChronometer();
-                stopCombo();
-                loadGameOnStart = false;
-                createNewGame();
-                savedCurrentState = false;
-                breakRecordAlert = true;
+                if(newGameAdView.isLoaded()){
+                    newGameAdView.show();
+                }
+                else{
+                    setUpNewGame();
+                }
             }
             else{
                 pauseChronometer();
                 setCanPlay(false);
                 pauseCombo();
                 ActivityUtils.showDialog(this, getString(R.string.unsaved_current_state), true, () -> {
-                    setCanPlay(true);
-                    stopChronometer();
-                    stopCombo();
-                    loadGameOnStart = false;
-                    createNewGame();
-                    breakRecordAlert = true;
+                    if(newGameAdView.isLoaded()){
+                        newGameAdView.show();
+                    }
+                    else{
+                        setUpNewGame();
+                    }
                 }, () -> {
                     setCanPlay(true);
                     startChronometer();
@@ -546,20 +557,43 @@ public class MainActivity extends BaseActivity
 
     }
 
+    private void setUpNewGame() {
+        setCanPlay(true);
+        stopChronometer();
+        stopCombo();
+        loadGameOnStart = false;
+        createNewGame();
+        breakRecordAlert = true;
+        savedCurrentState = false;
+    }
+
+    private AdRequest requestNewAdRequest() {
+        return new AdRequest.Builder()
+                .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
+                .addTestDevice("8DDE4A81B682B0D4E89B7D11A7B893FF")
+                .addTestDevice("AD276AD2D1CB10BE5142B2786D4C3817")
+                .addTestDevice("E03390F6D86E80375CCF82C18576611C")
+                .build();
+
+    }
+
     private void notifyGameServiceScore() {
         Games.Leaderboards.submitScore(googleApiClient, getString(R.string.leaderboard_high_score_id), gameProgress.getScore());
         int score = gameProgress.getScore();
         if(ACHIEVEMENT_BEGINNER_SCORER_THRESHOLD <= score){
             Games.Achievements.unlock(googleApiClient, getString(R.string.achievement_beginner_scorer));
         }
-        if(ACHIEVEMENT_INTERMEDIATE_SCORER_THRESHOLD <= score){
-            Games.Achievements.unlock(googleApiClient, getString(R.string.achievement_intermediate_scorer));
-        }
         if(ACHIEVEMENT_GOOD_SCORER_THRESHOLD <= score){
             Games.Achievements.unlock(googleApiClient, getString(R.string.achievement_good_scorer));
         }
         if(ACHIEVEMENT_GREAT_SCORER_THRESHOLD <= score){
             Games.Achievements.unlock(googleApiClient, getString(R.string.achievement_great_scorer));
+        }
+        if(ACHIEVEMENT_AWESOME_SCORER_THRESHOLD <= score){
+            Games.Achievements.unlock(googleApiClient, getString(R.string.achievement_awesome_scorer));
+        }
+        if(ACHIEVEMENT_NINJA_SCORER_THRESHOLD <= score){
+            Games.Achievements.unlock(googleApiClient, getString(R.string.achievement_ninja_scorer));
         }
     }
 

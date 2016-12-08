@@ -10,10 +10,11 @@ Save this file as res/values/games-ids.xml in your project.
     <string name="leaderboard_high_score_id">CgkI3YOZmpEdEAIQAA</string>
 
     <!-- Achievement -->
-    <string name="achievement_beginner_scorer">CgkI3YOZmpEdEAIQAw</string>
-    <string name="achievement_intermediate_scorer">CgkI3YOZmpEdEAIQBA</string>
-    <string name="achievement_good_scorer">CgkI3YOZmpEdEAIQBQ</string>
-    <string name="achievement_great_scorer">CgkI3YOZmpEdEAIQBg</string>
+    <string name="achievement_beginner_scorer">CgkI3YOZmpEdEAIQCQ</string>
+    <string name="achievement_good_scorer">CgkI3YOZmpEdEAIQAw</string>
+    <string name="achievement_great_scorer">CgkI3YOZmpEdEAIQBA</string>
+    <string name="achievement_awesome_scorer">CgkI3YOZmpEdEAIQBQ</string>
+    <string name="achievement_ninja_scorer">CgkI3YOZmpEdEAIQBg</string>
     <string name="achievement_enthusiast_player">CgkI3YOZmpEdEAIQBw</string>
     <string name="achievement_fanatic_player">CgkI3YOZmpEdEAIQCA</string>
 </resources>
