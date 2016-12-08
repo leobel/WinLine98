@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">WinLine</string>
+    <string name="app_name">Winline</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
@@ -35,7 +35,7 @@
     <string name="game_over_score">Score</string>
     <string name="game_over_time">Time</string>
     <string name="game_over_high_score">Record</string>
-    <string name="game_over_text">If you enjoy playing WinLine please take a moment and rate it.\n\nWe\'ll appreciate your support, thanks!</string>
+    <string name="game_over_text">Would you like to take a moment and rate the app?\n\nWe\'ll appreciate your support, thanks!</string>
 
     <!-- Record -->
     <string name="new_record_title">Great</string>
