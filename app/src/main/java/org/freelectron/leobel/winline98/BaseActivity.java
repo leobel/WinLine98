@@ -70,7 +70,12 @@ public class BaseActivity extends AppCompatActivity {
         // To count with Play market backstack, After pressing back button,
         // to taken back to our application, we need to add following flags to intent.
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY | Intent.FLAG_ACTIVITY_NEW_DOCUMENT | Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
-        startActivity(intent);
+        if(intent.resolveActivity(getPackageManager()) != null){
+            startActivity(intent);
+        }
+        else{
+            Toast.makeText(this, getString(R.string.share_app_not_found), Toast.LENGTH_SHORT).show();
+        }
     }
 
     public void shareApp(){

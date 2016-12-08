@@ -823,7 +823,6 @@ public class MainActivity extends BaseActivity
         }
     }
 
-
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
@@ -882,7 +881,6 @@ public class MainActivity extends BaseActivity
         timerAnimateTile = new Thread(animateSelectedTail);
         timerAnimateTile.start();
     }
-
 
     private void stopAnimateTail(Runnable actionAfter){
         animateSelectedTail.stopAnimation(actionAfter);
