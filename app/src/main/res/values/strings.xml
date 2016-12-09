@@ -1,8 +1,83 @@
 <resources>
-    <string name="app_name">Winline98</string>
+    <string name="app_name">Winline</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
+
+    <!-- Facebook -->
+    <string name="facebook_app_id">1115623851819997</string>
+    <string name="facebokk_app_name">com.facebook.katana</string>
+
+    <!-- Dialog -->
+    <string name="warning_title">Warning!</string>
+    <string name="error_title">Oops!</string>
+    <string name="success_title">Success!</string>
+    <string name="dialog_yes">Yes</string>
+    <string name="dialog_ok">Ok</string>
+    <string name="dialog_cancel">No</string>
+    <string name="unsaved_current_state">Your current game state isn\'t saved yet. New game will reset it.\n\nDo you want to proceed any way?</string>
+    <string name="dialog_process_request">Your request is being processes</string>
+
+
+    <!-- Delete game -->
+    <string name="delete_game">Are you sure you want to delete the game?</string>
+    <string name="delete_games">Are you sure you want to delete the games?</string>
+    <string name="delete_game_success">The game was deleted!</string>
+    <string name="delete_games_success">The games were deleted!</string>
+    <string name="delete_game_fail">The game couldn\'t be deleted?</string>
+    <string name="delete_games_fail">The games couldn\'t be deleted?</string>
+    <string name="delete_selected">%d selected</string>
+
+    <!-- Game Over -->
+    <string name="game_over">Game Over</string>
+    <string name="game_over_score">Score</string>
+    <string name="game_over_time">Time</string>
+    <string name="game_over_high_score">Record</string>
+    <string name="game_over_text">Would you like to take a moment and rate the app?\n\nWe\'ll appreciate your support, thanks!</string>
+
+    <!-- Record -->
+    <string name="new_record_title">Great</string>
+    <string name="new_record_message">New record</string>
+
+    <!-- Permissions -->
+    <string name="permission_title">Information</string>
+    <string name="use_external_storage_explanation">We use your external storage to save the games data.</string>
+
+    <!-- Drawer Menu -->
+    <string name="drawer_menu_toggle_sound">Sound</string>
+    <string name="drawer_menu_rate_game">Rate</string>
+    <string name="drawer_menu_ranking_game">Ranking</string>
+    <string name="drawer_menu_achievement_game">Achievements</string>
+    <string name="drawer_menu_about_game">About</string>
+    <string name="drawer_menu_help_game">Help</string>
+
+    <!-- Combo Score -->
+    <string name="combo_score">Great! +%d</string>
+
+    <!--About -->
+    <string name="app_version">v%s</string>
+    <string name="app_contact">Contact</string>
+    
+    <!-- Share App -->
+    <string name="play_store_url">https://play.google.com/store/apps/details?id=</string>
+    <string name="play_store_direct_url">market://details?id=</string>
+    <string name="share_title">Play Winline</string>
+    <string name="share_description">Puzzle game where you\'ll have to improve your self to score more every time.</string>
+    <string name="share_with">Share with</string>
+    <string name="share_app_not_found">No app found</string>
+    <string name="share_facebook">Facebook</string>
+    <string name="share_other">Other</string>
+    <string name="share_text_plain">text/plain</string>
+    <string name="share_image">image/*</string>
+
+    <!-- Google Play Games Services -->
+    <string name="game_service_not_available">Google Play Games Services is not available at this moment, please try again later.</string>
+    
+    <!-- Ads -->
+    <string name="admob_app_id">ca-app-pub-7647623315832735~1693148401</string>
+    <string name="banner_ad_unit_id">ca-app-pub-7647623315832735/3169881604</string>
+    <string name="new_game_interstitial_ad_unit_id">ca-app-pub-7647623315832735/8149981205  </string>
+
 </resources>

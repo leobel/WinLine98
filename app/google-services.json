@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "1001050751453",
+    "firebase_url": "https://winline-89025020.firebaseio.com",
+    "project_id": "winline-89025020",
+    "storage_bucket": "winline-89025020.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1001050751453:android:30b876ea6cd82c05",
+        "android_client_info": {
+          "package_name": "org.freelectron.leobel.winline98"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1001050751453-b90pfqiumo71i0fu27jilg9kckhre0ru.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.freelectron.leobel.winline98",
+            "certificate_hash": "98B250C0AA4EF3606150134A66E64855C3FE5CEE"
+          }
+        },
+        {
+          "client_id": "1001050751453-3cl4idsce9joovb9otat1pf37kc81lfk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "org.freelectron.leobel.winline98",
+            "certificate_hash": "857A888B4CBD77F7BF075A2B5E101C7052FD0199"
+          }
+        },
+        {
+          "client_id": "1001050751453-v4djf0rsoiru8iau1d8fvfpkv36pljfl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD5t7uJMMFRr1qu4X3JwZ-63GkpUUuFfuk"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1001050751453-v4djf0rsoiru8iau1d8fvfpkv36pljfl.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
