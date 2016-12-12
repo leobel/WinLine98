@@ -727,6 +727,11 @@ public class MainActivity extends BaseActivity
     protected void onResume() {
         super.onResume();
         createNewGame();
+    }
+
+    @Override
+    protected void onResumeFragments() {
+        super.onResumeFragments();
         if(pendingShowGameServicePopup){
             pendingShowGameServicePopup = false;
             ActivityUtils.showDialog(this, getString(R.string.game_service_not_available), getString(R.string.error_title));
