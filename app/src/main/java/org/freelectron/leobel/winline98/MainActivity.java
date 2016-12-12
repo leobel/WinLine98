@@ -573,6 +573,7 @@ public class MainActivity extends BaseActivity
                 .addTestDevice("8DDE4A81B682B0D4E89B7D11A7B893FF")
                 .addTestDevice("AD276AD2D1CB10BE5142B2786D4C3817")
                 .addTestDevice("E03390F6D86E80375CCF82C18576611C")
+                .addTestDevice("B90D7176E108E6CAAFA0EFE95C814E0E")
                 .build();
 
     }
