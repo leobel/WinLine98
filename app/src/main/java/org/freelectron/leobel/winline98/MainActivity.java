@@ -868,7 +868,6 @@ public class MainActivity extends BaseActivity
     public boolean onNavigationItemSelected(MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
-        boolean closeDrawer = true;
         if (id == R.id.toggle_sound) {
             boolean useSound = preferenceService.getAllowTouchSoundPreference();
             preferenceService.setAllowTouchSoundPreference(!useSound);
@@ -876,26 +875,25 @@ public class MainActivity extends BaseActivity
             if(preferenceService.getAllowTouchSoundPreference()){
                 mp.start();
             }
-            closeDrawer = false;
         } else if (id == R.id.rate_game) {
-            closeDrawer = false;
             rateApp();
 
         } else if (id == R.id.ranking_game) {
-            closeDrawer = false;
             if(gameServiceIsConnected(GameServiceRequest.OPEN_LEADER_BOARD)){
                 startActivityForResult(Games.Leaderboards.getLeaderboardIntent(googleApiClient, getString(R.string.leaderboard_high_score_id)), REQUEST_LEADER_BOARD);
             }
         } else if (id == R.id.achievement_game){
-            closeDrawer = false;
             if(gameServiceIsConnected(GameServiceRequest.OPEN_ACHIEVEMENT)){
                 startActivityForResult(Games.Achievements.getAchievementsIntent(googleApiClient), REQUEST_ACHIEVEMENTS);
             }
         }
-        if(closeDrawer){
-            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-            drawer.closeDrawer(GravityCompat.START);
+        else if(id == R.id.help_game){
+            ActivityUtils.showHelp(this);
         }
+//        if(closeDrawer){
+//            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+//            drawer.closeDrawer(GravityCompat.START);
+//        }
         return true;
     }
 

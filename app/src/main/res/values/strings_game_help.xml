@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="about_winline">What is Winline?</string>
+    <string name="about_winline_description">Winline is a one player puzzle game. It is base on the classic Colour Line game.
+        The player can move one ball per turn to a particular place if there is a path (linked set of vertical and
+        horizontal empty cells) between the current position of the ball and the desired destination. The goal is to
+        score the most points removing balls by forming lines (horizontal, vertical or diagonal) of at least five balls
+        of the same colour. If the player does form such lines of at least five balls of the same colour, the balls
+        in those lines disappear, adding the number of balls that disappear to the overall player points, and he gains
+        one turn, e.g. he can move another ball. If not, three new balls are added (at random colour and position), and
+        the game continues until the board is either full or empty.</string>
+
+    <string name="how_to_play">How to play?</string>
+    <string name="how_to_play_description">To play you only need to touch on the ball you want to move and then touch in an
+        empty cell. If there is a path between the position of the ball and the desired destination the ball will move. You
+        also can save your current game touching on the most right button at the board bottom, create a new game using the
+        button in the center and load a saved game with the button most to the left.
+    </string>
+
+    <string name="how_combo_work">How combo works?</string>
+    <string name="how_combo_work_description">The combo feature is a way to give the player the opportunity to increments the points
+        by rewarding consecutive scores. Any time the player scores a countdown will be start, during this time a subsequent
+        score will multiply the points involved in the score by a number starting in 2 and incrementing consecutively in 1
+        and reset the countdown. If the time pass without a score the multiplier will reset to 2.
+    </string>
+</resources>
