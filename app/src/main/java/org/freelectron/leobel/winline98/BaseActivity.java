@@ -7,26 +7,15 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
-import android.os.PersistableBundle;
-import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Chronometer;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.facebook.share.model.ShareLinkContent;
@@ -34,12 +23,10 @@ import com.facebook.share.model.SharePhoto;
 import com.facebook.share.model.SharePhotoContent;
 import com.facebook.share.widget.ShareDialog;
 
-import org.freelectron.leobel.winline98.models.WinLine;
 import org.freelectron.leobel.winline98.utils.ActivityUtils;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -60,7 +47,7 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     public void shareSavedGames(List<Bitmap> screenShots){
-        task = new ShareSavedGamesAsyncTask();
+        task = new ShareSavedGamesAsyncTask(this);
         task.execute(screenShots);
     }
 
@@ -152,16 +139,15 @@ public class BaseActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
+    protected void onDestroy() {
         if(task != null){
-            task.dispose();
-            task = null;
+            task.cancel(true);
         }
+        super.onDestroy();
     }
 
     @NonNull
-    private String getAppLink() {
+    public String getAppLink() {
         String appPackageName = getPackageName();
         return getString(R.string.play_store_url) + appPackageName;
     }
@@ -202,23 +188,26 @@ public class BaseActivity extends AppCompatActivity {
         return true;
     }
 
-    public class ShareSavedGamesAsyncTask extends AsyncTask<List<Bitmap>, Integer, List<File>>{
+    public static class ShareSavedGamesAsyncTask extends AsyncTask<List<Bitmap>, Integer, List<File>>{
 
+        private BaseActivity mActivity;
         private ProgressDialog mProgressDialog;
 
-        public ShareSavedGamesAsyncTask(){
+        public ShareSavedGamesAsyncTask(BaseActivity activity){
+            mActivity = activity;
             mProgressDialog = new ProgressDialog(getActivity());
             mProgressDialog.setIndeterminate(false);
-            mProgressDialog.setMessage(getString(R.string.dialog_process_request));
+            mProgressDialog.setMessage(mActivity.getString(R.string.dialog_process_request));
             mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
         }
 
-        public void dispose(){
+        @Override
+        protected void onCancelled() {
             mProgressDialog.dismiss();
         }
 
         public Activity getActivity() {
-            return BaseActivity.this;
+            return mActivity;
         }
 
         @Override
@@ -242,19 +231,19 @@ public class BaseActivity extends AppCompatActivity {
             Handler handler = new Handler();
             handler.postDelayed(() -> {
                 mProgressDialog.hide();
-                String shareLink = getAppLink();
-                String facebookAppName = getString(R.string.facebokk_app_name);
+                String shareLink = mActivity.getAppLink();
+                String facebookAppName = mActivity.getString(R.string.facebokk_app_name);
                 if(ActivityUtils.isAppInstalled(getActivity(), facebookAppName)){
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-                    builder.setTitle(getString(R.string.share_with));
-                    builder.setItems(new CharSequence[] {getString(R.string.share_facebook), getString(R.string.share_other)}, (dialog, which) -> {
+                    builder.setTitle(mActivity.getString(R.string.share_with));
+                    builder.setItems(new CharSequence[] {mActivity.getString(R.string.share_facebook), mActivity.getString(R.string.share_other)}, (dialog, which) -> {
                         switch (which){
                             case 0:
                                 List<SharePhoto> photos = new ArrayList<>(files.size());
                                 for(File file : files) {
                                     SharePhoto photo = new SharePhoto.Builder()
                                             .setImageUrl(Uri.fromFile(file))
-                                            .setCaption(getString(R.string.share_title))
+                                            .setCaption(mActivity.getString(R.string.share_title))
                                             .build();
                                     photos.add(photo);
                                 }
@@ -266,9 +255,9 @@ public class BaseActivity extends AppCompatActivity {
                             case 1:
                                 Intent intent = new Intent();
                                 intent.setAction(Intent.ACTION_SEND_MULTIPLE);
-                                intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_title));
+                                intent.putExtra(Intent.EXTRA_SUBJECT, mActivity.getString(R.string.share_title));
                                 intent.putExtra(Intent.EXTRA_TEXT, shareLink);
-                                intent.setType(getString(R.string.share_image));
+                                intent.setType(mActivity.getString(R.string.share_image));
                                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                                 ArrayList<Uri> uris = new ArrayList<>(files.size());
                                 for(File file : files) {
@@ -277,7 +266,7 @@ public class BaseActivity extends AppCompatActivity {
                                 intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
 
                                 // Exclude Facebook from Apps
-                                List<ResolveInfo> activities = getPackageManager().queryIntentActivities(intent, 0);
+                                List<ResolveInfo> activities = mActivity.getPackageManager().queryIntentActivities(intent, 0);
                                 ArrayList<Intent> targetIntents = new ArrayList<>();
 
                                 for (ResolveInfo currentInfo : activities) {
@@ -285,9 +274,9 @@ public class BaseActivity extends AppCompatActivity {
                                     if (!facebookAppName.equals(packageName)) {
                                         Intent targetIntent = new Intent(Intent.ACTION_SEND_MULTIPLE);
 
-                                        targetIntent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_title));
+                                        targetIntent.putExtra(Intent.EXTRA_SUBJECT, mActivity.getString(R.string.share_title));
                                         targetIntent.putExtra(Intent.EXTRA_TEXT, shareLink);
-                                        targetIntent.setType(getString(R.string.share_image));
+                                        targetIntent.setType(mActivity.getString(R.string.share_image));
                                         targetIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION); // temp permission for receiving app to read this file
                                         targetIntent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
 
@@ -297,12 +286,12 @@ public class BaseActivity extends AppCompatActivity {
                                 }
 
                                 if(targetIntents.size() > 0) {
-                                    Intent chooserIntent = Intent.createChooser(targetIntents.remove(0), getString(R.string.share_with));
+                                    Intent chooserIntent = Intent.createChooser(targetIntents.remove(0), mActivity.getString(R.string.share_with));
                                     chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS, targetIntents.toArray(new Parcelable[targetIntents.size()]));
-                                    startActivity(chooserIntent);
+                                    mActivity.startActivity(chooserIntent);
                                 }
                                 else {
-                                    Toast.makeText(getActivity(), getString(R.string.share_app_not_found), Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(getActivity(), mActivity.getString(R.string.share_app_not_found), Toast.LENGTH_SHORT).show();
                                 }
 
                                 break;
@@ -314,9 +303,9 @@ public class BaseActivity extends AppCompatActivity {
                 else{
                     Intent intent = new Intent();
                     intent.setAction(Intent.ACTION_SEND_MULTIPLE);
-                    intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.share_title));
+                    intent.putExtra(Intent.EXTRA_SUBJECT, mActivity.getString(R.string.share_title));
                     intent.putExtra(Intent.EXTRA_TEXT, shareLink);
-                    intent.setType(getString(R.string.share_image));
+                    intent.setType(mActivity.getString(R.string.share_image));
                     intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     ArrayList<Uri> uris = new ArrayList<>(files.size());
                     for(File file : files) {
@@ -324,7 +313,7 @@ public class BaseActivity extends AppCompatActivity {
                     }
                     intent.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
 
-                    startActivity(Intent.createChooser(intent, getString(R.string.share_with)));
+                    mActivity.startActivity(Intent.createChooser(intent, mActivity.getString(R.string.share_with)));
                 }
             }, 500); // 1/2 seconds delay
         }

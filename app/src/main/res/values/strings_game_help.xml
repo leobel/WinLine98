@@ -10,6 +10,10 @@
         one turn, e.g. he can move another ball. If not, three new balls are added (at random colour and position), and
         the game continues until the board is either full or empty.</string>
 
+    <string name="about_winline_description_note">Note: you won\'t get points for a configuration of five or more balls in a row
+        if you last moved ball is not part of such configuration (e.g. five or more in a row caused by random allocation
+        of the three new balls added).</string>
+
     <string name="how_to_play">How to play?</string>
     <string name="how_to_play_description">To play you only need to touch on the ball you want to move and then touch in an
         empty cell. If there is a path between the position of the ball and the desired destination the ball will move. You
