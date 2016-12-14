@@ -6,18 +6,16 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.ScaleAnimation;
 
-import org.freelectron.leobel.winline98.dialogs.HelpDialog;
+import org.freelectron.leobel.winline98.HelpActivity;
 import org.freelectron.leobel.winline98.dialogs.WinlineDialog;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.DateFormat;
 import java.util.Date;
-import java.util.Locale;
 
 import timber.log.Timber;
 
@@ -25,12 +23,6 @@ import timber.log.Timber;
  * Created by leobel on 10/4/16.
  */
 public class ActivityUtils {
-
-    public static void showHelp(Activity activity){
-        if (activity == null || !(activity instanceof AppCompatActivity)) return;
-        HelpDialog dialog = HelpDialog.newInstance();
-        dialog.show(((AppCompatActivity)activity).getSupportFragmentManager(), "help");
-    }
 
     public static void showDialog(Activity activity, String message){
         if (activity == null || !(activity instanceof AppCompatActivity)) return;
