@@ -724,6 +724,7 @@ public class MainActivity extends BaseActivity
     @Override
     protected void onResume() {
         super.onResume();
+        bottomAdView.resume();
         prepareSound();
         createNewGame();
     }
@@ -739,6 +740,7 @@ public class MainActivity extends BaseActivity
 
     @Override
     protected void onPause() {
+        bottomAdView.pause();
         if(canPlay){
             pauseChronometer();
             pauseCombo();
