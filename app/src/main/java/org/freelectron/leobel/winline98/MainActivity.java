@@ -186,11 +186,6 @@ public class MainActivity extends BaseActivity
         mProgressDialog.setMessage("Your request is being processes");
         mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 
-        mp = MediaPlayer.create(this, R.raw.buton_click);
-        ballSelect = MediaPlayer.create(this, R.raw.ball_select);
-        ballMoving = MediaPlayer.create(this, R.raw.ball_moving);
-        ballMoveFailure = MediaPlayer.create(this, R.raw.ball_move_failure);
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -557,6 +552,8 @@ public class MainActivity extends BaseActivity
 
     }
 
+
+
     private void setUpNewGame() {
         setCanPlay(true);
         stopChronometer();
@@ -727,6 +724,7 @@ public class MainActivity extends BaseActivity
     @Override
     protected void onResume() {
         super.onResume();
+        prepareSound();
         createNewGame();
     }
 
@@ -741,17 +739,38 @@ public class MainActivity extends BaseActivity
 
     @Override
     protected void onPause() {
-        super.onPause();
         if(canPlay){
             pauseChronometer();
             pauseCombo();
         }
+        super.onPause();
     }
 
     @Override
     protected void onStop() {
-        super.onStop();
         googleApiClient.disconnect();
+        releaseSound();
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        bottomAdView.destroy();
+        super.onDestroy();
+    }
+
+    private void prepareSound() {
+        mp = MediaPlayer.create(this, R.raw.buton_click);
+        ballSelect = MediaPlayer.create(this, R.raw.ball_select);
+        ballMoving = MediaPlayer.create(this, R.raw.ball_moving);
+        ballMoveFailure = MediaPlayer.create(this, R.raw.ball_move_failure);
+    }
+
+    private void releaseSound() {
+        mp.release();
+        ballSelect.release();
+        ballMoving.release();
+        ballMoveFailure.release();
     }
 
     @Override
@@ -888,7 +907,7 @@ public class MainActivity extends BaseActivity
             }
         }
         else if(id == R.id.help_game){
-            ActivityUtils.showHelp(this);
+            startActivity(new Intent(this, HelpActivity.class));
         }
 //        if(closeDrawer){
 //            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
