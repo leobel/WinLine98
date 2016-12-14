@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.animation.AlphaAnimation;
 import android.view.animation.ScaleAnimation;
 
+import org.freelectron.leobel.winline98.dialogs.HelpDialog;
 import org.freelectron.leobel.winline98.dialogs.WinlineDialog;
 
 import java.io.File;
@@ -24,6 +25,12 @@ import timber.log.Timber;
  * Created by leobel on 10/4/16.
  */
 public class ActivityUtils {
+
+    public static void showHelp(Activity activity){
+        if (activity == null || !(activity instanceof AppCompatActivity)) return;
+        HelpDialog dialog = HelpDialog.newInstance();
+        dialog.show(((AppCompatActivity)activity).getSupportFragmentManager(), "help");
+    }
 
     public static void showDialog(Activity activity, String message){
         if (activity == null || !(activity instanceof AppCompatActivity)) return;
