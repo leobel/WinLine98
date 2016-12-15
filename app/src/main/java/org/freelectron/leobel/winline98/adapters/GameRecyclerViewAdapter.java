@@ -207,6 +207,7 @@ public class GameRecyclerViewAdapter extends RecyclerView.Adapter<GameRecyclerVi
         public void setItem(WinLine item, Integer record){
             this.mItem = item;
             boardView.setBoard(mItem.getBoard());
+            boardView.invalidate();
             gameDate.setText(ActivityUtils.formatFullDate(mItem.getId()));
             long timeWhenStopped = -1L * mItem.getTime();
             chronometer.setBase(SystemClock.elapsedRealtime() + timeWhenStopped);

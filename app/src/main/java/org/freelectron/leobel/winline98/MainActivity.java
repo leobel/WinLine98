@@ -722,6 +722,14 @@ public class MainActivity extends BaseActivity
     }
 
     @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if(hasFocus){
+            hideSystemUI();
+        }
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         bottomAdView.resume();
