@@ -24,7 +24,7 @@
     <string name="how_combo_work">How combo works?</string>
     <string name="how_combo_work_description">The combo feature is a way to give the player the opportunity to increments the points
         by rewarding consecutive scores. Any time the player scores a countdown will be start, during this time a subsequent
-        score will multiply the points involved in the score by a number starting in 2 and incrementing consecutively in 1
-        and reset the countdown. If the time pass without a score the multiplier will reset to 2.
+        score will multiply the points involved in the score by a multiplier starting in 2 (incrementing consecutively by 1 on each score)
+        and reset the countdown. If the countdown finish without a score the multiplier will reset to 2.
     </string>
 </resources>
