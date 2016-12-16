@@ -51,6 +51,7 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
 
     private OnListFragmentInteractionListener mListener;
 
+    private View noSavedGame;
     private RecyclerView recyclerView;
     private GameRecyclerViewAdapter adapter;
 
@@ -107,6 +108,7 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
         // Set the adapter
         Context context = view.getContext();
 
+        noSavedGame = view.findViewById(R.id.no_game_saved);
         recyclerView = (RecyclerView) view.findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(context));
 
@@ -164,6 +166,7 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
         Collections.sort(items, (lhs, rhs) -> -lhs.getScore().compareTo(rhs.getScore()));
         adapter = new GameRecyclerViewAdapter(items, record, this);
         recyclerView.setAdapter(adapter);
+        checkSavedGamesCount();
         return view;
     }
 
@@ -231,13 +234,14 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
                 mpTrash.start();
             }
             adapter.removeItem(adapterPosition);
-            if(mListener.isSelectMultipleItemsStatus()){ // verify that are in multiple delete status
+            if(mListener.isSelectMultipleItemsStatus()){ // verify that it's in multiple delete status
                 if(selectedItems.containsKey(adapterPosition)){
                     selectedItems.remove(adapterPosition);
                 }
                 mListener.notifySelectMultipleItemsClicked(selectedItems.size());
             }
             ActivityUtils.showDialog(getActivity(), getString(R.string.delete_game_success), getString(R.string.success_title));
+            checkSavedGamesCount();
         }
         else{
             ActivityUtils.showDialog(getActivity(), getString(R.string.delete_game_fail), getString(R.string.error_title));
@@ -255,9 +259,17 @@ public class GameLoadFragment extends Fragment implements RecyclerViewGameLoadAd
             selectedItems.clear();
             mListener.selectMultipleItems(false);
             ActivityUtils.showDialog(getActivity(), getString(size > 1 ? R.string.delete_games_success : R.string.delete_game_success), getString(R.string.success_title));
+            checkSavedGamesCount();
         }
         else{
             ActivityUtils.showDialog(getActivity(), getString(size > 1 ? R.string.delete_games_fail : R.string.delete_game_fail), getString(R.string.error_title));
+        }
+    }
+
+    private void checkSavedGamesCount() {
+        if(adapter.getItemCount() == 0){
+            recyclerView.setVisibility(View.GONE);
+            noSavedGame.setVisibility(View.VISIBLE);
         }
     }
 

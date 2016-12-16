@@ -2,13 +2,14 @@ package org.freelectron.leobel.winline98;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
+import android.graphics.Point;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
@@ -16,6 +17,9 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Display;
+import android.view.View;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.facebook.share.model.ShareLinkContent;
@@ -26,8 +30,11 @@ import com.facebook.share.widget.ShareDialog;
 import org.freelectron.leobel.winline98.utils.ActivityUtils;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+
+import timber.log.Timber;
 
 /**
  * Created by leobel on 10/24/16.
@@ -39,11 +46,65 @@ public class BaseActivity extends AppCompatActivity {
 
     private  ShareSavedGamesAsyncTask task;
 
+    private View decorView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        decorView = getWindow().getDecorView();
+    }
 
+    protected void hideSystemUI() {
+        if (Build.VERSION.SDK_INT >= 19) {
+            int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+            decorView.setSystemUiVisibility(uiOptions);
+        }
+    }
+
+    protected boolean hasNavigationBar() {
+        WindowManager windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+        Point appUsableSize = getAppUsableScreenSize(windowManager);
+        Point realScreenSize = getRealScreenSize(windowManager);
+
+        // navigation bar on the right
+        if (Math.abs(appUsableSize.x - realScreenSize.x) > 0) {
+            return true;
+        }
+
+        // navigation bar at the bottom
+        if (Math.abs(appUsableSize.y - realScreenSize.y) > 0) {
+            return true;
+        }
+
+        // navigation bar is not present
+        return false;
+    }
+
+    private Point getAppUsableScreenSize(WindowManager windowManager) {
+        Display display = windowManager.getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        return size;
+    }
+
+    private Point getRealScreenSize(WindowManager windowManager) {
+        Display display = windowManager.getDefaultDisplay();
+        Point size = new Point();
+
+        if (Build.VERSION.SDK_INT >= 17) {
+            display.getRealSize(size);
+        } else if (Build.VERSION.SDK_INT >= 14) {
+            try {
+                size.x = (Integer) Display.class.getMethod("getRawWidth").invoke(display);
+                size.y = (Integer) Display.class.getMethod("getRawHeight").invoke(display);
+            } catch (Exception e) {}
+        }
+
+        return size;
     }
 
     public void shareSavedGames(List<Bitmap> screenShots){

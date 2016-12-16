@@ -57,6 +57,7 @@ import org.freelectron.winline.Checker;
 import org.freelectron.winline.LogicWinLine;
 import org.freelectron.winline.MPoint;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -79,15 +80,15 @@ public class MainActivity extends BaseActivity
     private static final int ACHIEVEMENT_AWESOME_SCORER_THRESHOLD = 50000;
     private static final int ACHIEVEMENT_NINJA_SCORER_THRESHOLD = 100000;
 
-    private String HIGHLIGHT_COMBO_SCORE = "HIGHLIGHT_COMBO_SCORE";
-    private String PREVIOUS_GAME_SCORE = "PREVIOUS_GAME_SCORE";
+    private static String HIGHLIGHT_COMBO_SCORE = "HIGHLIGHT_COMBO_SCORE";
+    private static String PREVIOUS_GAME_SCORE = "PREVIOUS_GAME_SCORE";
 
 
-    private Thread timerMoveTile;
-    private Thread timerAnimateTile;
-    private Thread timerAnimateInsertTile;
-    private Thread timerAnimateScoreTile;
+    private AnimateMoveTails animateMoveTails;
+    private AnimateInsertTails animateInsertTails;
+    private AnimateScore animateScore;
     private AnimateSelectedTail animateSelectedTail;
+    private boolean animateSelectedBallIsRunning;
 
     private View boardContainer;
     private BoardView boardView;
@@ -104,7 +105,6 @@ public class MainActivity extends BaseActivity
     private int dimension;
     private boolean savedCurrentState;
     private MPoint orig;
-    private String path;
     private Long timeWhenStopped = 0L;
 
 
@@ -318,8 +318,8 @@ public class MainActivity extends BaseActivity
 
                     scoreImage.setMax(game.getScore());
                     if(breakRecordAlert){
-                        pauseChronometer();
                         setCanPlay(false);
+                        pauseChronometer();
                         pauseCombo();
                         breakRecordAlert = false; // only once during a game
                         GameStatsDialog gameRecord = GameStatsDialog.newInstance(game.getScore(), chronometer.getText().toString(), preferenceService.getHighRecord(), false, true);
@@ -354,9 +354,10 @@ public class MainActivity extends BaseActivity
         });
 
         endAlertHandler = new Handler(msg -> {
-            pauseChronometer();
             setCanPlay(false);
+            pauseChronometer();
             pauseCombo();
+            pauseSelectedBallAnimation();
             scoreView.setText(game.getScore().toString());
             gameProgress.setScore(game.getScore());
             if(gameServiceIsConnected(GameServiceRequest.NOTIFY_SCORE)){
@@ -368,6 +369,7 @@ public class MainActivity extends BaseActivity
                 loadGameOnStart = false;
                 stopChronometer();
                 stopCombo();
+                stopSelectedBallAnimation();
                 createNewGame();
             });
             gameOver.show(getSupportFragmentManager(), "game over");
@@ -377,14 +379,17 @@ public class MainActivity extends BaseActivity
         dimension = boardView.getDimension();
 
         scoreImage.setOnClickListener( v -> {
-            pauseChronometer();
             setCanPlay(false);
+            pauseChronometer();
             pauseCombo();
+            pauseSelectedBallAnimation();
+
             GameStatsDialog gameInfo = GameStatsDialog.newInstance(game.getScore(), chronometer.getText().toString(), preferenceService.getHighRecord(), false);
             gameInfo.setOnCloseListener(() -> {
                 setCanPlay(true);
                 startChronometer();
                 startCombo();
+                startSelectedBallAnimation();
             });
             gameInfo.show(getSupportFragmentManager(), "game info");
 
@@ -403,9 +408,10 @@ public class MainActivity extends BaseActivity
                 }
             }
             else{
-                pauseChronometer();
                 setCanPlay(false);
+                pauseChronometer();
                 pauseCombo();
+                pauseSelectedBallAnimation();
                 ActivityUtils.showDialog(this, getString(R.string.unsaved_current_state), true, () -> {
                     if(newGameAdView.isLoaded()){
                         newGameAdView.show();
@@ -417,15 +423,17 @@ public class MainActivity extends BaseActivity
                     setCanPlay(true);
                     startChronometer();
                     startCombo();
+                    startSelectedBallAnimation();
                 });
             }
 
         });
 
         loadGame.setOnClickListener(v -> {
-            pauseChronometer();
             setCanPlay(false);
+            pauseChronometer();
             pauseCombo();
+            pauseSelectedBallAnimation();
             if(preferenceService.getAllowTouchSoundPreference()){
                 mp.start();
             }
@@ -463,13 +471,12 @@ public class MainActivity extends BaseActivity
                 return true;
             }
             handleBoardTouch = false;
-            BoardView board = (BoardView) v;
             if (game.getBoard()[i][j] == null) {
                 emptyPlace = true;
             }
             if (orig != null && emptyPlace) { // try to move to specific location
                 MPoint dest = new MPoint(i, j);
-                path = game.getPath(orig, dest);
+                String path = game.getPath(orig, dest);
                 if (path == null) { // can't move there!!!
                     if(preferenceService.getAllowTouchSoundPreference()){
                         ballMoveFailure.start();
@@ -478,8 +485,10 @@ public class MainActivity extends BaseActivity
                     return true;
                 }
                 savedCurrentState = false;
+                int x = orig.getX();
+                int y = orig.getY();
                 stopAnimateTail(() -> {
-                    MoveTile(board);
+                    MoveTile(x, y, path);
                     if(preferenceService.getAllowTouchSoundPreference()){
                         ballMoving.start();
                     }
@@ -489,8 +498,7 @@ public class MainActivity extends BaseActivity
                 handleBoardTouch = true;
                 return true;
             } else { // select ball
-                if(orig != null && orig.getX() == i && orig.getY() == j){
-                    orig = null;
+                if(orig != null && orig.getX() == i && orig.getY() == j){ // stop selected ball animation
                     stopAnimateTail(() -> {
                         boardHandler.sendMessage(new Message()); // refresh the board state
                     });
@@ -500,14 +508,16 @@ public class MainActivity extends BaseActivity
                 if(preferenceService.getAllowTouchSoundPreference()){
                     ballSelect.start();
                 }
-                orig = new MPoint(i, j);
-                if(animateSelectedTail != null && animateSelectedTail.isRunning()){ // there is one ball selected already
+
+                if(animateSelectedBallIsRunning){ // there is one ball selected already
                     stopAnimateTail(()-> {
-                        animateTail(orig);
+                        orig = new MPoint(i, j);
+                        animateTail(orig.getX(), orig.getY());
                     });
                 }
                 else {
-                    animateTail(orig);
+                    orig = new MPoint(i, j);
+                    animateTail(orig.getX(), orig.getY());
                 }
                 handleBoardTouch = true;
                 return true;
@@ -525,6 +535,7 @@ public class MainActivity extends BaseActivity
                 setCanPlay(false);
                 pauseChronometer();
                 pauseCombo();
+                pauseSelectedBallAnimation();
             }
 
             @Override
@@ -558,6 +569,7 @@ public class MainActivity extends BaseActivity
         setCanPlay(true);
         stopChronometer();
         stopCombo();
+        stopSelectedBallAnimation();
         loadGameOnStart = false;
         createNewGame();
         breakRecordAlert = true;
@@ -594,29 +606,6 @@ public class MainActivity extends BaseActivity
             Games.Achievements.unlock(googleApiClient, getString(R.string.achievement_ninja_scorer));
         }
     }
-
-//    @Override
-//    public boolean dispatchTouchEvent(MotionEvent event) {
-//        if (event.getAction() == MotionEvent.ACTION_UP) {
-//            DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-//            if (isDrawerOpen(drawer)) { //Your code here to check whether drawer is open or not.
-//
-//                View content = findViewById(R.id.nav_view); //drawer view id
-//                int[] contentLocation = new int[2];
-//                content.getLocationOnScreen(contentLocation);
-//                Rect rect = new Rect(contentLocation[0],
-//                        contentLocation[1],
-//                        contentLocation[0] + content.getWidth(),
-//                        contentLocation[1] + content.getHeight());
-//
-//                if (!(rect.contains((int) event.getX(), (int) event.getY()))) {
-//                    setCanPlay(true);
-//                }
-//
-//            }
-//        }
-//        return super.dispatchTouchEvent(event);
-//    }
 
     private void startComboAnimation(boolean startVisualAnimation) {
         chrono.setText(String.format(Locale.US, "%.1f", comboCount/1000f));
@@ -687,6 +676,7 @@ public class MainActivity extends BaseActivity
                 game = new LogicWinLine(loadedGame.getBoard(), loadedGame.getNext(), loadedGame.getScore());
                 breakRecordAlert = true;
                 stopCombo();
+                stopSelectedBallAnimation();
             }
         }
         else if(requestCode == REQUEST_RESOLVE_ERROR){
@@ -722,6 +712,14 @@ public class MainActivity extends BaseActivity
     }
 
     @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        if(hasNavigationBar() && hasFocus){
+            hideSystemUI();
+        }
+    }
+
+    @Override
     protected void onResume() {
         super.onResume();
         bottomAdView.resume();
@@ -744,6 +742,7 @@ public class MainActivity extends BaseActivity
         if(canPlay){
             pauseChronometer();
             pauseCombo();
+            pauseSelectedBallAnimation();
         }
         super.onPause();
     }
@@ -758,6 +757,10 @@ public class MainActivity extends BaseActivity
     @Override
     protected void onDestroy() {
         bottomAdView.destroy();
+        boardHandler.removeCallbacksAndMessages(null);
+        nextHandler.removeCallbacksAndMessages(null);
+        scoreHandler.removeCallbacksAndMessages(null);
+        endAlertHandler.removeCallbacksAndMessages(null);
         super.onDestroy();
     }
 
@@ -804,6 +807,25 @@ public class MainActivity extends BaseActivity
         if(canPlay){
             startChronometer();
             startCombo();
+            startSelectedBallAnimation();
+        }
+    }
+
+    private void startSelectedBallAnimation() {
+        if(animateSelectedBallIsRunning){
+            animateTail(orig.getX(), orig.getY());
+        }
+    }
+
+    private void pauseSelectedBallAnimation(){
+        if(animateSelectedBallIsRunning){
+            animateSelectedTail.stopAnimation(null);
+        }
+    }
+
+    private void stopSelectedBallAnimation(){
+        if(animateSelectedBallIsRunning){
+            stopAnimateTail(null);
         }
     }
 
@@ -833,9 +855,10 @@ public class MainActivity extends BaseActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        pauseChronometer();
         setCanPlay(false);
+        pauseChronometer();
         pauseCombo();
+        pauseSelectedBallAnimation();
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.share) {
@@ -844,6 +867,7 @@ public class MainActivity extends BaseActivity
                     setCanPlay(true);
                     startChronometer();
                     startCombo();
+                    startSelectedBallAnimation();
                 },() -> {
                     setCanPlay(true);
                 });
@@ -930,30 +954,31 @@ public class MainActivity extends BaseActivity
         return false;
     }
 
-    private void MoveTile(BoardView board) {
-        timerMoveTile = new Thread(new AnimateMoveTails(boardHandler, nextHandler, scoreHandler, endAlertHandler));
-        timerMoveTile.start();
+    private void MoveTile(int x, int y, String path) {
+        animateMoveTails = new AnimateMoveTails(new WeakReference<>(this), x, y, path);
+        animateMoveTails.start();
     }
 
-    private void animateTail(MPoint point){
-        Checker tail = game.getBoard()[point.getX()][point.getY()];
-        animateSelectedTail = new AnimateSelectedTail(new AnimateChecker(tail, 0), boardHandler);
-        timerAnimateTile = new Thread(animateSelectedTail);
-        timerAnimateTile.start();
+    private void animateTail(int x, int y){
+        animateSelectedTail = new AnimateSelectedTail(new WeakReference<>(this), x, y);
+        animateSelectedTail.start();
+        animateSelectedBallIsRunning = true;
     }
 
     private void stopAnimateTail(Runnable actionAfter){
+        orig = null;
+        animateSelectedBallIsRunning = false;
         animateSelectedTail.stopAnimation(actionAfter);
     }
 
     private void animateInsertTile(List<AnimateChecker> tails, Runnable doAfter) {
-        timerAnimateInsertTile = new Thread(new AnimateInsertTails(tails, boardHandler, doAfter));
-        timerAnimateInsertTile.start();
+        animateInsertTails = new AnimateInsertTails(new WeakReference<>(this), tails, doAfter);
+        animateInsertTails.start();
     }
 
     private void animateScoreTile(List<AnimateChecker> tiles, Runnable doAfter){
-        timerAnimateScoreTile = new Thread(new AnimateScore(tiles, boardHandler, doAfter));
-        timerAnimateScoreTile.start();
+        animateScore = new AnimateScore(new WeakReference<>(this), tiles, doAfter);
+        animateScore.start();
     }
 
     public void setLoadGameOnStart(boolean loadGameOnStart) {
@@ -1042,20 +1067,20 @@ public class MainActivity extends BaseActivity
         }
     }
 
-    class AnimateMoveTails implements Runnable {
-        Handler alertHandler;
-        Handler boardHandler;
-        Handler nextHandler;
-        Handler scoreHandler;
+    static class AnimateMoveTails extends Thread {
+        WeakReference<MainActivity> container;
+        MPoint orig;
+        String path;
 
-        public AnimateMoveTails(Handler boardHandler, Handler nextHandler, Handler scoreHandler, Handler alertHandler) {
-            this.boardHandler = boardHandler;
-            this.nextHandler = nextHandler;
-            this.scoreHandler = scoreHandler;
-            this.alertHandler = alertHandler;
+        public AnimateMoveTails(WeakReference<MainActivity> container, int x, int y, String path) {
+            this.container = container;
+            this.orig = new MPoint(x, y);
+            this.path = path;
         }
 
         public void run() {
+            MainActivity activity = container.get();
+            LogicWinLine game = activity.getGame();
             Checker[][] t = game.getBoard();
             int x = orig.getX();
             int y = orig.getY();
@@ -1077,8 +1102,8 @@ public class MainActivity extends BaseActivity
                         break;
                 }
                 t[x][y] = f;
-                boardView.setBoard(t);
-                this.boardHandler.sendMessage(new Message());
+                activity.setBoardGame(t);
+                activity.sendBoardAlertHandler(new Message());
                 try {
                     Thread.sleep(25);
                 } catch (InterruptedException e) {
@@ -1090,15 +1115,19 @@ public class MainActivity extends BaseActivity
             ContinueGameLogic(dest);
         }
 
-        public void ContinueGameLogic(MPoint dest) {
+        private void ContinueGameLogic(MPoint dest) {
+            MainActivity activity = container.get();
+            LogicWinLine game = activity.getGame();
+            int dimension = activity.getDimension();
             MPoint[] limit = new MPoint[8];
             int[] score = new int[4];
             if (game.canDelete(dest, limit, score)) {
                 List<AnimateChecker> tiles = new ArrayList<>();
                 Checker[][]board = game.getBoard(true);
                 int index = AnimateChecker.getScoreIndex();
-                int comboMultiple = comboIsRunning ? combo : 1;
+                int comboMultiple = activity.getComboIsRunning() ? activity.getCombo() : 1;
                 int previousScore = game.getScore();
+
 
                 for (int k = 0; k < score.length; k++) {
                     if (score[k] >= 5) {
@@ -1112,16 +1141,16 @@ public class MainActivity extends BaseActivity
                     }
                 }
 
-                animateScoreTile(tiles, () -> {
-                    boardView.setBoard(game.getBoard());
-                    boardHandler.sendMessage(new Message());
+                activity.animateScoreTile(tiles, () -> {
+                    activity.setBoardGame(game.getBoard());
+                    activity.sendBoardAlertHandler(new Message());
                     Message m = new Message();
                     Bundle bundle = new Bundle();
                     bundle.putBoolean(HIGHLIGHT_COMBO_SCORE, comboMultiple > 1);
                     bundle.putInt(PREVIOUS_GAME_SCORE, previousScore);
                     m.setData(bundle);
-                    scoreHandler.sendMessage(m);
-                    handleBoardTouch = true;
+                    activity.sendScoreAlertHandler(m);
+                    activity.setHandleBoardTouch(true);
                 });
             } else {
                 try {
@@ -1135,40 +1164,39 @@ public class MainActivity extends BaseActivity
                         tails.add(new AnimateChecker(board[x][y], index));
                     }
                     game.buildNext(3);
-                    animateInsertTile(tails, () -> {
-                        boardView.setBoard(game.getBoard());
-                        nextView.setBoard(game.getNext());
-                        this.boardHandler.sendMessage(new Message());
-                        this.nextHandler.sendMessage(new Message());
-                        handleBoardTouch = true;
+                    activity.animateInsertTile(tails, () -> {
+                        activity.setBoardGame(game.getBoard());
+                        activity.setNextBoardGame(game.getNext());
+                        activity.sendBoardAlertHandler(new Message());
+                        activity.sendNextAlertHandler(new Message());
+                        activity.setHandleBoardTouch(true);
                     });
                 } catch (Exception ex) {
                     ex.printStackTrace();
-                    handleBoardTouch = true;
+                    activity.setHandleBoardTouch(true);
                 }
             }
-            orig = null;
             if (game.gameOver()) {
-                endAlertHandler.sendMessage(new Message());
+                activity.sendEndAlertHandler(new Message());
             }
         }
-
-
     }
 
-    class AnimateInsertTails implements Runnable{
-        Handler boardHandler;
+    static class AnimateInsertTails extends Thread {
+        WeakReference<MainActivity> container;
         List<AnimateChecker> tails;
         Runnable doAfter;
 
-        public AnimateInsertTails(List<AnimateChecker> tails, Handler boardHandler, Runnable doAfter){
+        public AnimateInsertTails(WeakReference<MainActivity> container, List<AnimateChecker> tails, Runnable doAfter){
+            this.container = container;
             this.tails = tails;
-            this.boardHandler = boardHandler;
             this.doAfter = doAfter;
         }
 
         @Override
         public void run() {
+            MainActivity activity = container.get();
+            LogicWinLine game = activity.getGame();
             Checker[][] board = game.getBoard();
             List<Checker> originals = new ArrayList<>(3);
             for (AnimateChecker checker: tails){
@@ -1180,7 +1208,7 @@ public class MainActivity extends BaseActivity
                     MPoint position = checker.getPosition();
                     board[position.getX()][position.getY()] = checker;
                 }
-                this.boardHandler.sendMessage(new Message());
+                activity.sendBoardAlertHandler(new Message());
                 try {
                     Thread.sleep(40);
                 } catch (InterruptedException e) {
@@ -1197,16 +1225,18 @@ public class MainActivity extends BaseActivity
         }
     }
 
-    class AnimateSelectedTail implements Runnable {
-        Handler boardHandler;
-        AnimateChecker tail;
+    static class AnimateSelectedTail extends Thread {
+        WeakReference<MainActivity> container;
+        int x;
+        int y;
         private AtomicBoolean canRun;
         Runnable actionAfter;
 
 
-        public AnimateSelectedTail(AnimateChecker tail, Handler boardHandler){
-            this.boardHandler = boardHandler;
-            this.tail = tail;
+        public AnimateSelectedTail(WeakReference<MainActivity> container, int x, int y){
+            this.container = container;
+            this.x = x;
+            this.y = y;
             canRun = new AtomicBoolean();
             canRun.set(true);
         }
@@ -1217,19 +1247,17 @@ public class MainActivity extends BaseActivity
 
         }
 
-        public boolean isRunning(){
-            return canRun.get();
-        }
-
         @Override
         public void run() {
-            MPoint point = tail.getPosition();
-            Checker[][] board = game.getBoard();
-            board[point.getX()][point.getY()] = tail;
+            MainActivity activity = container.get();
+            Checker[][] board = container.get().getGame().getBoard();
+            AnimateChecker tail = new AnimateChecker(board[x][y], 0);
+            board[x][y] = tail;
+
             while (canRun.get()){
                 for(int i=0; i < AnimateChecker.FRAMES_COUNT; i++){
                     tail.setAnimateColor(i);
-                    this.boardHandler.sendMessage(new Message());
+                    activity.sendBoardAlertHandler(new Message());
                     try {
                         Thread.sleep(100);
                     } catch (InterruptedException e) {
@@ -1237,27 +1265,27 @@ public class MainActivity extends BaseActivity
                     }
                 }
             }
-            board[point.getX()][point.getY()] = tail.getChecker();
+            board[x][y] = tail.getChecker();
             if(actionAfter != null)
                 actionAfter.run();
         }
     }
 
-    class AnimateScore implements Runnable{
-
+    static class AnimateScore extends Thread {
+        WeakReference<MainActivity> container;
         private final List<AnimateChecker> tiles;
-        private final Handler boardHandler;
         private final Runnable doAfter;
 
-        public AnimateScore(List<AnimateChecker> tiles, Handler boardHandler, Runnable doAfter){
+        public AnimateScore(WeakReference<MainActivity> container, List<AnimateChecker> tiles, Runnable doAfter){
+            this.container = container;
             this.tiles = tiles;
-            this.boardHandler = boardHandler;
             this.doAfter = doAfter;
         }
 
         @Override
         public void run() {
-            Checker[][] board = game.getBoard();
+            MainActivity activity = container.get();
+            Checker[][] board = activity.getGame().getBoard();
             List<Checker> originals = new ArrayList<>(3);
             for (AnimateChecker checker: tiles){
                 originals.add(checker.getChecker());
@@ -1268,7 +1296,7 @@ public class MainActivity extends BaseActivity
                     MPoint position = checker.getPosition();
                     board[position.getX()][position.getY()] = checker;
                 }
-                this.boardHandler.sendMessage(new Message());
+                activity.sendBoardAlertHandler(new Message());
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
@@ -1283,6 +1311,50 @@ public class MainActivity extends BaseActivity
                 doAfter.run();
             }
         }
+    }
+
+    private LogicWinLine getGame() {
+        return game;
+    }
+
+    private void setBoardGame(Checker[][] boardGame){
+        boardView.setBoard(boardGame);
+    }
+
+    private void setNextBoardGame(Checker[] nextGame){
+        nextView.setBoard(nextGame);
+    }
+
+    private boolean getComboIsRunning() {
+        return comboIsRunning;
+    }
+
+    private int getCombo() {
+        return combo;
+    }
+
+    private int getDimension() {
+        return dimension;
+    }
+
+    private void setHandleBoardTouch(boolean value){
+        handleBoardTouch = value;
+    }
+
+    private void sendBoardAlertHandler(Message m){
+        boardHandler.sendMessage(m);
+    }
+
+    private void sendNextAlertHandler(Message m){
+        nextHandler.sendMessage(m);
+    }
+
+    private void sendScoreAlertHandler(Message m){
+        scoreHandler.sendMessage(m);
+    }
+
+    private void sendEndAlertHandler(Message m) {
+        endAlertHandler.sendMessage(m);
     }
 
     public enum GameServiceRequest{

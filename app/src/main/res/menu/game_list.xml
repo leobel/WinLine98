@@ -4,7 +4,7 @@
 
     <item
         android:id="@+id/share_item"
-        android:title="share"
+        android:title="@string/icon_share"
         android:icon="@drawable/ic_share"
         app:showAsAction="always">
 
@@ -13,7 +13,7 @@
 
     <item
         android:id="@+id/delete_item"
-        android:title="delete"
+        android:title="@string/icon_delete"
         android:icon="@drawable/ic_trash"
         app:showAsAction="always">
 
@@ -22,24 +22,24 @@
 
     <item
         android:id="@+id/sort_by"
-        android:title="Sort By"
+        android:title="@string/icon_sort_by"
         app:showAsAction="always">
 
         <menu>
             <item
                 android:id="@+id/game_saved_date"
                 android:orderInCategory="100"
-                android:title="Most Recent">
+                android:title="@string/icon_most_recent">
             </item>
             <item
                 android:id="@+id/game_saved_score"
                 android:orderInCategory="100"
-                android:title="High Score">
+                android:title="@string/icon_high_score">
             </item>
             <item
                 android:id="@+id/game_saved_time"
                 android:orderInCategory="100"
-                android:title="Longer played">
+                android:title="@string/icon_longer_played">
             </item>
         </menu>
 

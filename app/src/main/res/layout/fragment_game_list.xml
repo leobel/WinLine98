@@ -15,4 +15,17 @@
         tools:context="org.freelectron.leobel.winline98.GameLoadFragment"
         tools:listitem="@layout/fragment_game" />
 
+    <RelativeLayout
+        android:id="@+id/no_game_saved"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/no_saved_game"
+            android:layout_centerInParent="true"/>
+    </RelativeLayout>
+
 </FrameLayout>
