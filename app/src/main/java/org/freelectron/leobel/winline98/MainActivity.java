@@ -121,8 +121,6 @@ public class MainActivity extends BaseActivity
     @Inject
     public PreferenceService preferenceService;
 
-    private ProgressDialog mProgressDialog;
-
     private boolean loadGameOnStart;
     private boolean canPlay;
     private boolean breakRecordAlert;
@@ -167,7 +165,7 @@ public class MainActivity extends BaseActivity
         gameServiceRequest = GameServiceRequest.NONE;
         gameProgress = new GameProgress();
 
-        googleApiClient = new GoogleApiClient.Builder(this)
+        googleApiClient = new GoogleApiClient.Builder(getApplicationContext())
                 .addConnectionCallbacks(this)
                 .addOnConnectionFailedListener(this)
                 .addApi(Games.API)
@@ -180,11 +178,6 @@ public class MainActivity extends BaseActivity
             Games.Achievements.increment(googleApiClient, getString(R.string.achievement_enthusiast_player), 1);
             Games.Achievements.increment(googleApiClient, getString(R.string.achievement_fanatic_player), 1);
         }
-
-        mProgressDialog = new ProgressDialog(this);
-        mProgressDialog.setIndeterminate(false);
-        mProgressDialog.setMessage("Your request is being processes");
-        mProgressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -208,17 +201,11 @@ public class MainActivity extends BaseActivity
 
         bottomAdView.loadAd(requestNewAdRequest());
 
-        newGameAdView = new InterstitialAd(this);
+        newGameAdView = new InterstitialAd(getApplicationContext());
 
         newGameAdView.setAdUnitId(getString(R.string.new_game_interstitial_ad_unit_id));
 
-        newGameAdView.setAdListener(new AdListener() {
-            @Override
-            public void onAdClosed() {
-                newGameAdView.loadAd(requestNewAdRequest());
-                setUpNewGame();
-            }
-        });
+        newGameAdView.setAdListener(new MyAdListener(new WeakReference<>(this)));
 
         newGameAdView.loadAd(requestNewAdRequest());
 
@@ -446,7 +433,6 @@ public class MainActivity extends BaseActivity
             }
             if(gameService.save(game, (int)(SystemClock.elapsedRealtime() - chronometer.getBase()))){
                 savedCurrentState = true;
-                mProgressDialog.hide();
                 Toast.makeText(this, "Your game was saved!", Toast.LENGTH_SHORT).show();
 
             }
@@ -582,7 +568,6 @@ public class MainActivity extends BaseActivity
                 .addTestDevice("8DDE4A81B682B0D4E89B7D11A7B893FF")
                 .addTestDevice("AD276AD2D1CB10BE5142B2786D4C3817")
                 .addTestDevice("E03390F6D86E80375CCF82C18576611C")
-                .addTestDevice("B90D7176E108E6CAAFA0EFE95C814E0E")
                 .build();
 
     }
@@ -1367,6 +1352,22 @@ public class MainActivity extends BaseActivity
         NOTIFY_ACHIEVEMENT_GOOD_SCORER,
         NOTIFY_ACHIEVEMENT_GREAT_SCORER,
         NOTIFY_ACHIEVEMENT_SUPPORTER_PLAYER
+    }
+
+    public static class MyAdListener extends AdListener{
+
+        private final WeakReference<MainActivity> container;
+
+        public MyAdListener(WeakReference<MainActivity> container){
+            this.container = container;
+        }
+
+        @Override
+        public void onAdClosed() {
+            MainActivity activity = container.get();
+            activity.newGameAdView.loadAd(activity.requestNewAdRequest());
+            activity.setUpNewGame();
+        }
     }
 
 }
