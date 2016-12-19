@@ -17,9 +17,13 @@ import dagger.Component;
 public interface ApplicationComponent {
     void inject(WinLineApp app);
 
-    void inject(MainActivity activity);
+    void inject(GameActivity activity);
 
     void inject(GameLoadFragment fragment);
 
     void inject(GameStatsDialog dialogFragment);
+
+    void inject(InteractiveHelpActivity interactiveHelpActivity);
+
+    void inject(MainActivity mainActivity);
 }

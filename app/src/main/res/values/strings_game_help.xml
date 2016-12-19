@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="winline_help">Demo Help</string>
+    <string name="winline_help_description">Touch on the button to see a simple demo help, it\'ll take less than a minute!</string>
+
     <string name="about_winline">What should you know?</string>
 
     <string name="about_winline_description">Winline is a one player puzzle game.</string>
@@ -44,7 +47,5 @@
     <string name="guide_step8_description">Touch on this button to see the list of your saved games. Here you can see when you saved it, the score and the time
         you spend on it. To select one, just touch on it.</string>
 
-
-
-    <string name="winline_help_tour">Try the demo!</string>
+    <string name="winline_help_tour">Try Demo Help!</string>
 </resources>

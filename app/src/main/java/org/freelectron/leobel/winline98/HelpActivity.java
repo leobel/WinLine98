@@ -1,5 +1,6 @@
 package org.freelectron.leobel.winline98;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.Toolbar;
@@ -46,7 +47,7 @@ public class HelpActivity extends BaseActivity {
 
         Button demo = (Button) findViewById(R.id.winline_help_demo);
         demo.setOnClickListener(view -> {
-
+            startActivity(new Intent(this, InteractiveHelpActivity.class));
         });
     }
 }

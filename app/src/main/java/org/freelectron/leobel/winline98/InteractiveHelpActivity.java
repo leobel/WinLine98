@@ -1,5 +1,6 @@
 package org.freelectron.leobel.winline98;
 
+import android.content.Intent;
 import android.graphics.Point;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,9 +23,9 @@ import org.freelectron.winline.Checker;
 import org.freelectron.winline.LogicWinLine;
 import org.freelectron.winline.MPoint;
 
-import timber.log.Timber;
-
 public class InteractiveHelpActivity extends AppCompatActivity implements View.OnClickListener {
+
+    public static String LAUNCH_GAME_ACTIVITY = "LAUNCH_GAME_ACTIVITY";
 
     BoardView boardView;
     NextView nextView;
@@ -46,11 +47,12 @@ public class InteractiveHelpActivity extends AppCompatActivity implements View.O
             R.string.guide_step6_description, R.string.guide_step7_description, R.string.guide_step8_description};
     int index = 0;
 
+    boolean shouldLaunchGameActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_game);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -74,6 +76,7 @@ public class InteractiveHelpActivity extends AppCompatActivity implements View.O
         scoreImage.setMax(500);
         scoreImage.setProgress(217);
 
+        shouldLaunchGameActivity = getIntent().getBooleanExtra(LAUNCH_GAME_ACTIVITY, false);
 
         boardView.onSetPosition(() -> {
             RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -117,7 +120,6 @@ public class InteractiveHelpActivity extends AppCompatActivity implements View.O
         board[7][4] = new Checker(new MPoint(7,4), LogicWinLine.Color.WHITE);
         board[8][7] = new Checker(new MPoint(8,7), LogicWinLine.Color.GREEN);
         Checker[]next = new Checker[]{new Checker(LogicWinLine.Color.RED), new Checker(LogicWinLine.Color.BLUE), new Checker(LogicWinLine.Color.GREEN)};
-//        LogicWinLine game = new LogicWinLine(board, next, 0);
         boardView.setBoard(board);
         nextView.setBoard(next);
 
@@ -125,8 +127,7 @@ public class InteractiveHelpActivity extends AppCompatActivity implements View.O
         boardView.getLocationInWindow(location);
         ballLocation = new Point(location[0] + boardView.getLeftPosition() + 4 * boardView.mTileSize + boardView.mTileSize/2, location[1] + boardView.getTopPosition() + boardView.mTileSize + boardView.mTileSize/2);
         emptyLocation = new Point(ballLocation.x, ballLocation.y + 4 * boardView.mTileSize);
-        Timber.d("target ball x:" + (location[0] + boardView.getLeftPosition()));
-        Timber.d("target ball y:" + (location[1] + boardView.getTopPosition()));
+
         Target target1 = new PointTarget(ballLocation);
         Target target2 = new PointTarget(emptyLocation);
         Target target3 = new ViewTarget(comboTrack);
@@ -152,7 +153,29 @@ public class InteractiveHelpActivity extends AppCompatActivity implements View.O
         }
         else{
             showcaseView.hide();
+            if(shouldLaunchGameActivity){
+                launchGameActivity();
+            }
+            else{
+                finish();
+            }
         }
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(shouldLaunchGameActivity){
+            launchGameActivity();
+        }
+        else {
+            super.onBackPressed();
+        }
+    }
+
+    private void launchGameActivity() {
+        Intent intent = new Intent(this, GameActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
     }
 }
