@@ -87,6 +87,9 @@ dependencies {
     // Facebook SDK
     compile 'com.facebook.android:facebook-android-sdk:4.15.0'
 
+    // show case view
+    compile 'com.github.amlcurran.showcaseview:library:5.4.3'
+
     // Test dependencies
     androidTestCompile ('junit:junit:4.12') {
         exclude module: 'hamcrest-core'

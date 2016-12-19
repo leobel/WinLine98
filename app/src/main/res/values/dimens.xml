@@ -7,4 +7,10 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
     <dimen name="text_margin">16dp</dimen>
+
+    <dimen name="showcase_radius">48dp</dimen>
+    <!--<dimen name="showcase_radius_inner">96dp</dimen>-->
+    <!--<dimen name="showcase_radius_outer">128dp</dimen>-->
+
+    <!--<dimen name="showcase_radius_material">94dp</dimen>-->
 </resources>
