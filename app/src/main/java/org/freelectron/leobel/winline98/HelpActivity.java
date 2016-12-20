@@ -34,7 +34,7 @@ public class HelpActivity extends BaseActivity {
                 "<b>&#8226; %s</b><br/><br/>" +
                 "<b>&#8226; %s</b><br/><br/>" +
                 "<b>&#8226; %s</b><br/><br/>" +
-                "<b>&#8226; %s<b/></div>",
+                "<b><font color=#FF0000> &#8226; %s</font></b></div>",
                 getString(R.string.about_winline_description),
                 getString(R.string.about_winline_description1),
                 getString(R.string.about_winline_description2),

@@ -18,15 +18,11 @@ import javax.inject.Inject;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    @Inject
-    public PreferenceService preferenceService;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        WinLineApp.getInstance().getComponent().inject(this);
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -40,22 +36,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             startActivity(intent);
         });
 
-        if(preferenceService.getShowInteractiveHelp()){
-            preferenceService.setShowInteractiveHelp(false);
+        ShowcaseView showcaseView = new ShowcaseView.Builder(this)
+                .setTarget(new ViewTarget(demo))
+                .setOnClickListener(this)
+                .build();
+        showcaseView.setButtonText("Skip");
+        showcaseView.setContentTitle(getString(R.string.winline_help));
+        showcaseView.setContentText(getString(R.string.winline_help_description));
 
-            ShowcaseView showcaseView = new ShowcaseView.Builder(this)
-                    .setTarget(new ViewTarget(demo))
-                    .setOnClickListener(this)
-                    .build();
-            showcaseView.setButtonText("Skip");
-            showcaseView.setContentTitle(getString(R.string.winline_help));
-            showcaseView.setContentText(getString(R.string.winline_help_description));
-        }
-        else{
-            Intent intent = new Intent(this, GameActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-        }
 
     }
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="winline_help">Demo Help</string>
-    <string name="winline_help_description">Touch on the button to see a simple demo help, it\'ll take less than a minute!</string>
+    <string name="winline_help_description">Touch on the green button to see the simple demo help, it\'ll take just a few seconds!</string>
 
     <string name="about_winline">What should you know?</string>
 
@@ -39,13 +39,13 @@
     <string name="guide_step6_description">You can save your game touching on this button. The game will be on the list of saved games.
 
     </string><string name="guide_step7">New game</string>
-    <string name="guide_step7_description">You can create a new game touching on this button. If your current game isn\'t saved yet a dialog will be warn you
+    <string name="guide_step7_description">You can create a new game touching on this button. If your current game isn\'t saved yet a dialog will show up warning you
         about it.</string>
 
 
     <string name="guide_step8">Select a saved game</string>
     <string name="guide_step8_description">Touch on this button to see the list of your saved games. Here you can see when you saved it, the score and the time
-        you spend on it. To select one, just touch on it.</string>
+        you spend on it. To select one just touch on it.</string>
 
     <string name="winline_help_tour">Try Demo Help!</string>
 </resources>

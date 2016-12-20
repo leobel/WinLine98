@@ -25,5 +25,5 @@ public interface ApplicationComponent {
 
     void inject(InteractiveHelpActivity interactiveHelpActivity);
 
-    void inject(MainActivity mainActivity);
+    void inject(SplashActivity splashActivity);
 }
