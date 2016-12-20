@@ -3,17 +3,15 @@ package org.freelectron.leobel.winline98.dialogs;
 
 import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Chronometer;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import org.freelectron.leobel.winline98.MainActivity;
+import org.freelectron.leobel.winline98.GameActivity;
 import org.freelectron.leobel.winline98.R;
 import org.freelectron.leobel.winline98.WinLineApp;
 import org.freelectron.leobel.winline98.services.PreferenceService;
@@ -130,7 +128,7 @@ public class GameStatsDialog extends BaseDialog {
             if(preferenceService.getAllowTouchSoundPreference()){
                 mp.start();
             }
-            MainActivity activity =  (MainActivity)getActivity();
+            GameActivity activity =  (GameActivity)getActivity();
             activity.rateApp();
         });
 
@@ -145,7 +143,7 @@ public class GameStatsDialog extends BaseDialog {
             if(preferenceService.getAllowTouchSoundPreference()){
                 mp.start();
             }
-            MainActivity activity =  (MainActivity)getActivity();
+            GameActivity activity =  (GameActivity)getActivity();
             activity.shareApp();
         });
 

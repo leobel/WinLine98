@@ -1,30 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="about_winline">What is Winline?</string>
-    <string name="about_winline_description">Winline is a one player puzzle game. It is base on the classic Colour Line game.
-        The player can move one ball per turn to a particular place if there is a path (linked set of vertical and
-        horizontal empty cells) between the current position of the ball and the desired destination. The goal is to
-        score the most points removing balls by forming lines (horizontal, vertical or diagonal) of at least five balls
-        of the same colour. If the player does form such lines of at least five balls of the same colour, the balls
-        in those lines disappear, adding the number of balls that disappear to the overall player points, and he gains
-        one turn, e.g. he can move another ball. If not, three new balls are added (at random colour and position), and
-        the game continues until the board is either full or empty.</string>
+    <string name="winline_help">Demo Help</string>
+    <string name="winline_help_description">Touch on the green button to see the simple demo help, it\'ll take just a few seconds!</string>
 
-    <string name="about_winline_description_note">Note: you won\'t get points for a configuration of five or more balls in a row
-        if you last moved ball is not part of such configuration (e.g. five or more in a row caused by random allocation
-        of the three new balls added).</string>
+    <string name="about_winline">What should you know?</string>
 
-    <string name="how_to_play">How to play?</string>
-    <string name="how_to_play_description">To play you only need to touch on the ball you want to move and then touch in an
-        empty cell. If there is a path between the position of the ball and the desired destination the ball will move. You
-        also can save your current game touching on the most right button at the board bottom, create a new game using the
-        button in the center and load a saved game with the button most to the left.
+    <string name="about_winline_description">Winline is a one player puzzle game.</string>
+    <string name="about_winline_description1">The player can move one ball per turn to a particular place if there is path to there</string>
+    <string name="about_winline_description2">A path is a linked set of vertical and horizontal empty cells between 2 position.</string>
+    <string name="about_winline_description3">The goal is to score points by forming lines (horizontal, vertical or diagonal) of at least five balls
+        of the same colour.</string>
+    <string name="about_winline_description4">The balls involves in a score will disappear, adding those balls to the player points.</string>
+    <string name="about_winline_description5">When you score you gain one turn, e.g. you can move another ball.</string>
+    <string name="about_winline_description6">If you move and not score three new balls are added (at random colour and position).</string>
+    <string name="about_winline_description7">The game is over either the board is full or empty.</string>
+    <string name="about_winline_description8">You won\'t get points for a configuration of five or more balls in a row if you last move isn\'t
+        part of such configuration (e.g. five or more in a row caused by random allocation of the three new balls added).</string>
+
+    <string name="guide_step1">Move ball (Step 1)</string>
+    <string name="guide_step1_description">To move a ball touch the ball you want to move.</string>
+
+
+    <string name="guide_step2">Move ball (Step 2)</string>
+    <string name="guide_step2_description">After a ball is selected touch on the empty cell you want to move it.</string>
+
+    <string name="guide_step3">Combo score</string>
+    <string name="guide_step3_description">The combo give you the opportunity to increments your points during a period of time (10 sec). Any subsequent
+        score (during this time) will multiply the points by a multiplier starting in 2 (incrementing consecutively by 1 on each score).
     </string>
 
-    <string name="how_combo_work">How combo works?</string>
-    <string name="how_combo_work_description">The combo feature is a way to give the player the opportunity to increments the points
-        by rewarding consecutive scores. Any time the player scores a countdown will be start, during this time a subsequent
-        score will multiply the points involved in the score by a multiplier starting in 2 (incrementing consecutively by 1 on each score)
-        and reset the countdown. If the countdown finish without a score the multiplier will reset to 2.
-    </string>
+    <string name="guide_step4">No score</string>
+    <string name="guide_step4_description">If you move a ball without make a score, three new balls will be added to the board at random position.</string>
+
+    <string name="guide_step5">Game record</string>
+    <string name="guide_step5_description">Touch the start next to your current score to see your best record.</string>
+
+    <string name="guide_step6">Save game</string>
+    <string name="guide_step6_description">You can save your game touching on this button. The game will be on the list of saved games.
+
+    </string><string name="guide_step7">New game</string>
+    <string name="guide_step7_description">You can create a new game touching on this button. If your current game isn\'t saved yet a dialog will show up warning you
+        about it.</string>
+
+
+    <string name="guide_step8">Select a saved game</string>
+    <string name="guide_step8_description">Touch on this button to see the list of your saved games. Here you can see when you saved it, the score and the time
+        you spend on it. To select one just touch on it.</string>
+
+    <string name="winline_help_tour">Try Demo Help!</string>
 </resources>

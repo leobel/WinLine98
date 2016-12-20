@@ -9,6 +9,7 @@ public class PreferenceServiceImpl implements PreferenceService {
 
     private static String HIGH_RECORD = "HIGH_RECORD";
     private static String ALLOW_TOUCH_SOUND_PREFERENCE = "ALLOW_TOUCH_SOUND_PREFERENCE";
+    private static String SHOW_INTERACTIVE_HELP_PREFERENCE = "SHOW_INTERACTIVE_HELP_PREFERENCE";
 
     private final SharedPreferences sharedPreferences;
 
@@ -38,5 +39,17 @@ public class PreferenceServiceImpl implements PreferenceService {
     @Override
     public Boolean getAllowTouchSoundPreference() {
         return sharedPreferences.getBoolean(ALLOW_TOUCH_SOUND_PREFERENCE, true);
+    }
+
+    @Override
+    public boolean getShowInteractiveHelp() {
+        return sharedPreferences.getBoolean(SHOW_INTERACTIVE_HELP_PREFERENCE, true);
+    }
+
+    @Override
+    public void setShowInteractiveHelp(boolean showInteractiveHelp) {
+        SharedPreferences.Editor  editor =  sharedPreferences.edit();
+        editor.putBoolean(SHOW_INTERACTIVE_HELP_PREFERENCE, showInteractiveHelp);
+        editor.commit();
     }
 }

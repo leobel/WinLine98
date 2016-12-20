@@ -24,7 +24,7 @@ android {
         minSdkVersion 15
         targetSdkVersion 25
         versionCode 5
-        versionName "1.0.0"
+        versionName "1.1.0"
         multiDexEnabled true
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -86,6 +86,9 @@ dependencies {
 
     // Facebook SDK
     compile 'com.facebook.android:facebook-android-sdk:4.15.0'
+
+    // show case view
+    compile 'com.github.amlcurran.showcaseview:library:5.4.3'
 
     // Test dependencies
     androidTestCompile ('junit:junit:4.12') {

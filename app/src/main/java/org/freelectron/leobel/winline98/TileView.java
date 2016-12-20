@@ -158,6 +158,8 @@ public class TileView extends View {
 
     public int getLeftPosition(){return mXOffset;}
 
+    public int getTopPosition(){return mYOffset;}
+
     public int getRightPosition(){return getLeft() + mXOffset + (mTileSize * mXTileCount);}
 
     @Override

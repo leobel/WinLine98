@@ -12,4 +12,8 @@ public interface PreferenceService {
     void setAllowTouchSoundPreference(Boolean allowTouchSoundPreference);
 
     Boolean getAllowTouchSoundPreference();
+
+    boolean getShowInteractiveHelp();
+
+    void setShowInteractiveHelp(boolean showInteractiveHelp);
 }
