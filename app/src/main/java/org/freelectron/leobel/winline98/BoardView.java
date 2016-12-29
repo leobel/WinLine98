@@ -1,20 +1,17 @@
 package org.freelectron.leobel.winline98;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.graphics.drawable.AnimatedVectorDrawable;
-import android.graphics.drawable.AnimationDrawable;
-import android.graphics.drawable.BitmapDrawable;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.View;
 
+import org.freelectron.leobel.winline98.utils.OnTouchBallListener;
+import org.freelectron.leobel.winline98.utils.OnTouchEmptyListener;
 import org.freelectron.winline.Checker;
-import org.freelectron.winline.LogicWinLine;
-import org.freelectron.winline.MPoint;
 
 import java.lang.reflect.Array;
+
+import timber.log.Timber;
 
 /**
  * Created by leobel on 7/22/16.
@@ -22,6 +19,8 @@ import java.lang.reflect.Array;
 public class BoardView extends TileView implements TileView.OnTileViewListener {
 
     Runnable doAfterSetPosition;
+    private OnTouchEmptyListener touchEmptyListener = (x, y) -> {};
+    private OnTouchBallListener touchBallListener = (x, y) -> {};
 
     public BoardView(Context context){
         super(context);
@@ -58,10 +57,31 @@ public class BoardView extends TileView implements TileView.OnTileViewListener {
         doAfterSetPosition = after;
     }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        int i = (int) ((event.getY() - mYOffset) / mTileSize);
+        int j = (int) ((event.getX() - mXOffset) / mTileSize);
+        if(mTileGrid[i][j] == null){
+           touchEmptyListener.onTouchEmpty(i, j);
+        }
+        else{
+            touchBallListener.onTouchBall(i, j);
+        }
+        return super.onTouchEvent(event);
+    }
+
 
     @Override
     public void onSetPosition() {
         if(doAfterSetPosition != null)
             doAfterSetPosition.run();
+    }
+
+    public void setOnTouchBallListener(OnTouchBallListener l){
+        touchBallListener = l;
+    }
+
+    public void setOnTouchEmptyListener(OnTouchEmptyListener l){
+        touchEmptyListener = l;
     }
 }

@@ -64,6 +64,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
 
+import timber.log.Timber;
+
 public class GameActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener,  GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
@@ -431,83 +433,74 @@ public class GameActivity extends BaseActivity
             }
             if(gameService.save(game, (int)(SystemClock.elapsedRealtime() - chronometer.getBase()))){
                 savedCurrentState = true;
-                Toast.makeText(this, "Your game was saved!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.save_game), Toast.LENGTH_SHORT).show();
 
             }
             else {
-                Toast.makeText(this, "Your game can\'t be saved.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.cannot_save_game), Toast.LENGTH_SHORT).show();
             }
         });
 
         handleBoardTouch = true;
-        boardView.setOnTouchListener((v, event) -> {
-            if(!handleBoardTouch) return false;
-            boolean emptyPlace = false;
-            if (v.getId() != R.id.board) {
-                return false;
-            }
-            if (event.getAction() != 1) {
-                return true;
-            }
-            int i = (int) ((event.getY() - ((float) boardView.mYOffset)) / ((float) boardView.mTileSize));
-            int j = (int) ((event.getX() - ((float) boardView.mXOffset)) / ((float) boardView.mTileSize));
-            if (i < 0 || i >= dimension || j < 0 || j >= dimension) {
-                return true;
-            }
-            handleBoardTouch = false;
-            if (game.getBoard()[i][j] == null) {
-                emptyPlace = true;
-            }
-            if (orig != null && emptyPlace) { // try to move to specific location
-                MPoint dest = new MPoint(i, j);
-                String path = game.getPath(orig, dest);
-                if (path == null) { // can't move there!!!
-                    if(preferenceService.getAllowTouchSoundPreference()){
-                        ballMoveFailure.start();
-                    }
-                    handleBoardTouch = true;
-                    return true;
-                }
-                savedCurrentState = false;
-                int x = orig.getX();
-                int y = orig.getY();
-                stopAnimateTail(() -> {
-                    MoveTile(x, y, path);
-                    if(preferenceService.getAllowTouchSoundPreference()){
-                        ballMoving.start();
-                    }
-                });
-                return true;
-            } else if (emptyPlace) {
-                handleBoardTouch = true;
-                return true;
-            } else { // select ball
-                if(orig != null && orig.getX() == i && orig.getY() == j){ // stop selected ball animation
-                    stopAnimateTail(() -> {
-                        boardHandler.sendMessage(new Message()); // refresh the board state
-                    });
-                    handleBoardTouch = true;
-                    return true;
-                }
-                if(preferenceService.getAllowTouchSoundPreference()){
-                    ballSelect.start();
-                }
+        boardView.setOnTouchEmptyListener((i, j) -> {
+            if(handleBoardTouch){
+                if (orig != null) { // try to move to specific location
+                    handleBoardTouch = false;
+                    MPoint dest = new MPoint(i, j);
+                    String path = game.getPath(orig, dest);
+                    if (path != null) { // can move there!!!
+                        savedCurrentState = false;
+                        int x = orig.getX();
+                        int y = orig.getY();
+                        stopAnimateTail(() -> {
+                            MoveTile(x, y, path, () ->{
+                                handleBoardTouch = true;
+                            });
+                            if(preferenceService.getAllowTouchSoundPreference()){
+                                ballMoving.start();
+                            }
+                        });
 
-                if(animateSelectedBallIsRunning){ // there is one ball selected already
-                    stopAnimateTail(()-> {
-                        orig = new MPoint(i, j);
-                        animateTail(orig.getX(), orig.getY());
-                    });
+                        if(preferenceService.getAllowTouchSoundPreference()){
+                            ballMoveFailure.start();
+                        }
+                    }
+                    else{
+                        handleBoardTouch = true;
+                    }
+                }
+            }
+
+        });
+
+        boardView.setOnTouchBallListener((i, j) -> {
+            if(handleBoardTouch) {
+                handleBoardTouch = false;
+                if(orig != null){
+                    if(orig.getX() == i && orig.getY() == j) { // stop selected ball animation
+                        stopAnimateTail(() -> {
+                            boardHandler.sendMessage(new Message()); // refresh the board state
+                            handleBoardTouch = true;
+                        });
+                    }
+                    else{ // switch the selected ball animation
+                        stopAnimateTail(()-> {
+                            orig = new MPoint(i, j);
+                            animateTail(orig.getX(), orig.getY());
+                            handleBoardTouch = true;
+                        });
+                    }
                 }
                 else {
                     orig = new MPoint(i, j);
                     animateTail(orig.getX(), orig.getY());
+                    handleBoardTouch = true;
                 }
-                handleBoardTouch = true;
-                return true;
+                if(preferenceService.getAllowTouchSoundPreference()){
+                    ballSelect.start();
+                }
             }
         });
-
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -940,8 +933,8 @@ public class GameActivity extends BaseActivity
         return false;
     }
 
-    private void MoveTile(int x, int y, String path) {
-        animateMoveTails = new AnimateMoveTails(new WeakReference<>(this), x, y, path);
+    private void MoveTile(int x, int y, String path, Runnable actionAfter) {
+        animateMoveTails = new AnimateMoveTails(new WeakReference<>(this), x, y, path, actionAfter);
         animateMoveTails.start();
     }
 
@@ -1059,11 +1052,13 @@ public class GameActivity extends BaseActivity
         WeakReference<GameActivity> container;
         MPoint orig;
         String path;
+        Runnable actionAfter;
 
-        public AnimateMoveTails(WeakReference<GameActivity> container, int x, int y, String path) {
+        public AnimateMoveTails(WeakReference<GameActivity> container, int x, int y, String path, Runnable actionAfter) {
             this.container = container;
             this.orig = new MPoint(x, y);
             this.path = path;
+            this.actionAfter = actionAfter;
         }
 
         public void run() {
@@ -1098,9 +1093,13 @@ public class GameActivity extends BaseActivity
                     e.printStackTrace();
                 }
             }
+
             MPoint dest = new MPoint(x, y);
             game.moveChecker(orig, dest, f);
             ContinueGameLogic(dest);
+            if(actionAfter != null){
+                actionAfter.run();
+            }
         }
 
         private void ContinueGameLogic(MPoint dest) {
