@@ -52,6 +52,7 @@ import org.freelectron.leobel.winline98.models.WinLine;
 import org.freelectron.leobel.winline98.services.GameService;
 import org.freelectron.leobel.winline98.services.PreferenceService;
 import org.freelectron.leobel.winline98.utils.ActivityUtils;
+import org.freelectron.leobel.winline98.utils.GameAnimation;
 import org.freelectron.winline.Checker;
 import org.freelectron.winline.LogicWinLine;
 import org.freelectron.winline.MPoint;
@@ -64,8 +65,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
 
+import timber.log.Timber;
+
 public class GameActivity extends BaseActivity
-        implements NavigationView.OnNavigationItemSelectedListener,  GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+        implements GameAnimation, NavigationView.OnNavigationItemSelectedListener,  GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private static final int LOAD_GAME = 1;
     private static final String DIALOG_ERROR = "DIALOG_ERROR";
@@ -431,83 +434,74 @@ public class GameActivity extends BaseActivity
             }
             if(gameService.save(game, (int)(SystemClock.elapsedRealtime() - chronometer.getBase()))){
                 savedCurrentState = true;
-                Toast.makeText(this, "Your game was saved!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.save_game), Toast.LENGTH_SHORT).show();
 
             }
             else {
-                Toast.makeText(this, "Your game can\'t be saved.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.cannot_save_game), Toast.LENGTH_SHORT).show();
             }
         });
 
         handleBoardTouch = true;
-        boardView.setOnTouchListener((v, event) -> {
-            if(!handleBoardTouch) return false;
-            boolean emptyPlace = false;
-            if (v.getId() != R.id.board) {
-                return false;
-            }
-            if (event.getAction() != 1) {
-                return true;
-            }
-            int i = (int) ((event.getY() - ((float) boardView.mYOffset)) / ((float) boardView.mTileSize));
-            int j = (int) ((event.getX() - ((float) boardView.mXOffset)) / ((float) boardView.mTileSize));
-            if (i < 0 || i >= dimension || j < 0 || j >= dimension) {
-                return true;
-            }
-            handleBoardTouch = false;
-            if (game.getBoard()[i][j] == null) {
-                emptyPlace = true;
-            }
-            if (orig != null && emptyPlace) { // try to move to specific location
-                MPoint dest = new MPoint(i, j);
-                String path = game.getPath(orig, dest);
-                if (path == null) { // can't move there!!!
-                    if(preferenceService.getAllowTouchSoundPreference()){
-                        ballMoveFailure.start();
-                    }
-                    handleBoardTouch = true;
-                    return true;
-                }
-                savedCurrentState = false;
-                int x = orig.getX();
-                int y = orig.getY();
-                stopAnimateTail(() -> {
-                    MoveTile(x, y, path);
-                    if(preferenceService.getAllowTouchSoundPreference()){
-                        ballMoving.start();
-                    }
-                });
-                return true;
-            } else if (emptyPlace) {
-                handleBoardTouch = true;
-                return true;
-            } else { // select ball
-                if(orig != null && orig.getX() == i && orig.getY() == j){ // stop selected ball animation
-                    stopAnimateTail(() -> {
-                        boardHandler.sendMessage(new Message()); // refresh the board state
-                    });
-                    handleBoardTouch = true;
-                    return true;
-                }
-                if(preferenceService.getAllowTouchSoundPreference()){
-                    ballSelect.start();
-                }
+        boardView.setOnTouchEmptyListener((i, j) -> {
+            if(handleBoardTouch){
+                if (orig != null) { // try to move to specific location
+                    handleBoardTouch = false;
+                    MPoint dest = new MPoint(i, j);
+                    String path = game.getPath(orig, dest);
+                    if (path != null) { // can move there!!!
+                        savedCurrentState = false;
+                        int x = orig.getX();
+                        int y = orig.getY();
+                        stopAnimateTail(() -> {
+                            MoveTile(x, y, path, () ->{
+                                handleBoardTouch = true;
+                            });
+                            if(preferenceService.getAllowTouchSoundPreference()){
+                                ballMoving.start();
+                            }
+                        });
 
-                if(animateSelectedBallIsRunning){ // there is one ball selected already
-                    stopAnimateTail(()-> {
-                        orig = new MPoint(i, j);
-                        animateTail(orig.getX(), orig.getY());
-                    });
+                        if(preferenceService.getAllowTouchSoundPreference()){
+                            ballMoveFailure.start();
+                        }
+                    }
+                    else{
+                        handleBoardTouch = true;
+                    }
+                }
+            }
+
+        });
+
+        boardView.setOnTouchBallListener((i, j) -> {
+            if(handleBoardTouch) {
+                handleBoardTouch = false;
+                if(orig != null){
+                    if(orig.getX() == i && orig.getY() == j) { // stop selected ball animation
+                        stopAnimateTail(() -> {
+                            boardHandler.sendMessage(new Message()); // refresh the board state
+                            handleBoardTouch = true;
+                        });
+                    }
+                    else{ // switch the selected ball animation
+                        stopAnimateTail(()-> {
+                            orig = new MPoint(i, j);
+                            animateTail(orig.getX(), orig.getY());
+                            handleBoardTouch = true;
+                        });
+                    }
                 }
                 else {
                     orig = new MPoint(i, j);
                     animateTail(orig.getX(), orig.getY());
+                    handleBoardTouch = true;
                 }
-                handleBoardTouch = true;
-                return true;
+                if(preferenceService.getAllowTouchSoundPreference()){
+                    ballSelect.start();
+                }
             }
         });
-
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -940,29 +934,34 @@ public class GameActivity extends BaseActivity
         return false;
     }
 
-    private void MoveTile(int x, int y, String path) {
-        animateMoveTails = new AnimateMoveTails(new WeakReference<>(this), x, y, path);
+    @Override
+    public void MoveTile(int x, int y, String path, Runnable actionAfter) {
+        animateMoveTails = new AnimateMoveTails(new WeakReference<>(this), x, y, path, actionAfter);
         animateMoveTails.start();
     }
 
-    private void animateTail(int x, int y){
+    @Override
+    public void animateTail(int x, int y){
         animateSelectedTail = new AnimateSelectedTail(new WeakReference<>(this), x, y);
         animateSelectedTail.start();
         animateSelectedBallIsRunning = true;
     }
 
-    private void stopAnimateTail(Runnable actionAfter){
+    @Override
+    public void stopAnimateTail(Runnable actionAfter){
         orig = null;
         animateSelectedBallIsRunning = false;
         animateSelectedTail.stopAnimation(actionAfter);
     }
 
-    private void animateInsertTile(List<AnimateChecker> tails, Runnable doAfter) {
+    @Override
+    public void animateInsertTile(List<AnimateChecker> tails, Runnable doAfter) {
         animateInsertTails = new AnimateInsertTails(new WeakReference<>(this), tails, doAfter);
         animateInsertTails.start();
     }
 
-    private void animateScoreTile(List<AnimateChecker> tiles, Runnable doAfter){
+    @Override
+    public void animateScoreTile(List<AnimateChecker> tiles, Runnable doAfter){
         animateScore = new AnimateScore(new WeakReference<>(this), tiles, doAfter);
         animateScore.start();
     }
@@ -1056,18 +1055,20 @@ public class GameActivity extends BaseActivity
     }
 
     static class AnimateMoveTails extends Thread {
-        WeakReference<GameActivity> container;
+        WeakReference<GameAnimation> container;
         MPoint orig;
         String path;
+        Runnable actionAfter;
 
-        public AnimateMoveTails(WeakReference<GameActivity> container, int x, int y, String path) {
+        public AnimateMoveTails(WeakReference<GameAnimation> container, int x, int y, String path, Runnable actionAfter) {
             this.container = container;
             this.orig = new MPoint(x, y);
             this.path = path;
+            this.actionAfter = actionAfter;
         }
 
         public void run() {
-            GameActivity activity = container.get();
+            GameAnimation activity = container.get();
             LogicWinLine game = activity.getGame();
             Checker[][] t = game.getBoard();
             int x = orig.getX();
@@ -1098,13 +1099,14 @@ public class GameActivity extends BaseActivity
                     e.printStackTrace();
                 }
             }
+
             MPoint dest = new MPoint(x, y);
             game.moveChecker(orig, dest, f);
             ContinueGameLogic(dest);
         }
 
         private void ContinueGameLogic(MPoint dest) {
-            GameActivity activity = container.get();
+            GameAnimation activity = container.get();
             LogicWinLine game = activity.getGame();
             int dimension = activity.getDimension();
             MPoint[] limit = new MPoint[8];
@@ -1138,7 +1140,9 @@ public class GameActivity extends BaseActivity
                     bundle.putInt(PREVIOUS_GAME_SCORE, previousScore);
                     m.setData(bundle);
                     activity.sendScoreAlertHandler(m);
-                    activity.setHandleBoardTouch(true);
+                    if(actionAfter != null){
+                        actionAfter.run();
+                    }
                 });
             } else {
                 try {
@@ -1157,11 +1161,15 @@ public class GameActivity extends BaseActivity
                         activity.setNextBoardGame(game.getNext());
                         activity.sendBoardAlertHandler(new Message());
                         activity.sendNextAlertHandler(new Message());
-                        activity.setHandleBoardTouch(true);
+                        if(actionAfter != null){
+                            actionAfter.run();
+                        }
                     });
                 } catch (Exception ex) {
                     ex.printStackTrace();
-                    activity.setHandleBoardTouch(true);
+                    if(actionAfter != null){
+                        actionAfter.run();
+                    }
                 }
             }
             if (game.gameOver()) {
@@ -1171,11 +1179,11 @@ public class GameActivity extends BaseActivity
     }
 
     static class AnimateInsertTails extends Thread {
-        WeakReference<GameActivity> container;
+        WeakReference<GameAnimation> container;
         List<AnimateChecker> tails;
         Runnable doAfter;
 
-        public AnimateInsertTails(WeakReference<GameActivity> container, List<AnimateChecker> tails, Runnable doAfter){
+        public AnimateInsertTails(WeakReference<GameAnimation> container, List<AnimateChecker> tails, Runnable doAfter){
             this.container = container;
             this.tails = tails;
             this.doAfter = doAfter;
@@ -1183,7 +1191,7 @@ public class GameActivity extends BaseActivity
 
         @Override
         public void run() {
-            GameActivity activity = container.get();
+            GameAnimation activity = container.get();
             LogicWinLine game = activity.getGame();
             Checker[][] board = game.getBoard();
             List<Checker> originals = new ArrayList<>(3);
@@ -1214,14 +1222,14 @@ public class GameActivity extends BaseActivity
     }
 
     static class AnimateSelectedTail extends Thread {
-        WeakReference<GameActivity> container;
+        WeakReference<GameAnimation> container;
         int x;
         int y;
         private AtomicBoolean canRun;
         Runnable actionAfter;
 
 
-        public AnimateSelectedTail(WeakReference<GameActivity> container, int x, int y){
+        public AnimateSelectedTail(WeakReference<GameAnimation> container, int x, int y){
             this.container = container;
             this.x = x;
             this.y = y;
@@ -1237,7 +1245,7 @@ public class GameActivity extends BaseActivity
 
         @Override
         public void run() {
-            GameActivity activity = container.get();
+            GameAnimation activity = container.get();
             Checker[][] board = container.get().getGame().getBoard();
             AnimateChecker tail = new AnimateChecker(board[x][y], 0);
             board[x][y] = tail;
@@ -1260,11 +1268,11 @@ public class GameActivity extends BaseActivity
     }
 
     static class AnimateScore extends Thread {
-        WeakReference<GameActivity> container;
+        WeakReference<GameAnimation> container;
         private final List<AnimateChecker> tiles;
         private final Runnable doAfter;
 
-        public AnimateScore(WeakReference<GameActivity> container, List<AnimateChecker> tiles, Runnable doAfter){
+        public AnimateScore(WeakReference<GameAnimation> container, List<AnimateChecker> tiles, Runnable doAfter){
             this.container = container;
             this.tiles = tiles;
             this.doAfter = doAfter;
@@ -1272,7 +1280,7 @@ public class GameActivity extends BaseActivity
 
         @Override
         public void run() {
-            GameActivity activity = container.get();
+            GameAnimation activity = container.get();
             Checker[][] board = activity.getGame().getBoard();
             List<Checker> originals = new ArrayList<>(3);
             for (AnimateChecker checker: tiles){
@@ -1301,47 +1309,53 @@ public class GameActivity extends BaseActivity
         }
     }
 
-    private LogicWinLine getGame() {
+    @Override
+    public LogicWinLine getGame() {
         return game;
     }
 
-    private void setBoardGame(Checker[][] boardGame){
+    @Override
+    public void setBoardGame(Checker[][] boardGame){
         boardView.setBoard(boardGame);
     }
 
-    private void setNextBoardGame(Checker[] nextGame){
+    @Override
+    public void setNextBoardGame(Checker[] nextGame){
         nextView.setBoard(nextGame);
     }
 
-    private boolean getComboIsRunning() {
+    @Override
+    public boolean getComboIsRunning() {
         return comboIsRunning;
     }
 
-    private int getCombo() {
+    @Override
+    public int getCombo() {
         return combo;
     }
 
-    private int getDimension() {
+    @Override
+    public int getDimension() {
         return dimension;
     }
 
-    private void setHandleBoardTouch(boolean value){
-        handleBoardTouch = value;
-    }
-
-    private void sendBoardAlertHandler(Message m){
+    @Override
+    public void sendBoardAlertHandler(Message m){
         boardHandler.sendMessage(m);
     }
 
-    private void sendNextAlertHandler(Message m){
+    @Override
+    public void sendNextAlertHandler(Message m){
         nextHandler.sendMessage(m);
     }
 
-    private void sendScoreAlertHandler(Message m){
+    @Override
+    public void sendScoreAlertHandler(Message m){
         scoreHandler.sendMessage(m);
     }
 
-    private void sendEndAlertHandler(Message m) {
+    @Override
+    public void sendEndAlertHandler(Message m) {
         endAlertHandler.sendMessage(m);
     }
 
