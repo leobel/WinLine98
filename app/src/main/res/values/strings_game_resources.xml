@@ -17,4 +17,8 @@ Save this file as res/values/games-ids.xml in your project.
     <string name="achievement_ninja_scorer">CgkI3YOZmpEdEAIQBg</string>
     <string name="achievement_enthusiast_player">CgkI3YOZmpEdEAIQBw</string>
     <string name="achievement_fanatic_player">CgkI3YOZmpEdEAIQCA</string>
+    <string name="achievement_greedy_move">CgkI3YOZmpEdEAIQCg</string>
+    <string name="achievement_strategic_move">CgkI3YOZmpEdEAIQCw</string>
+    <string name="achievement_amazing_move">CgkI3YOZmpEdEAIQDA</string>
+
 </resources>

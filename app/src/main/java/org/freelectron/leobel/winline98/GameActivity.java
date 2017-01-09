@@ -65,8 +65,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.inject.Inject;
 
-import timber.log.Timber;
-
 public class GameActivity extends BaseActivity
         implements GameAnimation, NavigationView.OnNavigationItemSelectedListener,  GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
@@ -81,9 +79,13 @@ public class GameActivity extends BaseActivity
     private static final int ACHIEVEMENT_GREAT_SCORER_THRESHOLD = 5000;
     private static final int ACHIEVEMENT_AWESOME_SCORER_THRESHOLD = 50000;
     private static final int ACHIEVEMENT_NINJA_SCORER_THRESHOLD = 100000;
+    private static final int ACHIEVEMENT_GREEDY_MOVE_THRESHOLD = 7;
+    private static final int ACHIEVEMENT_STRATEGIC_MOVE_THRESHOLD = 12;
+    private static final int ACHIEVEMENT_AMAZING_MOVE_THRESHOLD = 18;
 
     private static String HIGHLIGHT_COMBO_SCORE = "HIGHLIGHT_COMBO_SCORE";
     private static String PREVIOUS_GAME_SCORE = "PREVIOUS_GAME_SCORE";
+    private static String BALLS_SCORE = "BALLS_SCORE";
 
 
     private AnimateMoveTails animateMoveTails;
@@ -326,17 +328,19 @@ public class GameActivity extends BaseActivity
                 preferenceService.setHighRecord(game.getScore());
             }
             gameProgress.setScore(game.getScore());
-            if(gameServiceIsConnected(GameServiceRequest.NOTIFY_SCORE)){
-                notifyGameServiceScore();
-            }
-
             scoreView.setText(game.getScore().toString());
             Bundle data = msg.getData();
             boolean highlightScore = data.getBoolean(HIGHLIGHT_COMBO_SCORE);
+            int scoreBalls = data.getInt(BALLS_SCORE);
             if(highlightScore){
                 Toast toast = Toast.makeText(this, getString(R.string.combo_score, game.getScore() - data.getInt(PREVIOUS_GAME_SCORE)), Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL, 0, 0);
                 toast.show();
+            }
+
+            gameProgress.setOneShotScore(scoreBalls);
+            if(gameServiceIsConnected(GameServiceRequest.NOTIFY_SCORE)){
+                notifyGameServiceScore();
             }
             return false;
         });
@@ -581,6 +585,18 @@ public class GameActivity extends BaseActivity
         }
         if(ACHIEVEMENT_NINJA_SCORER_THRESHOLD <= score){
             Games.Achievements.unlock(googleApiClient, getString(R.string.achievement_ninja_scorer));
+        }
+
+        // check one move achievements
+        int oneShotScore = gameProgress.getOneShotScore();
+        if(ACHIEVEMENT_GREEDY_MOVE_THRESHOLD <= oneShotScore){
+            Games.Achievements.unlock(googleApiClient, getString(R.string.achievement_greedy_move));
+        }
+        if(ACHIEVEMENT_STRATEGIC_MOVE_THRESHOLD <= oneShotScore){
+            Games.Achievements.unlock(googleApiClient, getString(R.string.achievement_strategic_move));
+        }
+        if(ACHIEVEMENT_AMAZING_MOVE_THRESHOLD <= oneShotScore){
+            Games.Achievements.unlock(googleApiClient, getString(R.string.achievement_amazing_move));
         }
     }
 
@@ -1117,11 +1133,12 @@ public class GameActivity extends BaseActivity
                 int index = AnimateChecker.getScoreIndex();
                 int comboMultiple = activity.getComboIsRunning() ? activity.getCombo() : 1;
                 int previousScore = game.getScore();
-
+                int directions = 0;
 
                 for (int k = 0; k < score.length; k++) {
                     if (score[k] >= 5) {
                         game.addScore(comboMultiple * score[k]);
+                        directions++;
                         List<Integer> positions = game.deleteSequence(limit[k * 2], limit[(k * 2) + 1], (k * 2) + 1);
                         for(Integer pos: positions){
                             int x = pos / dimension;
@@ -1138,6 +1155,7 @@ public class GameActivity extends BaseActivity
                     Bundle bundle = new Bundle();
                     bundle.putBoolean(HIGHLIGHT_COMBO_SCORE, comboMultiple > 1);
                     bundle.putInt(PREVIOUS_GAME_SCORE, previousScore);
+                    bundle.putInt(BALLS_SCORE, tiles.size());
                     m.setData(bundle);
                     activity.sendScoreAlertHandler(m);
                     if(actionAfter != null){
