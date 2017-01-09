@@ -29,6 +29,8 @@
     <string name="icon_high_score">High Score</string>
     <string name="icon_longer_played">Longer Played</string>
     <string name="no_saved_game">No saved game</string>
+    <string name="save_game">Your game was saved!</string>
+    <string name="cannot_save_game">Your game can\'t be saved.</string>
 
     <!-- Delete game -->
     <string name="delete_game">Are you sure you want to delete the game?</string>

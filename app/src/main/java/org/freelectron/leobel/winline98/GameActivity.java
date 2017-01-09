@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PersistableBundle;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -52,10 +53,12 @@ import org.freelectron.leobel.winline98.models.WinLine;
 import org.freelectron.leobel.winline98.services.GameService;
 import org.freelectron.leobel.winline98.services.PreferenceService;
 import org.freelectron.leobel.winline98.utils.ActivityUtils;
+import org.freelectron.leobel.winline98.utils.GameAnimation;
 import org.freelectron.winline.Checker;
 import org.freelectron.winline.LogicWinLine;
 import org.freelectron.winline.MPoint;
 
+import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -65,7 +68,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import javax.inject.Inject;
 
 public class GameActivity extends BaseActivity
-        implements NavigationView.OnNavigationItemSelectedListener,  GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+        implements GameAnimation, NavigationView.OnNavigationItemSelectedListener,  GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private static final int LOAD_GAME = 1;
     private static final String DIALOG_ERROR = "DIALOG_ERROR";
@@ -78,9 +81,29 @@ public class GameActivity extends BaseActivity
     private static final int ACHIEVEMENT_GREAT_SCORER_THRESHOLD = 5000;
     private static final int ACHIEVEMENT_AWESOME_SCORER_THRESHOLD = 50000;
     private static final int ACHIEVEMENT_NINJA_SCORER_THRESHOLD = 100000;
+    private static final int ACHIEVEMENT_GREEDY_MOVE_THRESHOLD = 7;
+    private static final int ACHIEVEMENT_STRATEGIC_MOVE_THRESHOLD = 12;
+    private static final int ACHIEVEMENT_AMAZING_MOVE_THRESHOLD = 18;
+    private static final int ACHIEVEMENT_COMBO_BEGINNER_THRESHOLD = 3;
+    private static final int ACHIEVEMENT_COMBO_FLUENCY_THRESHOLD = 12;
+    private static final int ACHIEVEMENT_COMBONATOR_THRESHOLD = 20;
+
+    private static final String STATE_GAME_PROGRESS = "STATE_GAME_PROGRESS";
+    private static final String STATE_GAME = "STATE_GAME";
+    private static final String STATE_LOAD_GAME_ON_START = "STATE_LOAD_GAME_ON_START";
+    private static final String STATE_CAN_PLAY = "STATE_CAN_PLAY";
+    private static final String STATE_TIME_WHEN_STOPPED = "STATE_TIME_WHEN_STOPPED";
+    private static final String STATE_COMBO_IS_RUNNING = "STATE_COMBO_IS_RUNNING";
+    private static final String STATE_COMBO_TIME = "STATE_COMBO_TIME";
+    private static final String STATE_COMBO_VALUE = "STATE_COMBO_VALUE";
+    private static final String STATE_ANIMATE_SELECTED_BALL_IS_RUNNING = "STATE_ANIMATE_SELECTED_BALL_IS_RUNNING";
+    private static final String STATE_ORIGIN_POINT = "STATE_ORIGIN_POINT";
+    private static final String STATE_BREAK_RECORD_ALERT = "STATE_BREAK_RECORD_ALERT";
+    private static final String STATE_HANDLE_BOARD_TOUCH = "STATE_HANDLE_BOARD_TOUCH";
 
     private static String HIGHLIGHT_COMBO_SCORE = "HIGHLIGHT_COMBO_SCORE";
     private static String PREVIOUS_GAME_SCORE = "PREVIOUS_GAME_SCORE";
+    private static String BALLS_SCORE = "BALLS_SCORE";
 
 
     private AnimateMoveTails animateMoveTails;
@@ -104,7 +127,7 @@ public class GameActivity extends BaseActivity
     private int dimension;
     private boolean savedCurrentState;
     private MPoint orig;
-    private Long timeWhenStopped = 0L;
+    private Long timeWhenStopped;
 
 
     private Handler boardHandler;
@@ -159,10 +182,37 @@ public class GameActivity extends BaseActivity
 
         WinLineApp.getInstance().getComponent().inject(this);
 
-        mResolvingError = savedInstanceState != null && savedInstanceState.getBoolean(STATE_RESOLVING_ERROR, false);
-
         gameServiceRequest = GameServiceRequest.NONE;
-        gameProgress = new GameProgress();
+
+        if(savedInstanceState != null){
+            mResolvingError = savedInstanceState.getBoolean(STATE_RESOLVING_ERROR, false);
+            gameProgress = (GameProgress) savedInstanceState.getSerializable(STATE_GAME_PROGRESS);
+            game = (LogicWinLine) savedInstanceState.getSerializable(STATE_GAME);
+            loadGameOnStart = savedInstanceState.getBoolean(STATE_LOAD_GAME_ON_START);
+            canPlay = savedInstanceState.getBoolean(STATE_CAN_PLAY);
+            breakRecordAlert = savedInstanceState.getBoolean(STATE_BREAK_RECORD_ALERT);
+            timeWhenStopped = savedInstanceState.getLong(STATE_TIME_WHEN_STOPPED);
+            comboIsRunning = savedInstanceState.getBoolean(STATE_COMBO_IS_RUNNING);
+            comboCount = savedInstanceState.getLong(STATE_COMBO_TIME);
+            combo = savedInstanceState.getInt(STATE_COMBO_VALUE);
+            animateSelectedBallIsRunning = savedInstanceState.getBoolean(STATE_ANIMATE_SELECTED_BALL_IS_RUNNING);
+            orig = (MPoint) savedInstanceState.getSerializable(STATE_ORIGIN_POINT);
+            handleBoardTouch = savedInstanceState.getBoolean(STATE_HANDLE_BOARD_TOUCH);
+        }
+        else{
+            mResolvingError = false;
+            gameProgress = new GameProgress();
+            loadGameOnStart = false;
+            canPlay = true;
+            breakRecordAlert = true;
+            timeWhenStopped = 0L;
+            comboIsRunning = false;
+            comboCount = 10000;
+            combo = 2;
+            animateSelectedBallIsRunning = false;
+            orig = null;
+            handleBoardTouch = true;
+        }
 
         googleApiClient = new GoogleApiClient.Builder(getApplicationContext())
                 .addConnectionCallbacks(this)
@@ -208,9 +258,6 @@ public class GameActivity extends BaseActivity
 
         newGameAdView.loadAd(requestNewAdRequest());
 
-        comboCount = 10000;
-        combo = 2;
-
         scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scale);
         fadeInAnimation = AnimationUtils.loadAnimation(this, R.anim.fade_in);
         fadeOutAnimation = AnimationUtils.loadAnimation(this, R.anim.fade_out);
@@ -251,10 +298,6 @@ public class GameActivity extends BaseActivity
 
             }
         });
-
-        loadGameOnStart = false;
-        setCanPlay(true);
-        breakRecordAlert = true;
 
         scoreImage.setMax(preferenceService.getHighRecord());
 
@@ -323,17 +366,23 @@ public class GameActivity extends BaseActivity
                 preferenceService.setHighRecord(game.getScore());
             }
             gameProgress.setScore(game.getScore());
-            if(gameServiceIsConnected(GameServiceRequest.NOTIFY_SCORE)){
-                notifyGameServiceScore();
-            }
-
             scoreView.setText(game.getScore().toString());
             Bundle data = msg.getData();
             boolean highlightScore = data.getBoolean(HIGHLIGHT_COMBO_SCORE);
+            int scoreBalls = data.getInt(BALLS_SCORE);
             if(highlightScore){
+                gameProgress.setConsecutiveScores(gameProgress.getConsecutiveScores() + 1);
                 Toast toast = Toast.makeText(this, getString(R.string.combo_score, game.getScore() - data.getInt(PREVIOUS_GAME_SCORE)), Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL, 0, 0);
                 toast.show();
+            }
+            else{
+                gameProgress.setConsecutiveScores(1);
+            }
+
+            gameProgress.setOneShotScore(scoreBalls);
+            if(gameServiceIsConnected(GameServiceRequest.NOTIFY_SCORE)){
+                notifyGameServiceScore();
             }
             return false;
         });
@@ -431,83 +480,73 @@ public class GameActivity extends BaseActivity
             }
             if(gameService.save(game, (int)(SystemClock.elapsedRealtime() - chronometer.getBase()))){
                 savedCurrentState = true;
-                Toast.makeText(this, "Your game was saved!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.save_game), Toast.LENGTH_SHORT).show();
 
             }
             else {
-                Toast.makeText(this, "Your game can\'t be saved.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, getString(R.string.cannot_save_game), Toast.LENGTH_SHORT).show();
             }
         });
 
-        handleBoardTouch = true;
-        boardView.setOnTouchListener((v, event) -> {
-            if(!handleBoardTouch) return false;
-            boolean emptyPlace = false;
-            if (v.getId() != R.id.board) {
-                return false;
-            }
-            if (event.getAction() != 1) {
-                return true;
-            }
-            int i = (int) ((event.getY() - ((float) boardView.mYOffset)) / ((float) boardView.mTileSize));
-            int j = (int) ((event.getX() - ((float) boardView.mXOffset)) / ((float) boardView.mTileSize));
-            if (i < 0 || i >= dimension || j < 0 || j >= dimension) {
-                return true;
-            }
-            handleBoardTouch = false;
-            if (game.getBoard()[i][j] == null) {
-                emptyPlace = true;
-            }
-            if (orig != null && emptyPlace) { // try to move to specific location
-                MPoint dest = new MPoint(i, j);
-                String path = game.getPath(orig, dest);
-                if (path == null) { // can't move there!!!
-                    if(preferenceService.getAllowTouchSoundPreference()){
-                        ballMoveFailure.start();
-                    }
-                    handleBoardTouch = true;
-                    return true;
-                }
-                savedCurrentState = false;
-                int x = orig.getX();
-                int y = orig.getY();
-                stopAnimateTail(() -> {
-                    MoveTile(x, y, path);
-                    if(preferenceService.getAllowTouchSoundPreference()){
-                        ballMoving.start();
-                    }
-                });
-                return true;
-            } else if (emptyPlace) {
-                handleBoardTouch = true;
-                return true;
-            } else { // select ball
-                if(orig != null && orig.getX() == i && orig.getY() == j){ // stop selected ball animation
-                    stopAnimateTail(() -> {
-                        boardHandler.sendMessage(new Message()); // refresh the board state
-                    });
-                    handleBoardTouch = true;
-                    return true;
-                }
-                if(preferenceService.getAllowTouchSoundPreference()){
-                    ballSelect.start();
-                }
+        boardView.setOnTouchEmptyListener((i, j) -> {
+            if(handleBoardTouch){
+                if (orig != null) { // try to move to specific location
+                    handleBoardTouch = false;
+                    MPoint dest = new MPoint(i, j);
+                    String path = game.getPath(orig, dest);
+                    if (path != null) { // can move there!!!
+                        savedCurrentState = false;
+                        int x = orig.getX();
+                        int y = orig.getY();
+                        stopAnimateTail(() -> {
+                            MoveTile(x, y, path, () ->{
+                                handleBoardTouch = true;
+                            });
+                            if(preferenceService.getAllowTouchSoundPreference()){
+                                ballMoving.start();
+                            }
+                        });
 
-                if(animateSelectedBallIsRunning){ // there is one ball selected already
-                    stopAnimateTail(()-> {
-                        orig = new MPoint(i, j);
-                        animateTail(orig.getX(), orig.getY());
-                    });
+                        if(preferenceService.getAllowTouchSoundPreference()){
+                            ballMoveFailure.start();
+                        }
+                    }
+                    else{
+                        handleBoardTouch = true;
+                    }
+                }
+            }
+
+        });
+
+        boardView.setOnTouchBallListener((i, j) -> {
+            if(handleBoardTouch) {
+                handleBoardTouch = false;
+                if(orig != null){
+                    if(orig.getX() == i && orig.getY() == j) { // stop selected ball animation
+                        stopAnimateTail(() -> {
+                            boardHandler.sendMessage(new Message()); // refresh the board state
+                            handleBoardTouch = true;
+                        });
+                    }
+                    else{ // switch the selected ball animation
+                        stopAnimateTail(()-> {
+                            orig = new MPoint(i, j);
+                            animateTail(orig.getX(), orig.getY());
+                            handleBoardTouch = true;
+                        });
+                    }
                 }
                 else {
                     orig = new MPoint(i, j);
                     animateTail(orig.getX(), orig.getY());
+                    handleBoardTouch = true;
                 }
-                handleBoardTouch = true;
-                return true;
+                if(preferenceService.getAllowTouchSoundPreference()){
+                    ballSelect.start();
+                }
             }
         });
-
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -546,8 +585,6 @@ public class GameActivity extends BaseActivity
         navigationView.setNavigationItemSelectedListener(this);
 
     }
-
-
 
     private void setUpNewGame() {
         setCanPlay(true);
@@ -588,6 +625,30 @@ public class GameActivity extends BaseActivity
         if(ACHIEVEMENT_NINJA_SCORER_THRESHOLD <= score){
             Games.Achievements.unlock(googleApiClient, getString(R.string.achievement_ninja_scorer));
         }
+
+        // check one move achievements
+        int oneShotScore = gameProgress.getOneShotScore();
+        if(ACHIEVEMENT_GREEDY_MOVE_THRESHOLD <= oneShotScore){
+            Games.Achievements.unlock(googleApiClient, getString(R.string.achievement_greedy_move));
+        }
+        if(ACHIEVEMENT_STRATEGIC_MOVE_THRESHOLD <= oneShotScore){
+            Games.Achievements.unlock(googleApiClient, getString(R.string.achievement_strategic_move));
+        }
+        if(ACHIEVEMENT_AMAZING_MOVE_THRESHOLD <= oneShotScore){
+            Games.Achievements.unlock(googleApiClient, getString(R.string.achievement_amazing_move));
+        }
+
+        //check combo achievements
+        int consecutiveScores = gameProgress.getConsecutiveScores();
+        if(ACHIEVEMENT_COMBO_BEGINNER_THRESHOLD <= consecutiveScores){
+            Games.Achievements.unlock(googleApiClient, getString(R.string.achievement_beginner_combo_player));
+        }
+        if(ACHIEVEMENT_COMBO_FLUENCY_THRESHOLD <= consecutiveScores){
+            Games.Achievements.unlock(googleApiClient, getString(R.string.achievement_fluency_combo_player));
+        }
+        if(ACHIEVEMENT_COMBONATOR_THRESHOLD <= consecutiveScores){
+            Games.Achievements.unlock(googleApiClient, getString(R.string.achievement_combonator_combo_player));
+        }
     }
 
     private void startComboAnimation(boolean startVisualAnimation) {
@@ -626,7 +687,6 @@ public class GameActivity extends BaseActivity
         comboIsRunning = false;
         comboCount = 10000;
         combo = 2;
-
     }
 
     private void pauseCombo(){
@@ -658,6 +718,7 @@ public class GameActivity extends BaseActivity
                 timeWhenStopped = -1L * loadedGame.getTime();
                 game = new LogicWinLine(loadedGame.getBoard(), loadedGame.getNext(), loadedGame.getScore());
                 gameProgress.setScore(game.getScore());
+                gameProgress.setOneShotScore(0);
                 breakRecordAlert = true;
                 stopCombo();
                 stopSelectedBallAnimation();
@@ -768,6 +829,18 @@ public class GameActivity extends BaseActivity
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(STATE_RESOLVING_ERROR, mResolvingError);
+        outState.putSerializable(STATE_GAME_PROGRESS, gameProgress);
+        outState.putSerializable(STATE_GAME, game);
+        outState.putBoolean(STATE_LOAD_GAME_ON_START, loadGameOnStart);
+        outState.putBoolean(STATE_CAN_PLAY, canPlay);
+        outState.putBoolean(STATE_BREAK_RECORD_ALERT, breakRecordAlert);
+        outState.putLong(STATE_TIME_WHEN_STOPPED, timeWhenStopped);
+        outState.putBoolean(STATE_COMBO_IS_RUNNING, comboIsRunning);
+        outState.putLong(STATE_COMBO_TIME, comboCount);
+        outState.putInt(STATE_COMBO_VALUE, combo);
+        outState.putBoolean(STATE_ANIMATE_SELECTED_BALL_IS_RUNNING, animateSelectedBallIsRunning);
+        outState.putSerializable(STATE_ORIGIN_POINT, orig);
+        outState.putBoolean(STATE_HANDLE_BOARD_TOUCH, handleBoardTouch);
     }
 
     private void createNewGame(){
@@ -940,29 +1013,34 @@ public class GameActivity extends BaseActivity
         return false;
     }
 
-    private void MoveTile(int x, int y, String path) {
-        animateMoveTails = new AnimateMoveTails(new WeakReference<>(this), x, y, path);
+    @Override
+    public void MoveTile(int x, int y, String path, Runnable actionAfter) {
+        animateMoveTails = new AnimateMoveTails(new WeakReference<>(this), x, y, path, actionAfter);
         animateMoveTails.start();
     }
 
-    private void animateTail(int x, int y){
+    @Override
+    public void animateTail(int x, int y){
         animateSelectedTail = new AnimateSelectedTail(new WeakReference<>(this), x, y);
         animateSelectedTail.start();
         animateSelectedBallIsRunning = true;
     }
 
-    private void stopAnimateTail(Runnable actionAfter){
+    @Override
+    public void stopAnimateTail(Runnable actionAfter){
         orig = null;
         animateSelectedBallIsRunning = false;
         animateSelectedTail.stopAnimation(actionAfter);
     }
 
-    private void animateInsertTile(List<AnimateChecker> tails, Runnable doAfter) {
+    @Override
+    public void animateInsertTile(List<AnimateChecker> tails, Runnable doAfter) {
         animateInsertTails = new AnimateInsertTails(new WeakReference<>(this), tails, doAfter);
         animateInsertTails.start();
     }
 
-    private void animateScoreTile(List<AnimateChecker> tiles, Runnable doAfter){
+    @Override
+    public void animateScoreTile(List<AnimateChecker> tiles, Runnable doAfter){
         animateScore = new AnimateScore(new WeakReference<>(this), tiles, doAfter);
         animateScore.start();
     }
@@ -1056,18 +1134,20 @@ public class GameActivity extends BaseActivity
     }
 
     static class AnimateMoveTails extends Thread {
-        WeakReference<GameActivity> container;
+        WeakReference<GameAnimation> container;
         MPoint orig;
         String path;
+        Runnable actionAfter;
 
-        public AnimateMoveTails(WeakReference<GameActivity> container, int x, int y, String path) {
+        public AnimateMoveTails(WeakReference<GameAnimation> container, int x, int y, String path, Runnable actionAfter) {
             this.container = container;
             this.orig = new MPoint(x, y);
             this.path = path;
+            this.actionAfter = actionAfter;
         }
 
         public void run() {
-            GameActivity activity = container.get();
+            GameAnimation activity = container.get();
             LogicWinLine game = activity.getGame();
             Checker[][] t = game.getBoard();
             int x = orig.getX();
@@ -1098,13 +1178,14 @@ public class GameActivity extends BaseActivity
                     e.printStackTrace();
                 }
             }
+
             MPoint dest = new MPoint(x, y);
             game.moveChecker(orig, dest, f);
             ContinueGameLogic(dest);
         }
 
         private void ContinueGameLogic(MPoint dest) {
-            GameActivity activity = container.get();
+            GameAnimation activity = container.get();
             LogicWinLine game = activity.getGame();
             int dimension = activity.getDimension();
             MPoint[] limit = new MPoint[8];
@@ -1115,7 +1196,6 @@ public class GameActivity extends BaseActivity
                 int index = AnimateChecker.getScoreIndex();
                 int comboMultiple = activity.getComboIsRunning() ? activity.getCombo() : 1;
                 int previousScore = game.getScore();
-
 
                 for (int k = 0; k < score.length; k++) {
                     if (score[k] >= 5) {
@@ -1136,9 +1216,12 @@ public class GameActivity extends BaseActivity
                     Bundle bundle = new Bundle();
                     bundle.putBoolean(HIGHLIGHT_COMBO_SCORE, comboMultiple > 1);
                     bundle.putInt(PREVIOUS_GAME_SCORE, previousScore);
+                    bundle.putInt(BALLS_SCORE, tiles.size());
                     m.setData(bundle);
                     activity.sendScoreAlertHandler(m);
-                    activity.setHandleBoardTouch(true);
+                    if(actionAfter != null){
+                        actionAfter.run();
+                    }
                 });
             } else {
                 try {
@@ -1157,11 +1240,15 @@ public class GameActivity extends BaseActivity
                         activity.setNextBoardGame(game.getNext());
                         activity.sendBoardAlertHandler(new Message());
                         activity.sendNextAlertHandler(new Message());
-                        activity.setHandleBoardTouch(true);
+                        if(actionAfter != null){
+                            actionAfter.run();
+                        }
                     });
                 } catch (Exception ex) {
                     ex.printStackTrace();
-                    activity.setHandleBoardTouch(true);
+                    if(actionAfter != null){
+                        actionAfter.run();
+                    }
                 }
             }
             if (game.gameOver()) {
@@ -1171,11 +1258,11 @@ public class GameActivity extends BaseActivity
     }
 
     static class AnimateInsertTails extends Thread {
-        WeakReference<GameActivity> container;
+        WeakReference<GameAnimation> container;
         List<AnimateChecker> tails;
         Runnable doAfter;
 
-        public AnimateInsertTails(WeakReference<GameActivity> container, List<AnimateChecker> tails, Runnable doAfter){
+        public AnimateInsertTails(WeakReference<GameAnimation> container, List<AnimateChecker> tails, Runnable doAfter){
             this.container = container;
             this.tails = tails;
             this.doAfter = doAfter;
@@ -1183,7 +1270,7 @@ public class GameActivity extends BaseActivity
 
         @Override
         public void run() {
-            GameActivity activity = container.get();
+            GameAnimation activity = container.get();
             LogicWinLine game = activity.getGame();
             Checker[][] board = game.getBoard();
             List<Checker> originals = new ArrayList<>(3);
@@ -1214,14 +1301,14 @@ public class GameActivity extends BaseActivity
     }
 
     static class AnimateSelectedTail extends Thread {
-        WeakReference<GameActivity> container;
+        WeakReference<GameAnimation> container;
         int x;
         int y;
         private AtomicBoolean canRun;
         Runnable actionAfter;
 
 
-        public AnimateSelectedTail(WeakReference<GameActivity> container, int x, int y){
+        public AnimateSelectedTail(WeakReference<GameAnimation> container, int x, int y){
             this.container = container;
             this.x = x;
             this.y = y;
@@ -1237,7 +1324,7 @@ public class GameActivity extends BaseActivity
 
         @Override
         public void run() {
-            GameActivity activity = container.get();
+            GameAnimation activity = container.get();
             Checker[][] board = container.get().getGame().getBoard();
             AnimateChecker tail = new AnimateChecker(board[x][y], 0);
             board[x][y] = tail;
@@ -1260,11 +1347,11 @@ public class GameActivity extends BaseActivity
     }
 
     static class AnimateScore extends Thread {
-        WeakReference<GameActivity> container;
+        WeakReference<GameAnimation> container;
         private final List<AnimateChecker> tiles;
         private final Runnable doAfter;
 
-        public AnimateScore(WeakReference<GameActivity> container, List<AnimateChecker> tiles, Runnable doAfter){
+        public AnimateScore(WeakReference<GameAnimation> container, List<AnimateChecker> tiles, Runnable doAfter){
             this.container = container;
             this.tiles = tiles;
             this.doAfter = doAfter;
@@ -1272,7 +1359,7 @@ public class GameActivity extends BaseActivity
 
         @Override
         public void run() {
-            GameActivity activity = container.get();
+            GameAnimation activity = container.get();
             Checker[][] board = activity.getGame().getBoard();
             List<Checker> originals = new ArrayList<>(3);
             for (AnimateChecker checker: tiles){
@@ -1301,47 +1388,53 @@ public class GameActivity extends BaseActivity
         }
     }
 
-    private LogicWinLine getGame() {
+    @Override
+    public LogicWinLine getGame() {
         return game;
     }
 
-    private void setBoardGame(Checker[][] boardGame){
+    @Override
+    public void setBoardGame(Checker[][] boardGame){
         boardView.setBoard(boardGame);
     }
 
-    private void setNextBoardGame(Checker[] nextGame){
+    @Override
+    public void setNextBoardGame(Checker[] nextGame){
         nextView.setBoard(nextGame);
     }
 
-    private boolean getComboIsRunning() {
+    @Override
+    public boolean getComboIsRunning() {
         return comboIsRunning;
     }
 
-    private int getCombo() {
+    @Override
+    public int getCombo() {
         return combo;
     }
 
-    private int getDimension() {
+    @Override
+    public int getDimension() {
         return dimension;
     }
 
-    private void setHandleBoardTouch(boolean value){
-        handleBoardTouch = value;
-    }
-
-    private void sendBoardAlertHandler(Message m){
+    @Override
+    public void sendBoardAlertHandler(Message m){
         boardHandler.sendMessage(m);
     }
 
-    private void sendNextAlertHandler(Message m){
+    @Override
+    public void sendNextAlertHandler(Message m){
         nextHandler.sendMessage(m);
     }
 
-    private void sendScoreAlertHandler(Message m){
+    @Override
+    public void sendScoreAlertHandler(Message m){
         scoreHandler.sendMessage(m);
     }
 
-    private void sendEndAlertHandler(Message m) {
+    @Override
+    public void sendEndAlertHandler(Message m) {
         endAlertHandler.sendMessage(m);
     }
 

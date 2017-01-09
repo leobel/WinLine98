@@ -9,7 +9,6 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.AppCompatCheckBox;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.helper.ItemTouchHelper;
@@ -38,8 +37,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import javax.inject.Inject;
-
-import timber.log.Timber;
 
 /**
  * A fragment representing a list of Items.
