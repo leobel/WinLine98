@@ -20,5 +20,8 @@ Save this file as res/values/games-ids.xml in your project.
     <string name="achievement_greedy_move">CgkI3YOZmpEdEAIQCg</string>
     <string name="achievement_strategic_move">CgkI3YOZmpEdEAIQCw</string>
     <string name="achievement_amazing_move">CgkI3YOZmpEdEAIQDA</string>
+    <string name="achievement_beginner_combo_player">CgkI3YOZmpEdEAIQDQ</string>
+    <string name="achievement_fluency_combo_player">CgkI3YOZmpEdEAIQDg</string>
+    <string name="achievement_combonator_combo_player">CgkI3YOZmpEdEAIQDw</string>
 
 </resources>

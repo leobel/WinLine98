@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Message;
+import android.os.PersistableBundle;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -57,6 +58,7 @@ import org.freelectron.winline.Checker;
 import org.freelectron.winline.LogicWinLine;
 import org.freelectron.winline.MPoint;
 
+import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
@@ -82,6 +84,22 @@ public class GameActivity extends BaseActivity
     private static final int ACHIEVEMENT_GREEDY_MOVE_THRESHOLD = 7;
     private static final int ACHIEVEMENT_STRATEGIC_MOVE_THRESHOLD = 12;
     private static final int ACHIEVEMENT_AMAZING_MOVE_THRESHOLD = 18;
+    private static final int ACHIEVEMENT_COMBO_BEGINNER_THRESHOLD = 3;
+    private static final int ACHIEVEMENT_COMBO_FLUENCY_THRESHOLD = 12;
+    private static final int ACHIEVEMENT_COMBONATOR_THRESHOLD = 20;
+
+    private static final String STATE_GAME_PROGRESS = "STATE_GAME_PROGRESS";
+    private static final String STATE_GAME = "STATE_GAME";
+    private static final String STATE_LOAD_GAME_ON_START = "STATE_LOAD_GAME_ON_START";
+    private static final String STATE_CAN_PLAY = "STATE_CAN_PLAY";
+    private static final String STATE_TIME_WHEN_STOPPED = "STATE_TIME_WHEN_STOPPED";
+    private static final String STATE_COMBO_IS_RUNNING = "STATE_COMBO_IS_RUNNING";
+    private static final String STATE_COMBO_TIME = "STATE_COMBO_TIME";
+    private static final String STATE_COMBO_VALUE = "STATE_COMBO_VALUE";
+    private static final String STATE_ANIMATE_SELECTED_BALL_IS_RUNNING = "STATE_ANIMATE_SELECTED_BALL_IS_RUNNING";
+    private static final String STATE_ORIGIN_POINT = "STATE_ORIGIN_POINT";
+    private static final String STATE_BREAK_RECORD_ALERT = "STATE_BREAK_RECORD_ALERT";
+    private static final String STATE_HANDLE_BOARD_TOUCH = "STATE_HANDLE_BOARD_TOUCH";
 
     private static String HIGHLIGHT_COMBO_SCORE = "HIGHLIGHT_COMBO_SCORE";
     private static String PREVIOUS_GAME_SCORE = "PREVIOUS_GAME_SCORE";
@@ -109,7 +127,7 @@ public class GameActivity extends BaseActivity
     private int dimension;
     private boolean savedCurrentState;
     private MPoint orig;
-    private Long timeWhenStopped = 0L;
+    private Long timeWhenStopped;
 
 
     private Handler boardHandler;
@@ -164,10 +182,37 @@ public class GameActivity extends BaseActivity
 
         WinLineApp.getInstance().getComponent().inject(this);
 
-        mResolvingError = savedInstanceState != null && savedInstanceState.getBoolean(STATE_RESOLVING_ERROR, false);
-
         gameServiceRequest = GameServiceRequest.NONE;
-        gameProgress = new GameProgress();
+
+        if(savedInstanceState != null){
+            mResolvingError = savedInstanceState.getBoolean(STATE_RESOLVING_ERROR, false);
+            gameProgress = (GameProgress) savedInstanceState.getSerializable(STATE_GAME_PROGRESS);
+            game = (LogicWinLine) savedInstanceState.getSerializable(STATE_GAME);
+            loadGameOnStart = savedInstanceState.getBoolean(STATE_LOAD_GAME_ON_START);
+            canPlay = savedInstanceState.getBoolean(STATE_CAN_PLAY);
+            breakRecordAlert = savedInstanceState.getBoolean(STATE_BREAK_RECORD_ALERT);
+            timeWhenStopped = savedInstanceState.getLong(STATE_TIME_WHEN_STOPPED);
+            comboIsRunning = savedInstanceState.getBoolean(STATE_COMBO_IS_RUNNING);
+            comboCount = savedInstanceState.getLong(STATE_COMBO_TIME);
+            combo = savedInstanceState.getInt(STATE_COMBO_VALUE);
+            animateSelectedBallIsRunning = savedInstanceState.getBoolean(STATE_ANIMATE_SELECTED_BALL_IS_RUNNING);
+            orig = (MPoint) savedInstanceState.getSerializable(STATE_ORIGIN_POINT);
+            handleBoardTouch = savedInstanceState.getBoolean(STATE_HANDLE_BOARD_TOUCH);
+        }
+        else{
+            mResolvingError = false;
+            gameProgress = new GameProgress();
+            loadGameOnStart = false;
+            canPlay = true;
+            breakRecordAlert = true;
+            timeWhenStopped = 0L;
+            comboIsRunning = false;
+            comboCount = 10000;
+            combo = 2;
+            animateSelectedBallIsRunning = false;
+            orig = null;
+            handleBoardTouch = true;
+        }
 
         googleApiClient = new GoogleApiClient.Builder(getApplicationContext())
                 .addConnectionCallbacks(this)
@@ -213,9 +258,6 @@ public class GameActivity extends BaseActivity
 
         newGameAdView.loadAd(requestNewAdRequest());
 
-        comboCount = 10000;
-        combo = 2;
-
         scaleAnimation = AnimationUtils.loadAnimation(this, R.anim.scale);
         fadeInAnimation = AnimationUtils.loadAnimation(this, R.anim.fade_in);
         fadeOutAnimation = AnimationUtils.loadAnimation(this, R.anim.fade_out);
@@ -256,10 +298,6 @@ public class GameActivity extends BaseActivity
 
             }
         });
-
-        loadGameOnStart = false;
-        setCanPlay(true);
-        breakRecordAlert = true;
 
         scoreImage.setMax(preferenceService.getHighRecord());
 
@@ -333,9 +371,13 @@ public class GameActivity extends BaseActivity
             boolean highlightScore = data.getBoolean(HIGHLIGHT_COMBO_SCORE);
             int scoreBalls = data.getInt(BALLS_SCORE);
             if(highlightScore){
+                gameProgress.setConsecutiveScores(gameProgress.getConsecutiveScores() + 1);
                 Toast toast = Toast.makeText(this, getString(R.string.combo_score, game.getScore() - data.getInt(PREVIOUS_GAME_SCORE)), Toast.LENGTH_SHORT);
                 toast.setGravity(Gravity.CENTER_VERTICAL|Gravity.CENTER_HORIZONTAL, 0, 0);
                 toast.show();
+            }
+            else{
+                gameProgress.setConsecutiveScores(1);
             }
 
             gameProgress.setOneShotScore(scoreBalls);
@@ -446,7 +488,6 @@ public class GameActivity extends BaseActivity
             }
         });
 
-        handleBoardTouch = true;
         boardView.setOnTouchEmptyListener((i, j) -> {
             if(handleBoardTouch){
                 if (orig != null) { // try to move to specific location
@@ -545,8 +586,6 @@ public class GameActivity extends BaseActivity
 
     }
 
-
-
     private void setUpNewGame() {
         setCanPlay(true);
         stopChronometer();
@@ -598,6 +637,18 @@ public class GameActivity extends BaseActivity
         if(ACHIEVEMENT_AMAZING_MOVE_THRESHOLD <= oneShotScore){
             Games.Achievements.unlock(googleApiClient, getString(R.string.achievement_amazing_move));
         }
+
+        //check combo achievements
+        int consecutiveScores = gameProgress.getConsecutiveScores();
+        if(ACHIEVEMENT_COMBO_BEGINNER_THRESHOLD <= consecutiveScores){
+            Games.Achievements.unlock(googleApiClient, getString(R.string.achievement_beginner_combo_player));
+        }
+        if(ACHIEVEMENT_COMBO_FLUENCY_THRESHOLD <= consecutiveScores){
+            Games.Achievements.unlock(googleApiClient, getString(R.string.achievement_fluency_combo_player));
+        }
+        if(ACHIEVEMENT_COMBONATOR_THRESHOLD <= consecutiveScores){
+            Games.Achievements.unlock(googleApiClient, getString(R.string.achievement_combonator_combo_player));
+        }
     }
 
     private void startComboAnimation(boolean startVisualAnimation) {
@@ -636,7 +687,6 @@ public class GameActivity extends BaseActivity
         comboIsRunning = false;
         comboCount = 10000;
         combo = 2;
-
     }
 
     private void pauseCombo(){
@@ -668,6 +718,7 @@ public class GameActivity extends BaseActivity
                 timeWhenStopped = -1L * loadedGame.getTime();
                 game = new LogicWinLine(loadedGame.getBoard(), loadedGame.getNext(), loadedGame.getScore());
                 gameProgress.setScore(game.getScore());
+                gameProgress.setOneShotScore(0);
                 breakRecordAlert = true;
                 stopCombo();
                 stopSelectedBallAnimation();
@@ -778,6 +829,18 @@ public class GameActivity extends BaseActivity
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putBoolean(STATE_RESOLVING_ERROR, mResolvingError);
+        outState.putSerializable(STATE_GAME_PROGRESS, gameProgress);
+        outState.putSerializable(STATE_GAME, game);
+        outState.putBoolean(STATE_LOAD_GAME_ON_START, loadGameOnStart);
+        outState.putBoolean(STATE_CAN_PLAY, canPlay);
+        outState.putBoolean(STATE_BREAK_RECORD_ALERT, breakRecordAlert);
+        outState.putLong(STATE_TIME_WHEN_STOPPED, timeWhenStopped);
+        outState.putBoolean(STATE_COMBO_IS_RUNNING, comboIsRunning);
+        outState.putLong(STATE_COMBO_TIME, comboCount);
+        outState.putInt(STATE_COMBO_VALUE, combo);
+        outState.putBoolean(STATE_ANIMATE_SELECTED_BALL_IS_RUNNING, animateSelectedBallIsRunning);
+        outState.putSerializable(STATE_ORIGIN_POINT, orig);
+        outState.putBoolean(STATE_HANDLE_BOARD_TOUCH, handleBoardTouch);
     }
 
     private void createNewGame(){
@@ -1133,12 +1196,10 @@ public class GameActivity extends BaseActivity
                 int index = AnimateChecker.getScoreIndex();
                 int comboMultiple = activity.getComboIsRunning() ? activity.getCombo() : 1;
                 int previousScore = game.getScore();
-                int directions = 0;
 
                 for (int k = 0; k < score.length; k++) {
                     if (score[k] >= 5) {
                         game.addScore(comboMultiple * score[k]);
-                        directions++;
                         List<Integer> positions = game.deleteSequence(limit[k * 2], limit[(k * 2) + 1], (k * 2) + 1);
                         for(Integer pos: positions){
                             int x = pos / dimension;
