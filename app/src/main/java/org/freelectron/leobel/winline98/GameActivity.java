@@ -567,6 +567,7 @@ public class GameActivity extends BaseActivity
                 setCanPlay(true);
                 startChronometer();
                 startCombo();
+                startSelectedBallAnimation();
             }
 
 
