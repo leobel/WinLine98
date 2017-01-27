@@ -61,11 +61,13 @@ public class BoardView extends TileView implements TileView.OnTileViewListener {
     public boolean onTouchEvent(MotionEvent event) {
         int i = (int) ((event.getY() - mYOffset) / mTileSize);
         int j = (int) ((event.getX() - mXOffset) / mTileSize);
-        if(mTileGrid[i][j] == null){
-           touchEmptyListener.onTouchEmpty(i, j);
-        }
-        else{
-            touchBallListener.onTouchBall(i, j);
+        if(i >= 0 && i < dimension && j >= 0 && j < dimension){
+            if(mTileGrid[i][j] == null){
+                touchEmptyListener.onTouchEmpty(i, j);
+            }
+            else{
+                touchBallListener.onTouchBall(i, j);
+            }
         }
         return super.onTouchEvent(event);
     }
