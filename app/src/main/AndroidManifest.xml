@@ -18,6 +18,9 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <meta-data
+            android:name="android.max_aspect"
+            android:value="2.1" />
+        <meta-data
             android:name="com.google.android.gms.games.APP_ID"
             android:value="@string/app_id" />
         <meta-data
