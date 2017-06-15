@@ -23,8 +23,8 @@ android {
         applicationId "org.freelectron.leobel.winline98"
         minSdkVersion 15
         targetSdkVersion 25
-        versionCode 8
-        versionName "1.2.2"
+        versionCode 9
+        versionName "1.2.3"
         multiDexEnabled true
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
