@@ -692,7 +692,8 @@ public class GameActivity extends BaseActivity
 
     private void pauseCombo(){
         if(comboIsRunning){
-            countDownTimer.cancel();
+            if(countDownTimer != null)
+                countDownTimer.cancel();
             comboTrack.clearAnimation();
             comboTrack.setVisibility(View.VISIBLE);
         }
